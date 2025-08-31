@@ -61,20 +61,59 @@ export default function Blog() {
   return (
     <div className="py-24 sm:py-32">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Blog Yoga</h2>
-            <p className="mt-2 text-lg leading-8 text-gray-600">
+          {/* Hero Section with Featured Post Wireframe */}
+          <div className="mx-auto max-w-2xl text-center mb-16">
+            <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">Blog Yên Yoga</h1>
+            <p className="mt-6 text-lg leading-8 text-gray-600">
               Khám phá kiến thức, mẹo vặt và câu chuyện trải nghiệm từ cộng đồng yoga của chúng tôi.
             </p>
+          </div>
+
+          {/* Featured Post Wireframe */}
+          <div className="mb-20">
+            <div className="relative aspect-[16/9] bg-gradient-to-r from-primary-100 to-secondary-100 rounded-2xl shadow-xl overflow-hidden">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-primary-500">
+                  <svg className="mx-auto h-24 w-24 mb-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                  </svg>
+                  <p className="text-lg font-medium">Featured Blog Post</p>
+                  <p className="text-sm">Bài viết nổi bật với hình ảnh lớn</p>
+                </div>
+              </div>
+              {/* Featured post overlay */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900/80 to-transparent p-8">
+                <span className="inline-block px-3 py-1 text-xs font-medium bg-primary-600 text-white rounded-full mb-3">
+                  Bài viết nổi bật
+                </span>
+                <h2 className="text-2xl font-bold text-white mb-2">
+                  Yoga và sức khỏe tinh thần: Khoa học đằng sau lợi ích
+                </h2>
+                <p className="text-gray-200 text-sm">
+                  Tìm hiểu những nghiên cứu khoa học mới nhất về tác động của yoga đến sức khỏe tinh thần...
+                </p>
+              </div>
+            </div>
           </div>
           <div className="mx-auto mt-16 grid max-w-2xl auto-rows-fr grid-cols-1 gap-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
             {blogPosts.map((post) => (
               <article
                 key={post.id}
-                className="relative isolate flex flex-col justify-end overflow-hidden rounded-2xl bg-gray-900 px-8 pb-8 pt-80 sm:pt-48 lg:pt-80"
+                className="relative isolate flex flex-col justify-end overflow-hidden rounded-2xl bg-secondary-800 px-8 pb-8 pt-80 sm:pt-48 lg:pt-80"
               >
-                <div className="absolute inset-0 -z-10 bg-gradient-to-t from-gray-900 via-gray-900/40" />
-                <div className="absolute inset-0 -z-10 rounded-2xl ring-1 ring-inset ring-gray-900/10" />
+                {/* Blog post image wireframe */}
+                <div className="absolute inset-0 -z-20 bg-gradient-to-br from-secondary-200 to-accent-200">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center text-secondary-400">
+                      <svg className="mx-auto h-16 w-16 mb-2" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                      </svg>
+                      <p className="text-xs">Blog Image</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 -z-10 bg-gradient-to-t from-secondary-900 via-secondary-900/40" />
+                <div className="absolute inset-0 -z-10 rounded-2xl ring-1 ring-inset ring-secondary-900/10" />
                 
                 <div className="flex flex-wrap items-center gap-y-1 overflow-hidden text-sm leading-6 text-gray-300">
                   <time dateTime={post.publishedAt} className="mr-8">
@@ -89,7 +128,7 @@ export default function Blog() {
                     </div>
                   </div>
                   <div className="ml-auto">
-                    <span className="text-emerald-400">{post.readTime}</span>
+                    <span className="text-accent-400">{post.readTime}</span>
                   </div>
                 </div>
                 <h3 className="mt-3 text-lg font-semibold leading-6 text-white">
@@ -105,7 +144,7 @@ export default function Blog() {
                   {post.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-400 ring-1 ring-inset ring-emerald-500/20"
+                      className="inline-flex items-center rounded-md bg-primary-500/10 px-2 py-1 text-xs font-medium text-primary-400 ring-1 ring-inset ring-primary-500/20"
                     >
                       {tag}
                     </span>
@@ -116,7 +155,7 @@ export default function Blog() {
           </div>
           
           {/* Newsletter Signup */}
-          <div className="mx-auto mt-16 max-w-2xl rounded-3xl bg-emerald-50 px-6 py-16 sm:mt-20 sm:px-16">
+          <div className="mx-auto mt-16 max-w-2xl rounded-3xl bg-secondary-50 px-6 py-16 sm:mt-20 sm:px-16 border border-secondary-200">
             <div className="text-center">
               <h2 className="text-2xl font-bold tracking-tight text-gray-900">
                 Đăng ký nhận bản tin
@@ -134,12 +173,12 @@ export default function Blog() {
                   type="email"
                   autoComplete="email"
                   required
-                  className="min-w-0 flex-auto rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6"
+                  className="min-w-0 flex-auto rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6"
                   placeholder="Nhập email của bạn"
                 />
                 <button
                   type="submit"
-                  className="flex-none rounded-md bg-emerald-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+                  className="flex-none rounded-md bg-primary-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
                 >
                   Đăng ký
                 </button>

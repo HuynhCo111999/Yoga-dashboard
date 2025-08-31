@@ -25,20 +25,43 @@ export default function Contact() {
   };
 
   return (
-    <div className="py-24 sm:py-32">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl space-y-16 divide-y divide-gray-100 lg:mx-0 lg:max-w-none">
-            <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-3">
+    <div className="py-16 sm:py-20 lg:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Hero Section with Map Wireframe */}
+          <div className="mb-12 sm:mb-16 lg:mb-20">
+            <div className="text-center mb-8 sm:mb-12">
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">Liên hệ với Yên Yoga</h1>
+              <p className="mt-4 sm:mt-6 text-base sm:text-lg leading-7 sm:leading-8 text-gray-600 max-w-2xl mx-auto px-4 sm:px-0">
+                Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn. Hãy liên hệ với chúng tôi để được tư vấn 
+                về các lớp học hoặc bất kỳ câu hỏi nào khác.
+              </p>
+            </div>
+            
+            {/* Map Wireframe */}
+            <div className="aspect-[2/1] sm:aspect-[3/1] lg:aspect-[2/1] bg-gradient-to-r from-secondary-100 to-secondary-200 rounded-2xl shadow-xl overflow-hidden mb-8 sm:mb-12">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-secondary-400 p-4">
+                  <svg className="mx-auto h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 mb-3 sm:mb-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                  </svg>
+                  <p className="text-base sm:text-lg font-medium">Interactive Map</p>
+                  <p className="text-sm">Google Maps hoặc bản đồ vị trí studio</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mx-auto max-w-2xl space-y-12 sm:space-y-16 divide-y divide-gray-100 lg:mx-0 lg:max-w-none">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:gap-x-8 sm:gap-y-10 lg:grid-cols-3">
               <div>
-                <h2 className="text-3xl font-bold tracking-tight text-gray-900">Liên hệ với chúng tôi</h2>
+                <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Thông tin liên hệ</h2>
                 <p className="mt-4 leading-7 text-gray-600">
-                  Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn. Hãy liên hệ với chúng tôi để được tư vấn 
-                  về các lớp học hoặc bất kỳ câu hỏi nào khác.
+                  Đến thăm studio của chúng tôi hoặc liên hệ qua các kênh bên dưới.
                 </p>
               </div>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:col-span-2 lg:gap-8">
-                <div className="rounded-2xl bg-gray-50 p-10">
-                  <h3 className="text-base font-semibold leading-7 text-gray-900">Studio chính</h3>
+                <div className="rounded-2xl bg-secondary-50 p-10 border border-secondary-200">
+                  <h3 className="text-base font-semibold leading-7 text-primary-600">Studio chính</h3>
                   <dl className="mt-3 space-y-1 text-sm leading-6 text-gray-600">
                     <div>
                       <dt className="sr-only">Địa chỉ</dt>
@@ -75,13 +98,13 @@ export default function Contact() {
                           <path d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.162V6a2 2 0 00-2-2H3z" />
                           <path d="M19 8.839l-7.77 3.885a2.75 2.75 0 01-2.46 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z" />
                         </svg>
-                        <span className="ml-2">info@yogastudio.vn</span>
+                        <span className="ml-2">info@yenyoga.vn</span>
                       </dd>
                     </div>
                   </dl>
                 </div>
-                <div className="rounded-2xl bg-gray-50 p-10">
-                  <h3 className="text-base font-semibold leading-7 text-gray-900">Giờ hoạt động</h3>
+                <div className="rounded-2xl bg-accent-50 p-10 border border-accent-200">
+                  <h3 className="text-base font-semibold leading-7 text-primary-600">Giờ hoạt động</h3>
                   <dl className="mt-3 space-y-1 text-sm leading-6 text-gray-600">
                     <div className="flex justify-between">
                       <dt>Thứ 2 - Thứ 6</dt>
@@ -120,7 +143,7 @@ export default function Contact() {
                         required
                         value={formData.name}
                         onChange={handleChange}
-                        className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6"
+                        className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -136,7 +159,7 @@ export default function Contact() {
                         required
                         value={formData.email}
                         onChange={handleChange}
-                        className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6"
+                        className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -151,7 +174,7 @@ export default function Contact() {
                         id="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6"
+                        className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -167,7 +190,7 @@ export default function Contact() {
                         required
                         value={formData.message}
                         onChange={handleChange}
-                        className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6"
+                        className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -175,7 +198,7 @@ export default function Contact() {
                 <div className="mt-10">
                   <button
                     type="submit"
-                    className="block w-full rounded-md bg-emerald-600 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+                    className="block w-full rounded-md bg-primary-600 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
                   >
                     Gửi tin nhắn
                   </button>

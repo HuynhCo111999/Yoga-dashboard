@@ -39,28 +39,45 @@ const navigation = {
 
 export default function Footer() {
   return (
-    <footer className="bg-white">
-      <div className="mx-auto max-w-7xl overflow-hidden px-6 py-20 sm:py-24 lg:px-8">
-        <nav className="-mb-6 columns-2 sm:flex sm:justify-center sm:space-x-12" aria-label="Footer">
+    <footer className="bg-secondary-900">
+      <div className="mx-auto max-w-7xl overflow-hidden px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
+        {/* Logo and Company Info */}
+        <div className="text-center mb-8 sm:mb-12">
+          <div className="flex justify-center items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-lg sm:text-xl">Y</span>
+            </div>
+            <span className="text-xl sm:text-2xl font-bold text-white">Yên Yoga</span>
+          </div>
+          <p className="text-sm sm:text-base text-secondary-300 max-w-md mx-auto px-4 sm:px-0">
+            Không gian yoga thanh tịnh, nơi bạn tìm thấy sự cân bằng giữa cơ thể và tâm hồn.
+          </p>
+        </div>
+
+        <nav className="-mb-4 sm:-mb-6 grid grid-cols-2 gap-4 sm:flex sm:justify-center sm:space-x-8 lg:space-x-12" aria-label="Footer">
           {navigation.main.map((item) => (
-            <div key={item.name} className="pb-6">
-              <Link href={item.href} className="text-sm leading-6 text-gray-600 hover:text-gray-900">
+            <div key={item.name} className="pb-4 sm:pb-6">
+              <Link href={item.href} className="text-sm leading-6 text-secondary-300 hover:text-primary-400 transition-colors">
                 {item.name}
               </Link>
             </div>
           ))}
         </nav>
-        <div className="mt-10 flex justify-center space-x-10">
+        
+        <div className="mt-6 sm:mt-10 flex justify-center space-x-6 sm:space-x-10">
           {navigation.social.map((item) => (
-            <a key={item.name} href={item.href} className="text-gray-400 hover:text-gray-500">
+            <a key={item.name} href={item.href} className="text-secondary-400 hover:text-primary-400 transition-colors">
               <span className="sr-only">{item.name}</span>
-              <item.icon className="h-6 w-6" aria-hidden="true" />
+              <item.icon className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
             </a>
           ))}
         </div>
-        <p className="mt-10 text-center text-xs leading-5 text-gray-500">
-          &copy; 2024 Yoga Studio. Bản quyền thuộc về chúng tôi.
-        </p>
+        
+        <div className="mt-6 sm:mt-10 pt-6 sm:pt-8 border-t border-secondary-700">
+          <p className="text-center text-xs sm:text-sm leading-5 text-secondary-400 px-4 sm:px-0">
+            &copy; 2024 Yên Yoga. Bản quyền thuộc về chúng tôi.
+          </p>
+        </div>
       </div>
     </footer>
   );
