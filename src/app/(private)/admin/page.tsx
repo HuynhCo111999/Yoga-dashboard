@@ -70,26 +70,27 @@ export default function AdminDashboard() {
     <AdminLayout>
       <div className="space-y-6">
         {/* Page header */}
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Tổng quan</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Thống kê tổng quan về hoạt động của studio yoga.
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Tổng quan Yên Yoga</h1>
+          <p className="mt-3 text-lg text-gray-600">
+            Thống kê tổng quan về hoạt động của studio yoga
           </p>
+          <div className="mt-4 h-1 w-24 bg-gradient-to-r from-primary-400 to-primary-600 rounded-full mx-auto"></div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((item) => (
-            <div key={item.name} className="relative overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:px-6 sm:py-6">
+            <div key={item.name} className="relative overflow-hidden rounded-2xl bg-white/80 backdrop-blur-sm border border-primary-100 px-6 py-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-primary-200">
               <dt>
-                <p className="truncate text-sm font-medium text-gray-500">{item.name}</p>
+                <p className="truncate text-sm font-semibold text-secondary-600 uppercase tracking-wide">{item.name}</p>
               </dt>
-              <dd className="flex items-baseline">
-                <p className="text-2xl font-semibold text-gray-900">{item.stat}</p>
+              <dd className="flex items-baseline mt-3">
+                <p className="text-3xl font-bold text-gray-900">{item.stat}</p>
                 <p
-                  className={`ml-2 flex items-baseline text-sm font-semibold ${
+                  className={`ml-3 flex items-baseline text-sm font-semibold ${
                     item.changeType === 'increase'
-                      ? 'text-emerald-600'
+                      ? 'text-primary-600'
                       : item.changeType === 'decrease'
                       ? 'text-red-600'
                       : 'text-gray-500'
@@ -97,7 +98,7 @@ export default function AdminDashboard() {
                 >
                   {item.changeType === 'increase' && (
                     <svg
-                      className="h-4 w-4 flex-shrink-0 self-center text-emerald-500"
+                      className="h-4 w-4 flex-shrink-0 self-center text-primary-500"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -131,30 +132,37 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* Recent Activities */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">Hoạt động gần đây</h3>
-              <div className="mt-6 flow-root">
-                <ul role="list" className="-my-5 divide-y divide-gray-200">
+          <div className="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-primary-100">
+            <div className="px-6 py-6 sm:p-8">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary-400 to-primary-600 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Hoạt động gần đây</h3>
+              </div>
+              <div className="flow-root">
+                <ul role="list" className="-my-6 divide-y divide-primary-100/50">
                   {recentActivities.map((activity) => (
                     <li key={activity.id} className="py-4">
                       <div className="flex items-center space-x-4">
                         <div className="flex-shrink-0">
-                          <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                            <span className="text-emerald-600 font-medium text-sm">
+                          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
+                            <span className="text-primary-700 font-semibold text-sm">
                               {activity.user.charAt(0)}
                             </span>
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm text-gray-900">
-                            <span className="font-medium">{activity.user}</span>{' '}
+                            <span className="font-semibold text-primary-700">{activity.user}</span>{' '}
                             {activity.action}{' '}
-                            <span className="font-medium">{activity.target}</span>
+                            <span className="font-semibold text-secondary-700">{activity.target}</span>
                           </p>
-                          <p className="text-sm text-gray-500">{activity.time}</p>
+                          <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
                         </div>
                       </div>
                     </li>
@@ -165,27 +173,34 @@ export default function AdminDashboard() {
           </div>
 
           {/* Upcoming Sessions */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">Ca tập hôm nay</h3>
-              <div className="mt-6 flow-root">
-                <ul role="list" className="-my-5 divide-y divide-gray-200">
+          <div className="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-primary-100">
+            <div className="px-6 py-6 sm:p-8">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="w-8 h-8 bg-gradient-to-br from-secondary-400 to-secondary-600 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Ca tập hôm nay</h3>
+              </div>
+              <div className="flow-root">
+                <ul role="list" className="-my-6 divide-y divide-primary-100/50">
                   {upcomingSessions.map((session) => (
                     <li key={session.id} className="py-4">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <p className="text-sm font-semibold text-gray-900 truncate">
                             {session.className}
                           </p>
-                          <p className="text-sm text-gray-500">
-                            {session.instructor} • {session.time}
+                          <p className="text-sm text-gray-600 mt-1">
+                            <span className="text-primary-600 font-medium">{session.instructor}</span> • {session.time}
                           </p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm text-gray-900">
-                            {session.registered}/{session.capacity}
-                          </p>
-                          <p className="text-xs text-gray-500">người đăng ký</p>
+                        <div className="text-right ml-4">
+                          <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-50 text-primary-700 border border-primary-200">
+                            {session.registered}/{session.capacity} người
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">đăng ký</p>
                         </div>
                       </div>
                     </li>

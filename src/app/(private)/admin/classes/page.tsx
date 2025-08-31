@@ -71,9 +71,9 @@ const instructors = [
 ];
 
 const difficultyColors = {
-  beginner: 'bg-green-100 text-green-800',
-  intermediate: 'bg-yellow-100 text-yellow-800',
-  advanced: 'bg-red-100 text-red-800'
+  beginner: 'bg-primary-100 text-primary-800 border border-primary-200',
+  intermediate: 'bg-accent-100 text-accent-800 border border-accent-200',
+  advanced: 'bg-secondary-100 text-secondary-800 border border-secondary-200'
 };
 
 const difficultyLabels = {
@@ -132,16 +132,23 @@ export default function ClassesPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Page header */}
-        <div className="sm:flex sm:items-center">
-          <div className="sm:flex-auto">
-            <h1 className="text-2xl font-semibold text-gray-900">Quản lý lớp học</h1>
-            <p className="mt-2 text-sm text-gray-700">
-              Tạo và quản lý các lớp học yoga.
-            </p>
+        <div className="text-center">
+          <div className="flex justify-center items-center space-x-3 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-accent-400 to-accent-600 rounded-xl flex items-center justify-center shadow-lg">
+              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">Quản lý lớp học</h1>
           </div>
-          <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Tạo và quản lý các lớp học yoga tại Yên Yoga
+          </p>
+          <div className="mt-4 h-1 w-24 bg-gradient-to-r from-accent-400 to-accent-600 rounded-full mx-auto"></div>
+          
+          <div className="mt-8">
             <button
               type="button"
               onClick={() => {
@@ -157,75 +164,104 @@ export default function ClassesPage() {
                 });
                 setShowAddForm(true);
               }}
-              className="inline-flex items-center justify-center rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:w-auto"
+              className="inline-flex items-center justify-center rounded-xl border border-transparent bg-gradient-to-r from-accent-500 to-accent-600 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:from-accent-600 hover:to-accent-700 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105"
             >
               <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-              Thêm lớp học
+              Thêm lớp học mới
             </button>
           </div>
         </div>
 
         {/* Classes table */}
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-          <ul role="list" className="divide-y divide-gray-200">
+        <div className="bg-white/80 backdrop-blur-sm shadow-xl overflow-hidden rounded-2xl border border-accent-100">
+          <ul role="list" className="divide-y divide-accent-100/50">
             {classes.map((cls) => (
-              <li key={cls.id}>
-                <div className="px-4 py-4 sm:px-6">
-                  <div className="flex items-center justify-between">
+              <li key={cls.id} className="hover:bg-accent-50/30 transition-colors duration-200">
+                <div className="px-6 py-6 sm:px-8">
+                  <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center">
-                        <h3 className="text-lg font-medium text-gray-900">{cls.name}</h3>
-                        <span
-                          className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            difficultyColors[cls.difficulty as keyof typeof difficultyColors]
-                          }`}
-                        >
-                          {difficultyLabels[cls.difficulty as keyof typeof difficultyLabels]}
-                        </span>
-                        <span
-                          className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            cls.isActive
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}
-                        >
-                          {cls.isActive ? 'Hoạt động' : 'Tạm ngưng'}
-                        </span>
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-accent-100 to-accent-200 rounded-full flex items-center justify-center shadow-md">
+                          <svg className="w-6 h-6 text-accent-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-900">{cls.name}</h3>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <span
+                              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                                difficultyColors[cls.difficulty as keyof typeof difficultyColors]
+                              }`}
+                            >
+                              {difficultyLabels[cls.difficulty as keyof typeof difficultyLabels]}
+                            </span>
+                            <span
+                              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${
+                                cls.isActive
+                                  ? 'bg-primary-100 text-primary-800 border-primary-200'
+                                  : 'bg-red-100 text-red-800 border-red-200'
+                              }`}
+                            >
+                              {cls.isActive ? '✓ Hoạt động' : '⏸ Tạm ngưng'}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <p className="mt-1 text-sm text-gray-600">{cls.description}</p>
-                      <div className="mt-2 flex items-center text-sm text-gray-500 space-x-4">
-                        <span className="flex items-center">
-                          <svg className="mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                          </svg>
-                          {cls.instructor}
-                        </span>
-                        <span className="flex items-center">
-                          <svg className="mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          {cls.duration} phút
-                        </span>
-                        <span className="flex items-center">
-                          <svg className="mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                          </svg>
-                          {cls.capacity} người
-                        </span>
+                      <p className="text-sm text-gray-600 mb-4 leading-relaxed">{cls.description}</p>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="flex items-center p-3 bg-primary-50/50 rounded-xl">
+                          <div className="flex items-center">
+                            <svg className="w-5 h-5 text-primary-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            <div>
+                              <p className="text-xs font-medium text-gray-600">Giảng viên</p>
+                              <p className="text-sm font-semibold text-gray-900">{cls.instructor}</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center p-3 bg-secondary-50/50 rounded-xl">
+                          <div className="flex items-center">
+                            <svg className="w-5 h-5 text-secondary-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                              <p className="text-xs font-medium text-gray-600">Thời lượng</p>
+                              <p className="text-sm font-semibold text-gray-900">{cls.duration} phút</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center p-3 bg-accent-50/50 rounded-xl">
+                          <div className="flex items-center">
+                            <svg className="w-5 h-5 text-accent-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <div>
+                              <p className="text-xs font-medium text-gray-600">Sức chứa</p>
+                              <p className="text-sm font-semibold text-gray-900">{cls.capacity} người</p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex flex-col space-y-3 ml-6">
                       <button
                         onClick={() => handleEditClass(cls)}
-                        className="text-emerald-600 hover:text-emerald-900"
+                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-accent-700 bg-accent-50 border border-accent-200 rounded-xl hover:bg-accent-100 hover:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-500 transition-all duration-200"
                       >
-                        <PencilIcon className="h-5 w-5" />
+                        <PencilIcon className="h-4 w-4 mr-2" />
+                        Chỉnh sửa
                       </button>
                       <button
                         onClick={() => handleDeleteClass(cls.id)}
-                        className="text-red-600 hover:text-red-900"
+                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-xl hover:bg-red-100 hover:border-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
                       >
-                        <TrashIcon className="h-5 w-5" />
+                        <TrashIcon className="h-4 w-4 mr-2" />
+                        Xóa
                       </button>
                     </div>
                   </div>

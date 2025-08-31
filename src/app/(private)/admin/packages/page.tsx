@@ -101,16 +101,23 @@ export default function PackagesPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Page header */}
-        <div className="sm:flex sm:items-center">
-          <div className="sm:flex-auto">
-            <h1 className="text-2xl font-semibold text-gray-900">Quản lý gói tập</h1>
-            <p className="mt-2 text-sm text-gray-700">
-              Tạo và quản lý các gói tập yoga cho thành viên.
-            </p>
+        <div className="text-center">
+          <div className="flex justify-center items-center space-x-3 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-secondary-400 to-secondary-600 rounded-xl flex items-center justify-center shadow-lg">
+              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">Quản lý gói tập</h1>
           </div>
-          <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Tạo và quản lý các gói tập yoga cho thành viên tại Yên Yoga
+          </p>
+          <div className="mt-4 h-1 w-24 bg-gradient-to-r from-secondary-400 to-secondary-600 rounded-full mx-auto"></div>
+          
+          <div className="mt-8">
             <button
               type="button"
               onClick={() => {
@@ -125,66 +132,92 @@ export default function PackagesPage() {
                 });
                 setShowAddForm(true);
               }}
-              className="inline-flex items-center justify-center rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:w-auto"
+              className="inline-flex items-center justify-center rounded-xl border border-transparent bg-gradient-to-r from-secondary-500 to-secondary-600 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:from-secondary-600 hover:to-secondary-700 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105"
             >
               <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-              Thêm gói tập
+              Thêm gói tập mới
             </button>
           </div>
         </div>
 
         {/* Packages grid */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {packages.map((pkg) => (
-            <div key={pkg.id} className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="px-4 py-5 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">{pkg.name}</h3>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => handleEditPackage(pkg)}
-                      className="text-emerald-600 hover:text-emerald-900"
-                    >
-                      <PencilIcon className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDeletePackage(pkg.id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                    </button>
+            <div key={pkg.id} className="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-secondary-100 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <div className="px-6 py-6 sm:p-8">
+                {/* Header with price highlight */}
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-secondary-400 to-secondary-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    </svg>
                   </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{pkg.name}</h3>
+                  <div className="text-3xl font-bold text-secondary-600 mb-2">
+                    {formatPrice(pkg.price)}
+                  </div>
+                  <p className="text-sm text-gray-600">{pkg.description}</p>
                 </div>
-                <p className="mt-2 text-sm text-gray-600">{pkg.description}</p>
-                <div className="mt-4 space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Giá:</span>
-                    <span className="text-sm font-medium text-gray-900">
-                      {formatPrice(pkg.price)}
+
+                {/* Package details */}
+                <div className="space-y-4 mb-6">
+                  <div className="flex items-center justify-between p-3 bg-secondary-50/50 rounded-xl">
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 text-secondary-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-sm font-medium text-gray-700">Thời hạn</span>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-900">{pkg.duration} ngày</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-primary-50/50 rounded-xl">
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 text-primary-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                      </svg>
+                      <span className="text-sm font-medium text-gray-700">Số lớp</span>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-900">
+                      {pkg.classLimit === -1 ? '✨ Không giới hạn' : `${pkg.classLimit} lớp`}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Thời hạn:</span>
-                    <span className="text-sm font-medium text-gray-900">{pkg.duration} ngày</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Số lớp:</span>
-                    <span className="text-sm font-medium text-gray-900">
-                      {pkg.classLimit === -1 ? 'Không giới hạn' : `${pkg.classLimit} lớp`}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Trạng thái:</span>
+
+                  <div className="flex items-center justify-between p-3 bg-accent-50/50 rounded-xl">
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 text-accent-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-sm font-medium text-gray-700">Trạng thái</span>
+                    </div>
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${
                         pkg.isActive
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
+                          ? 'bg-primary-100 text-primary-800 border-primary-200'
+                          : 'bg-red-100 text-red-800 border-red-200'
                       }`}
                     >
-                      {pkg.isActive ? 'Hoạt động' : 'Tạm ngưng'}
+                      {pkg.isActive ? '✓ Hoạt động' : '⏸ Tạm ngưng'}
                     </span>
                   </div>
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => handleEditPackage(pkg)}
+                    className="flex-1 inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-secondary-700 bg-secondary-50 border border-secondary-200 rounded-xl hover:bg-secondary-100 hover:border-secondary-300 focus:outline-none focus:ring-2 focus:ring-secondary-500 transition-all duration-200"
+                  >
+                    <PencilIcon className="h-4 w-4 mr-2" />
+                    Chỉnh sửa
+                  </button>
+                  <button
+                    onClick={() => handleDeletePackage(pkg.id)}
+                    className="flex-1 inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-xl hover:bg-red-100 hover:border-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
+                  >
+                    <TrashIcon className="h-4 w-4 mr-2" />
+                    Xóa
+                  </button>
                 </div>
               </div>
             </div>
@@ -193,105 +226,127 @@ export default function PackagesPage() {
 
         {/* Add/Edit Package Modal */}
         {showAddForm && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-              <div className="mt-3">
-                <h3 className="text-lg font-medium text-gray-900 text-center mb-4">
+          <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+            <div className="relative top-10 mx-auto p-8 border-0 w-full max-w-lg shadow-2xl rounded-2xl bg-white/95 backdrop-blur-lg border border-secondary-200">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-secondary-400 to-secondary-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">
                   {editingPackage ? 'Chỉnh sửa gói tập' : 'Thêm gói tập mới'}
                 </h3>
-                <form onSubmit={handleAddPackage} className="space-y-4">
+                <p className="text-gray-600">
+                  {editingPackage ? 'Cập nhật thông tin gói tập' : 'Tạo gói tập mới cho Yên Yoga'}
+                </p>
+              </div>
+              
+              <form onSubmit={handleAddPackage} className="space-y-6">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+                    Tên gói tập
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    required
+                    className="block w-full px-4 py-3 border border-secondary-200 rounded-xl shadow-sm focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 bg-white/80 backdrop-blur-sm transition-all duration-200"
+                    placeholder="Ví dụ: Gói Premium"
+                    value={newPackage.name}
+                    onChange={(e) => setNewPackage({ ...newPackage, name: e.target.value })}
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-2">
+                    Mô tả
+                  </label>
+                  <textarea
+                    id="description"
+                    rows={3}
+                    className="block w-full px-4 py-3 border border-secondary-200 rounded-xl shadow-sm focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 bg-white/80 backdrop-blur-sm transition-all duration-200"
+                    placeholder="Mô tả về gói tập này..."
+                    value={newPackage.description}
+                    onChange={(e) => setNewPackage({ ...newPackage, description: e.target.value })}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                      Tên gói tập
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      required
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"
-                      value={newPackage.name}
-                      onChange={(e) => setNewPackage({ ...newPackage, name: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                      Mô tả
-                    </label>
-                    <textarea
-                      id="description"
-                      rows={3}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"
-                      value={newPackage.description}
-                      onChange={(e) => setNewPackage({ ...newPackage, description: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="price" className="block text-sm font-semibold text-gray-700 mb-2">
                       Giá (VNĐ)
                     </label>
                     <input
                       type="number"
                       id="price"
                       required
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"
+                      className="block w-full px-4 py-3 border border-secondary-200 rounded-xl shadow-sm focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 bg-white/80 backdrop-blur-sm transition-all duration-200"
+                      placeholder="500000"
                       value={newPackage.price}
                       onChange={(e) => setNewPackage({ ...newPackage, price: e.target.value })}
                     />
                   </div>
+                  
                   <div>
-                    <label htmlFor="duration" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="duration" className="block text-sm font-semibold text-gray-700 mb-2">
                       Thời hạn (ngày)
                     </label>
                     <input
                       type="number"
                       id="duration"
                       required
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"
+                      className="block w-full px-4 py-3 border border-secondary-200 rounded-xl shadow-sm focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 bg-white/80 backdrop-blur-sm transition-all duration-200"
+                      placeholder="30"
                       value={newPackage.duration}
                       onChange={(e) => setNewPackage({ ...newPackage, duration: e.target.value })}
                     />
                   </div>
-                  <div>
-                    <label htmlFor="classLimit" className="block text-sm font-medium text-gray-700">
-                      Số lớp (để trống nếu không giới hạn)
-                    </label>
-                    <input
-                      type="number"
-                      id="classLimit"
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"
-                      value={newPackage.classLimit}
-                      onChange={(e) => setNewPackage({ ...newPackage, classLimit: e.target.value })}
-                    />
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      id="isActive"
-                      type="checkbox"
-                      className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
-                      checked={newPackage.isActive}
-                      onChange={(e) => setNewPackage({ ...newPackage, isActive: e.target.checked })}
-                    />
-                    <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
-                      Gói đang hoạt động
-                    </label>
-                  </div>
-                  <div className="flex justify-end space-x-3 pt-4">
-                    <button
-                      type="button"
-                      onClick={() => setShowAddForm(false)}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                    >
-                      Hủy
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 border border-transparent rounded-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
-                    >
-                      {editingPackage ? 'Cập nhật' : 'Thêm'}
-                    </button>
-                  </div>
-                </form>
-              </div>
+                </div>
+                
+                <div>
+                  <label htmlFor="classLimit" className="block text-sm font-semibold text-gray-700 mb-2">
+                    Số lớp (để trống nếu không giới hạn)
+                  </label>
+                  <input
+                    type="number"
+                    id="classLimit"
+                    className="block w-full px-4 py-3 border border-secondary-200 rounded-xl shadow-sm focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 bg-white/80 backdrop-blur-sm transition-all duration-200"
+                    placeholder="Để trống cho không giới hạn"
+                    value={newPackage.classLimit}
+                    onChange={(e) => setNewPackage({ ...newPackage, classLimit: e.target.value })}
+                  />
+                </div>
+                
+                <div className="flex items-center p-4 bg-secondary-50/50 rounded-xl">
+                  <input
+                    id="isActive"
+                    type="checkbox"
+                    className="h-5 w-5 text-secondary-600 focus:ring-secondary-500 border-secondary-300 rounded"
+                    checked={newPackage.isActive}
+                    onChange={(e) => setNewPackage({ ...newPackage, isActive: e.target.checked })}
+                  />
+                  <label htmlFor="isActive" className="ml-3 block text-sm font-medium text-gray-900">
+                    Gói đang hoạt động và có thể đăng ký
+                  </label>
+                </div>
+                
+                <div className="flex justify-end space-x-4 pt-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddForm(false)}
+                    className="px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-100 border border-gray-300 rounded-xl hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-secondary-500 to-secondary-600 border border-transparent rounded-xl hover:from-secondary-600 hover:to-secondary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-500 shadow-lg hover:shadow-xl transition-all duration-200"
+                  >
+                    {editingPackage ? 'Cập nhật gói tập' : 'Thêm gói tập'}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

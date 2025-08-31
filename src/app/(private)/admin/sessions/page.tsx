@@ -68,9 +68,9 @@ const classes = [
 ];
 
 const statusColors = {
-  scheduled: 'bg-blue-100 text-blue-800',
-  completed: 'bg-green-100 text-green-800',
-  cancelled: 'bg-red-100 text-red-800',
+  scheduled: 'bg-accent-100 text-accent-800 border border-accent-200',
+  completed: 'bg-primary-100 text-primary-800 border border-primary-200',
+  cancelled: 'bg-red-100 text-red-800 border border-red-200',
 };
 
 const statusLabels = {
@@ -163,16 +163,23 @@ export default function SessionsPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Page header */}
-        <div className="sm:flex sm:items-center">
-          <div className="sm:flex-auto">
-            <h1 className="text-2xl font-semibold text-gray-900">Quản lý ca tập</h1>
-            <p className="mt-2 text-sm text-gray-700">
-              Tạo và quản lý lịch trình các ca tập yoga.
-            </p>
+        <div className="text-center">
+          <div className="flex justify-center items-center space-x-3 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center shadow-lg">
+              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">Quản lý ca tập</h1>
           </div>
-          <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Tạo và quản lý lịch trình các ca tập yoga tại Yên Yoga
+          </p>
+          <div className="mt-4 h-1 w-24 bg-gradient-to-r from-primary-400 to-primary-600 rounded-full mx-auto"></div>
+          
+          <div className="mt-8">
             <button
               type="button"
               onClick={() => {
@@ -186,31 +193,38 @@ export default function SessionsPage() {
                 });
                 setShowAddForm(true);
               }}
-              className="inline-flex items-center justify-center rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:w-auto"
+              className="inline-flex items-center justify-center rounded-xl border border-transparent bg-gradient-to-r from-primary-500 to-primary-600 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:from-primary-600 hover:to-primary-700 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105"
             >
               <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-              Thêm ca tập
+              Thêm ca tập mới
             </button>
           </div>
         </div>
 
         {/* Sessions table */}
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-          <ul role="list" className="divide-y divide-gray-200">
+        <div className="bg-white/80 backdrop-blur-sm shadow-xl overflow-hidden rounded-2xl border border-primary-100">
+          <ul role="list" className="divide-y divide-primary-100/50">
             {sessions.map((session) => (
-              <li key={session.id}>
-                <div className="px-4 py-4 sm:px-6">
-                  <div className="flex items-center justify-between">
+              <li key={session.id} className="hover:bg-primary-50/30 transition-colors duration-200">
+                <div className="px-6 py-6 sm:px-8">
+                  <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center">
-                        <h3 className="text-lg font-medium text-gray-900">{session.className}</h3>
-                        <span
-                          className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            statusColors[session.status as keyof typeof statusColors]
-                          }`}
-                        >
-                          {statusLabels[session.status as keyof typeof statusLabels]}
-                        </span>
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center shadow-md">
+                          <svg className="w-6 h-6 text-primary-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-900">{session.className}</h3>
+                          <span
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                              statusColors[session.status as keyof typeof statusColors]
+                            }`}
+                          >
+                            {statusLabels[session.status as keyof typeof statusLabels]}
+                          </span>
+                        </div>
                       </div>
                       <div className="mt-1 flex items-center text-sm text-gray-500 space-x-4">
                         <span className="flex items-center">

@@ -14,10 +14,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Yoga Studio Dashboard",
-  description: "Quản lý studio yoga và đăng ký lớp học",
+  title: "Yên Yoga Studio",
+  description: "Không gian yoga thanh tịnh - Yên Yoga Studio",
   manifest: "/manifest.json",
-  themeColor: "#10b981",
+  themeColor: "#f97316",
   viewport: "width=device-width, initial-scale=1",
 };
 
