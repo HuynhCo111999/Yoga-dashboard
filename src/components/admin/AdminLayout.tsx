@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   UserGroupIcon, 
   CubeIcon, 
@@ -30,12 +31,22 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const { user, signOut, loading } = useAuth();
 
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userRole');
-    router.push('/login');
-  };
+  // Redirect if not admin
+  useEffect(() => {
+    if (!loading && !user) {
+      // No user at all - redirect to login
+      router.push('/login');
+    } else if (!loading && user && user.role && user.role !== 'admin') {
+      // User has role but not admin - redirect to appropriate dashboard
+      if (user.role === 'member') {
+        router.push('/member');
+      } else {
+        router.push('/login');
+      }
+    }
+  }, [user, loading, router]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -49,6 +60,32 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [showUserMenu]);
+
+  const handleLogout = async () => {
+    const result = await signOut();
+    if (!result.error) {
+      router.push('/login');
+    } else {
+      console.error('Logout error:', result.error);
+    }
+  };
+
+  // Show loading if auth is initializing
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-accent-50 to-secondary-50 flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <span className="text-gray-600">Đang tải...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show nothing if not admin (will redirect)
+  if (!user || !user.role || user.role !== 'admin') {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-accent-50 to-secondary-50">
@@ -203,7 +240,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   </div>
                   <span className="hidden lg:flex lg:items-center">
                     <span className="ml-4 text-sm font-semibold leading-6 text-gray-900" aria-hidden="true">
-                      Admin
+                      {user?.name || user?.email || 'Admin'}
                     </span>
                     <svg className="ml-2 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />

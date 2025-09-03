@@ -1,35 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-
-// Mock authentication - trong thực tế sẽ dùng auth service thật
-const mockAuth = {
-  isAuthenticated: () => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('isLoggedIn') === 'true';
-    }
-    return false;
-  },
-  getUserRole: () => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('userRole') || 'member';
-    }
-    return 'member';
-  },
-  login: (role: string) => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('userRole', role);
-    }
-  },
-  logout: () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('userRole');
-    }
-  }
-};
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function PrivateLayout({
   children,
@@ -38,44 +11,44 @@ export default function PrivateLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { user, loading } = useAuth();
 
   useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = mockAuth.isAuthenticated();
-      const userRole = mockAuth.getUserRole();
-      
-      if (!authenticated) {
-        // Redirect to login page
+    if (!loading) {
+      if (!user) {
         router.push('/login');
         return;
       }
 
-      // Check role-based access
-      if (pathname?.startsWith('/admin') && userRole !== 'admin') {
-        // Redirect to member dashboard if not admin
+      // Check role-based access for admin routes
+      if (pathname?.startsWith('/admin') && user.role !== 'admin') {
         router.push('/member');
         return;
       }
 
-      setIsAuthenticated(true);
-      setIsLoading(false);
-    };
+      // Check if member trying to access admin routes  
+      if (pathname?.startsWith('/member') && user.role !== 'member') {
+        router.push('/admin');
+        return;
+      }
+    }
+  }, [user, loading, router, pathname]);
 
-    checkAuth();
-  }, [router, pathname]);
-
-  if (isLoading) {
+  // Show loading while auth is initializing
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-emerald-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-accent-50 to-secondary-50 flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <span className="text-gray-600">Đang xác thực...</span>
+        </div>
       </div>
     );
   }
 
-  if (!isAuthenticated) {
-    return null; // Will redirect
+  // Show nothing if not authenticated (will redirect)
+  if (!user) {
+    return null;
   }
 
   return <>{children}</>;

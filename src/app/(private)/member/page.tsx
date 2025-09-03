@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 
 const memberData = {
   name: 'Nguyễn Thị Lan',
@@ -65,11 +66,15 @@ const upcomingClasses = [
 function MemberHeader() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const router = useRouter();
+  const { user, signOut } = useAuth();
 
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userRole');
-    router.push('/login');
+  const handleLogout = async () => {
+    const result = await signOut();
+    if (!result.error) {
+      router.push('/login');
+    } else {
+      console.error('Logout error:', result.error);
+    }
   };
 
   useEffect(() => {
@@ -111,11 +116,11 @@ function MemberHeader() {
             >
               <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center">
                 <span className="text-white font-medium text-sm">
-                  {memberData.name.charAt(0)}
+                  {(user?.name || user?.email || 'U').charAt(0).toUpperCase()}
                 </span>
               </div>
               <div className="hidden sm:block text-left">
-                <p className="text-sm font-semibold text-gray-900">{memberData.name}</p>
+                <p className="text-sm font-semibold text-gray-900">{user?.name || user?.email || 'Thành viên'}</p>
                 <p className="text-xs text-gray-500">Thành viên</p>
               </div>
               <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -177,6 +182,34 @@ function MemberHeader() {
 }
 
 export default function MemberDashboard() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+    // Allow both members and admins to access this page
+  }, [user, loading, router]);
+
+  // Show loading if auth is initializing
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-accent-50 to-secondary-50 flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <span className="text-gray-600">Đang tải...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show nothing if not authenticated (will redirect)
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-accent-50 to-secondary-50">
       {/* Member Header */}
@@ -187,7 +220,7 @@ export default function MemberDashboard() {
           {/* Welcome section */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Chào mừng trở lại, {memberData.name}!
+              Chào mừng trở lại, {user?.name || user?.email || 'bạn'}!
             </h1>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Chúc bạn có những buổi tập yoga thật hiệu quả và tràn đầy năng lượng. 

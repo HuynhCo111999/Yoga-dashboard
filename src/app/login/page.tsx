@@ -1,40 +1,71 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { signIn, user, loading } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
-    role: 'member'
+    password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [hasRedirected, setHasRedirected] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!loading && user && user.role && !hasRedirected) {
+      console.log('Redirecting logged in user:', user.email, 'Role:', user.role);
+      setHasRedirected(true);
+      
+      // Only redirect when we have user role (userData loaded)
+      if (user.role === 'admin') {
+        router.replace('/admin');
+      } else {
+        router.replace('/member');
+      }
+    }
+  }, [user, loading, router, hasRedirected]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
 
-    // Mock authentication - trong thực tế sẽ gọi API
-    setTimeout(() => {
-      if (formData.email && formData.password) {
-        // Store auth state
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userRole', formData.role);
-        
-        // Redirect based on role
-        if (formData.role === 'admin') {
-          router.push('/admin');
-        } else {
-          router.push('/member');
-        }
-      } else {
-        alert('Vui lòng nhập email và mật khẩu');
+    try {
+      const result = await signIn(formData.email, formData.password);
+      
+      if (result.error) {
+        setError(getErrorMessage(result.error));
+      } else if (result.user) {
+        // Auth context will handle redirect based on role
+        console.log('Login successful');
+        // Reset redirect flag after successful login
+        setHasRedirected(false);
       }
+    } catch {
+      setError('Đã xảy ra lỗi. Vui lòng thử lại.');
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
+  };
+
+  const getErrorMessage = (error: string) => {
+    if (error.includes('user-not-found')) {
+      return 'Không tìm thấy tài khoản với email này.';
+    } else if (error.includes('wrong-password')) {
+      return 'Mật khẩu không chính xác.';
+    } else if (error.includes('invalid-email')) {
+      return 'Email không hợp lệ.';
+    } else if (error.includes('too-many-requests')) {
+      return 'Quá nhiều lần thử. Vui lòng thử lại sau.';
+    } else {
+      return 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.';
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -44,18 +75,50 @@ export default function LoginPage() {
     });
   };
 
-  // Demo login functions
-  const loginAsAdmin = () => {
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userRole', 'admin');
-    router.push('/admin');
+  // Demo login functions - sử dụng test accounts
+  const loginAsAdmin = async () => {
+    setIsLoading(true);
+    setError('');
+    const result = await signIn('admin@yenyoga.com', 'admin123');
+    if (result.error) {
+      setError('Tài khoản admin demo chưa được tạo. Vui lòng tạo tài khoản admin trước.');
+    }
+    setIsLoading(false);
   };
 
-  const loginAsMember = () => {
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userRole', 'member');
-    router.push('/member');
+  const loginAsMember = async () => {
+    setIsLoading(true);
+    setError('');
+    const result = await signIn('member@yenyoga.com', 'member123');
+    if (result.error) {
+      setError('Tài khoản member demo chưa được tạo. Vui lòng tạo tài khoản member trước.');
+    }
+    setIsLoading(false);
   };
+
+  // Show loading if auth is initializing
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-accent-50 to-secondary-50 flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <span className="text-gray-600">Đang khởi tạo...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show redirecting message if user is logged in
+  if (user && user.role) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-accent-50 to-secondary-50 flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <span className="text-gray-600">Đang chuyển hướng...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-accent-50 to-secondary-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
@@ -94,6 +157,18 @@ export default function LoginPage() {
             </p>
           </div>
         
+          {/* Error message */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            </div>
+          )}
+
           {/* Login form */}
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-5">
@@ -144,35 +219,6 @@ export default function LoginPage() {
                     value={formData.password}
                     onChange={handleChange}
                   />
-                </div>
-              </div>
-
-              {/* Role selection */}
-              <div>
-                <label htmlFor="role" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Vai trò đăng nhập
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                  <select
-                    id="role"
-                    name="role"
-                    className="block w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:bg-white transition-all duration-200 appearance-none"
-                    value={formData.role}
-                    onChange={handleChange}
-                  >
-                    <option value="member">Thành viên</option>
-                    <option value="admin">Quản trị viên</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
                 </div>
               </div>
             </div>

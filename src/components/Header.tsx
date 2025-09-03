@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '@/contexts/AuthContext';
 
 const navigation = [
   { name: 'Trang chủ', href: '/' },
@@ -15,35 +16,20 @@ const navigation = [
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState('');
   const router = useRouter();
   const pathname = usePathname();
+  const { user, signOut } = useAuth();
 
-  useEffect(() => {
-    // Check authentication status
-    const checkAuth = () => {
-      if (typeof window !== 'undefined') {
-        const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-        const role = localStorage.getItem('userRole') || '';
-        setIsLoggedIn(loggedIn);
-        setUserRole(role);
-      }
-    };
+  const isLoggedIn = !!user;
+  const userRole = user?.role || '';
 
-    checkAuth();
-    
-    // Listen for storage changes
-    window.addEventListener('storage', checkAuth);
-    return () => window.removeEventListener('storage', checkAuth);
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userRole');
-    setIsLoggedIn(false);
-    setUserRole('');
-    router.push('/');
+  const handleLogout = async () => {
+    const result = await signOut();
+    if (!result.error) {
+      router.push('/');
+    } else {
+      console.error('Logout error:', result.error);
+    }
   };
 
   const isActive = (href: string) => {
