@@ -266,28 +266,28 @@ export default function AdminDashboard() {
               <div className="flow-root">
                 {recentActivities.length > 0 ? (
                   <ul role="list" className="-my-6 divide-y divide-primary-100/50">
-                    {recentActivities.map((activity) => (
-                      <li key={activity.id} className="py-4">
-                        <div className="flex items-center space-x-4">
-                          <div className="flex-shrink-0">
+                  {recentActivities.map((activity) => (
+                    <li key={activity.id} className="py-4">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex-shrink-0">
                             <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
                               <span className="text-primary-700 font-semibold text-sm">
                                 {activity.userName.charAt(0)}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm text-gray-900">
-                              <span className="font-semibold text-primary-700">{activity.userName}</span>{' '}
-                              {activity.action}{' '}
-                              <span className="font-semibold text-secondary-700">{activity.target}</span>
-                            </p>
-                            <p className="text-xs text-gray-500 mt-1">{formatActivityTime(activity.timestamp)}</p>
+                            </span>
                           </div>
                         </div>
-                      </li>
-                    ))}
-                  </ul>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-gray-900">
+                              <span className="font-semibold text-primary-700">{activity.userName}</span>{' '}
+                            {activity.action}{' '}
+                              <span className="font-semibold text-secondary-700">{activity.target}</span>
+                          </p>
+                            <p className="text-xs text-gray-500 mt-1">{formatActivityTime(activity.timestamp)}</p>
+                          </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     <p>Chưa có hoạt động nào</p>
@@ -311,27 +311,27 @@ export default function AdminDashboard() {
               <div className="flow-root">
                 {upcomingSessions.length > 0 ? (
                   <ul role="list" className="-my-6 divide-y divide-primary-100/50">
-                    {upcomingSessions.map((session) => (
-                      <li key={session.id} className="py-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1 min-w-0">
+                  {upcomingSessions.map((session) => (
+                    <li key={session.id} className="py-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-gray-900 truncate">
-                              {session.className}
-                            </p>
+                            {session.className}
+                          </p>
                             <p className="text-sm text-gray-600 mt-1">
                               <span className="text-primary-600 font-medium">{session.instructor}</span> • {session.time}
-                            </p>
-                          </div>
+                          </p>
+                        </div>
                           <div className="text-right ml-4">
                             <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-50 text-primary-700 border border-primary-200">
                               {session.registered}/{session.capacity} người
                             </div>
                             <p className="text-xs text-gray-500 mt-1">đăng ký</p>
                           </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     <p>Chưa có ca tập nào</p>

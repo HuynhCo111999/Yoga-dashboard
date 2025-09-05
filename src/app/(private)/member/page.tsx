@@ -4,64 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { memberDashboardApi, MemberDashboardStats, UpcomingSession, AttendedSession } from '@/lib/api';
 
-const memberData = {
-  name: 'Nguyễn Thị Lan',
-  email: 'lan.nguyen@email.com',
-  membershipStatus: 'active',
-  currentPackage: 'Gói Premium',
-  remainingClasses: 8,
-  joinDate: '2024-01-15',
-  nextClass: {
-    name: 'Hatha Yoga Cơ bản',
-    instructor: 'Nguyễn Thị Hương',
-    date: '2024-01-24',
-    time: '18:00 - 19:30'
-  }
-};
-
-const recentClasses = [
-  {
-    id: 1,
-    name: 'Vinyasa Flow',
-    instructor: 'Trần Văn Nam',
-    date: '2024-01-20',
-    status: 'attended'
-  },
-  {
-    id: 2,
-    name: 'Yin Yoga',
-    instructor: 'Lê Thị Mai',
-    date: '2024-01-18',
-    status: 'attended'
-  },
-  {
-    id: 3,
-    name: 'Hatha Yoga Cơ bản',
-    instructor: 'Nguyễn Thị Hương',
-    date: '2024-01-16',
-    status: 'attended'
-  }
-];
-
-const upcomingClasses = [
-  {
-    id: 1,
-    name: 'Hatha Yoga Cơ bản',
-    instructor: 'Nguyễn Thị Hương',
-    date: '2024-01-24',
-    time: '18:00 - 19:30',
-    status: 'registered'
-  },
-  {
-    id: 2,
-    name: 'Power Yoga',
-    instructor: 'Phạm Minh Đức',
-    date: '2024-01-26',
-    time: '06:30 - 07:45',
-    status: 'registered'
-  }
-];
+// Remove mock data - will be replaced with Firebase data
 
 function MemberHeader() {
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -184,6 +129,22 @@ function MemberHeader() {
 export default function MemberDashboard() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  
+  // State for Firebase data
+  const [memberStats, setMemberStats] = useState<MemberDashboardStats | null>(null);
+  const [nextClass, setNextClass] = useState<UpcomingSession | null>(null);
+  const [upcomingClasses, setUpcomingClasses] = useState<UpcomingSession[]>([]);
+  const [recentClasses, setRecentClasses] = useState<AttendedSession[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [cancelLoading, setCancelLoading] = useState<string | null>(null);
+
+  // Load member data
+  useEffect(() => {
+    if (user && user.uid) {
+      loadMemberData();
+    }
+  }, [user]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -192,6 +153,82 @@ export default function MemberDashboard() {
     }
     // Allow both members and admins to access this page
   }, [user, loading, router]);
+
+  const loadMemberData = async () => {
+    if (!user?.uid) return;
+
+    try {
+      setDataLoading(true);
+      setError(null);
+
+      // Load all data concurrently
+      const [statsResult, nextClassResult, upcomingResult, recentResult] = await Promise.all([
+        memberDashboardApi.getMemberStats(user.uid),
+        memberDashboardApi.getNextUpcomingSession(user.uid),
+        memberDashboardApi.getUpcomingSessions(user.uid, 5),
+        memberDashboardApi.getAttendedSessions(user.uid, 5),
+      ]);
+
+      // Handle stats
+      if (statsResult.success && statsResult.data) {
+        setMemberStats(statsResult.data);
+      } else {
+        console.error('Error loading member stats:', statsResult.error);
+      }
+
+      // Handle next class
+      if (nextClassResult.success) {
+        setNextClass(nextClassResult.data);
+      } else {
+        console.error('Error loading next class:', nextClassResult.error);
+      }
+
+      // Handle upcoming classes
+      if (upcomingResult.success && upcomingResult.data) {
+        setUpcomingClasses(upcomingResult.data);
+      } else {
+        console.error('Error loading upcoming classes:', upcomingResult.error);
+      }
+
+      // Handle recent classes
+      if (recentResult.success && recentResult.data) {
+        setRecentClasses(recentResult.data);
+      } else {
+        console.error('Error loading recent classes:', recentResult.error);
+      }
+    } catch (err) {
+      console.error('Error loading member data:', err);
+      setError('Có lỗi xảy ra khi tải dữ liệu');
+    } finally {
+      setDataLoading(false);
+    }
+  };
+
+  const handleCancelRegistration = async (sessionId: string, registrationId: string) => {
+    if (!user?.uid) return;
+
+    if (!confirm('Bạn có chắc chắn muốn hủy đăng ký lớp học này không?')) {
+      return;
+    }
+
+    try {
+      setCancelLoading(registrationId);
+      
+      const result = await memberDashboardApi.cancelRegistration(sessionId, user.uid);
+      
+      if (result.success) {
+        // Reload data to reflect changes
+        await loadMemberData();
+      } else {
+        setError(result.error || 'Có lỗi xảy ra khi hủy đăng ký');
+      }
+    } catch (err) {
+      console.error('Error cancelling registration:', err);
+      setError('Có lỗi xảy ra khi hủy đăng ký');
+    } finally {
+      setCancelLoading(null);
+    }
+  };
 
   // Show loading if auth is initializing
   if (loading) {
@@ -217,37 +254,69 @@ export default function MemberDashboard() {
       
       <div className="py-12 sm:py-16">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          {/* Error Display */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              {error}
+              <button 
+                onClick={() => setError(null)}
+                className="ml-2 text-red-800 hover:text-red-900"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           {/* Welcome section */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
               Chào mừng trở lại, {user?.name || user?.email || 'bạn'}!
             </h1>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Chúc bạn có những buổi tập yoga thật hiệu quả và tràn đầy năng lượng. 
+              Chúc bạn có những buổi tập yoga thật hiệu quả và tràn đầy năng lượng.
               Hãy bắt đầu hành trình khám phá sự cân bằng của cơ thể và tâm hồn.
             </p>
             <div className="mt-6 h-1 w-24 bg-gradient-to-r from-primary-400 to-primary-600 rounded-full mx-auto"></div>
           </div>
 
           {/* Stats cards */}
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-12">
-            <div className="bg-white/80 backdrop-blur-sm shadow-lg rounded-2xl border border-primary-100 hover:shadow-xl transition-all duration-300">
-              <div className="p-6">
+          {dataLoading ? (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-12">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-white/80 backdrop-blur-sm shadow-lg rounded-2xl border border-primary-100 animate-pulse">
+                  <div className="p-6">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <div className="w-12 h-12 bg-gray-300 rounded-xl"></div>
+                      </div>
+                      <div className="ml-5 w-0 flex-1">
+                        <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                        <div className="h-6 bg-gray-300 rounded"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-12">
+              <div className="bg-white/80 backdrop-blur-sm shadow-lg rounded-2xl border border-primary-100 hover:shadow-xl transition-all duration-300">
+                <div className="p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center">
-                      <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
-                      </svg>
-                    </div>
+                      <div className="w-12 h-12 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center">
+                        <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+                    </svg>
+                      </div>
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-semibold text-secondary-600 uppercase tracking-wide truncate">
+                        <dt className="text-sm font-semibold text-secondary-600 uppercase tracking-wide truncate">
                         Gói hiện tại
                       </dt>
-                      <dd className="text-xl font-bold text-gray-900 mt-1">
-                        {memberData.currentPackage}
+                        <dd className="text-xl font-bold text-gray-900 mt-1">
+                          {memberStats?.currentPackage || 'Chưa có gói'}
                       </dd>
                     </dl>
                   </div>
@@ -255,23 +324,23 @@ export default function MemberDashboard() {
               </div>
             </div>
 
-            <div className="bg-white/80 backdrop-blur-sm shadow-lg rounded-2xl border border-primary-100 hover:shadow-xl transition-all duration-300">
-              <div className="p-6">
+              <div className="bg-white/80 backdrop-blur-sm shadow-lg rounded-2xl border border-primary-100 hover:shadow-xl transition-all duration-300">
+                <div className="p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-gradient-to-br from-accent-400 to-accent-600 rounded-xl flex items-center justify-center">
-                      <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
+                      <div className="w-12 h-12 bg-gradient-to-br from-accent-400 to-accent-600 rounded-xl flex items-center justify-center">
+                        <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                      </div>
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-semibold text-secondary-600 uppercase tracking-wide truncate">
+                        <dt className="text-sm font-semibold text-secondary-600 uppercase tracking-wide truncate">
                         Lớp còn lại
                       </dt>
-                      <dd className="text-xl font-bold text-gray-900 mt-1">
-                        {memberData.remainingClasses} lớp
+                        <dd className="text-xl font-bold text-gray-900 mt-1">
+                          {memberStats?.remainingClasses || 0} lớp
                       </dd>
                     </dl>
                   </div>
@@ -279,23 +348,23 @@ export default function MemberDashboard() {
               </div>
             </div>
 
-            <div className="bg-white/80 backdrop-blur-sm shadow-lg rounded-2xl border border-primary-100 hover:shadow-xl transition-all duration-300">
-              <div className="p-6">
+              <div className="bg-white/80 backdrop-blur-sm shadow-lg rounded-2xl border border-primary-100 hover:shadow-xl transition-all duration-300">
+                <div className="p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-gradient-to-br from-secondary-400 to-secondary-600 rounded-xl flex items-center justify-center">
-                      <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5a2.25 2.25 0 002.25-2.25m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5a2.25 2.25 0 012.25 2.25v7.5" />
-                      </svg>
-                    </div>
+                      <div className="w-12 h-12 bg-gradient-to-br from-secondary-400 to-secondary-600 rounded-xl flex items-center justify-center">
+                        <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5a2.25 2.25 0 002.25-2.25m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5a2.25 2.25 0 012.25 2.25v7.5" />
+                    </svg>
+                      </div>
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-semibold text-secondary-600 uppercase tracking-wide truncate">
+                        <dt className="text-sm font-semibold text-secondary-600 uppercase tracking-wide truncate">
                         Ngày tham gia
                       </dt>
-                      <dd className="text-xl font-bold text-gray-900 mt-1">
-                        {new Date(memberData.joinDate).toLocaleDateString('vi-VN')}
+                        <dd className="text-xl font-bold text-gray-900 mt-1">
+                          {memberStats?.joinDate ? new Date(memberStats.joinDate).toLocaleDateString('vi-VN') : 'Chưa có'}
                       </dd>
                     </dl>
                   </div>
@@ -303,23 +372,23 @@ export default function MemberDashboard() {
               </div>
             </div>
 
-            <div className="bg-white/80 backdrop-blur-sm shadow-lg rounded-2xl border border-primary-100 hover:shadow-xl transition-all duration-300">
-              <div className="p-6">
+              <div className="bg-white/80 backdrop-blur-sm shadow-lg rounded-2xl border border-primary-100 hover:shadow-xl transition-all duration-300">
+                <div className="p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center">
-                      <div className={`h-4 w-4 rounded-full ${
-                        memberData.membershipStatus === 'active' ? 'bg-white' : 'bg-red-300'
-                      }`}></div>
-                    </div>
+                      <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center">
+                        <div className={`h-4 w-4 rounded-full ${
+                          memberStats?.membershipStatus === 'active' ? 'bg-white' : 'bg-red-300'
+                    }`}></div>
+                      </div>
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-semibold text-secondary-600 uppercase tracking-wide truncate">
+                        <dt className="text-sm font-semibold text-secondary-600 uppercase tracking-wide truncate">
                         Trạng thái
                       </dt>
-                      <dd className="text-xl font-bold text-gray-900 mt-1">
-                        {memberData.membershipStatus === 'active' ? 'Hoạt động' : 'Tạm ngưng'}
+                        <dd className="text-xl font-bold text-gray-900 mt-1">
+                          {memberStats?.membershipStatus === 'active' ? 'Hoạt động' : memberStats?.membershipStatus === 'inactive' ? 'Tạm ngưng' : 'Bị khóa'}
                       </dd>
                     </dl>
                   </div>
@@ -327,6 +396,7 @@ export default function MemberDashboard() {
               </div>
             </div>
           </div>
+          )}
 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
             {/* Next class */}
@@ -340,18 +410,27 @@ export default function MemberDashboard() {
                   </div>
                   <h3 className="text-xl font-bold text-gray-900">Lớp học tiếp theo</h3>
                 </div>
-                {memberData.nextClass ? (
+                {dataLoading ? (
+                  <div className="border border-primary-200 rounded-2xl p-6 bg-gradient-to-r from-primary-50 to-accent-50 animate-pulse">
+                    <div className="h-6 bg-gray-300 rounded mb-4"></div>
+                    <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                  </div>
+                ) : nextClass ? (
                   <div className="border border-primary-200 rounded-2xl p-6 bg-gradient-to-r from-primary-50 to-accent-50">
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="text-lg font-bold text-primary-900 mb-2">
-                          {memberData.nextClass.name}
+                          {nextClass.className}
                         </h4>
                         <p className="text-sm text-primary-700 mb-1">
-                          <span className="font-semibold">Giảng viên:</span> {memberData.nextClass.instructor}
+                          <span className="font-semibold">Giảng viên:</span> {nextClass.instructor}
                         </p>
                         <p className="text-sm text-primary-700">
-                          <span className="font-semibold">Thời gian:</span> {new Date(memberData.nextClass.date).toLocaleDateString('vi-VN')} • {memberData.nextClass.time}
+                          <span className="font-semibold">Thời gian:</span> {new Date(nextClass.date).toLocaleDateString('vi-VN')} • {nextClass.startTime} - {nextClass.endTime}
+                        </p>
+                        <p className="text-xs text-primary-600 mt-2">
+                          Trạng thái: {nextClass.registrationStatus === 'confirmed' ? 'Đã xác nhận' : 'Chờ xác nhận'}
                         </p>
                       </div>
                       <div className="text-primary-600">
@@ -391,21 +470,53 @@ export default function MemberDashboard() {
                   </div>
                   <h3 className="text-xl font-bold text-gray-900">Lớp đã đăng ký</h3>
                 </div>
-                <div className="space-y-4">
-                  {upcomingClasses.map((cls) => (
-                    <div key={cls.id} className="flex items-center justify-between p-4 border border-primary-100 rounded-xl bg-gradient-to-r from-white to-primary-50/30 hover:shadow-md transition-all duration-200">
-                      <div>
-                        <p className="text-sm font-semibold text-gray-900">{cls.name}</p>
-                        <p className="text-xs text-gray-600 mt-1">
-                          <span className="text-primary-600 font-medium">{cls.instructor}</span> • {new Date(cls.date).toLocaleDateString('vi-VN')} • {cls.time}
-                        </p>
+                {dataLoading ? (
+                  <div className="space-y-4">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="flex items-center justify-between p-4 border border-primary-100 rounded-xl bg-gradient-to-r from-white to-primary-50/30 animate-pulse">
+                        <div className="flex-1">
+                          <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                          <div className="h-3 bg-gray-300 rounded w-3/4"></div>
+                        </div>
+                        <div className="w-12 h-6 bg-gray-300 rounded"></div>
                       </div>
-                      <button className="text-red-600 hover:text-red-800 text-xs font-medium px-3 py-1 rounded-lg hover:bg-red-50 transition-colors">
-                        Hủy
+                    ))}
+                  </div>
+                ) : upcomingClasses.length > 0 ? (
+                  <div className="space-y-4">
+                    {upcomingClasses.map((session) => (
+                      <div key={session.id} className="flex items-center justify-between p-4 border border-primary-100 rounded-xl bg-gradient-to-r from-white to-primary-50/30 hover:shadow-md transition-all duration-200">
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">{session.className}</p>
+                          <p className="text-xs text-gray-600 mt-1">
+                            <span className="text-primary-600 font-medium">{session.instructor}</span> • {new Date(session.date).toLocaleDateString('vi-VN')} • {session.startTime} - {session.endTime}
+                          </p>
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-2 ${
+                            session.registrationStatus === 'confirmed' 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {session.registrationStatus === 'confirmed' ? '✓ Đã xác nhận' : '⏳ Chờ xác nhận'}
+                          </span>
+                        </div>
+                        <button 
+                          onClick={() => handleCancelRegistration(session.id, session.registrationId)}
+                          disabled={cancelLoading === session.registrationId}
+                          className="text-red-600 hover:text-red-800 text-xs font-medium px-3 py-1 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+                        >
+                          {cancelLoading === session.registrationId ? 'Đang hủy...' : 'Hủy'}
                       </button>
                     </div>
                   ))}
                 </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M9 5H7a2 2 0 00-2 2v6a2 2 0 002 2h2m6 0h2a2 2 0 002-2V7a2 2 0 00-2-2h-2m-6 4h6m-6 4h6" />
+                    </svg>
+                    <p>Chưa có lớp nào được đăng ký</p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -421,34 +532,74 @@ export default function MemberDashboard() {
                   <h3 className="text-xl font-bold text-gray-900">Lịch sử tham gia</h3>
                 </div>
                 <div className="overflow-hidden">
-                  <ul role="list" className="divide-y divide-primary-100/50">
-                    {recentClasses.map((cls) => (
-                      <li key={cls.id} className="py-5">
+                  {dataLoading ? (
+                    <ul role="list" className="divide-y divide-primary-100/50">
+                      {[...Array(3)].map((_, i) => (
+                        <li key={i} className="py-5 animate-pulse">
                         <div className="flex items-center space-x-4">
                           <div className="flex-shrink-0">
-                            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
-                              <svg className="h-6 w-6 text-primary-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
+                              <div className="h-12 w-12 rounded-full bg-gray-300"></div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                              <div className="h-3 bg-gray-300 rounded w-2/3"></div>
+                            </div>
+                            <div className="w-20 h-6 bg-gray-300 rounded"></div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : recentClasses.length > 0 ? (
+                    <ul role="list" className="divide-y divide-primary-100/50">
+                      {recentClasses.map((session) => (
+                        <li key={session.id} className="py-5">
+                          <div className="flex items-center space-x-4">
+                            <div className="flex-shrink-0">
+                              <div className={`h-12 w-12 rounded-full flex items-center justify-center ${
+                                session.status === 'attended' 
+                                  ? 'bg-gradient-to-br from-green-100 to-green-200' 
+                                  : 'bg-gradient-to-br from-red-100 to-red-200'
+                              }`}>
+                                <svg className={`h-6 w-6 ${
+                                  session.status === 'attended' ? 'text-green-600' : 'text-red-600'
+                                }`} fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                                  {session.status === 'attended' ? (
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  ) : (
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                  )}
+                                </svg>
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-base font-semibold text-gray-900 truncate">
-                              {cls.name}
+                              <p className="text-base font-semibold text-gray-900 truncate">
+                                {session.className}
                             </p>
-                            <p className="text-sm text-gray-600 truncate mt-1">
-                              <span className="text-primary-600 font-medium">{cls.instructor}</span> • {new Date(cls.date).toLocaleDateString('vi-VN')}
+                              <p className="text-sm text-gray-600 truncate mt-1">
+                                <span className="text-primary-600 font-medium">{session.instructor}</span> • {new Date(session.date).toLocaleDateString('vi-VN')} • {session.startTime} - {session.endTime}
                             </p>
                           </div>
                           <div>
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
-                              ✓ Đã tham gia
+                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${
+                                session.status === 'attended'
+                                  ? 'bg-green-100 text-green-800 border-green-200'
+                                  : 'bg-red-100 text-red-800 border-red-200'
+                              }`}>
+                                {session.status === 'attended' ? '✓ Đã tham gia' : '✗ Vắng mặt'}
                             </span>
                           </div>
                         </div>
                       </li>
                     ))}
                   </ul>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p>Chưa có lịch sử tham gia</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -458,8 +609,8 @@ export default function MemberDashboard() {
           <div className="mt-12 bg-gradient-to-r from-primary-50 to-accent-50 rounded-2xl p-8 border border-primary-100">
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                Thao tác nhanh
-              </h3>
+              Thao tác nhanh
+            </h3>
               <p className="text-gray-600">Khám phá thêm những dịch vụ yoga tuyệt vời</p>
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
