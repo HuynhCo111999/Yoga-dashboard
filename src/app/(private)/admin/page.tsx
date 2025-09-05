@@ -1,71 +1,190 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
+import { dashboardApi, DashboardStats, RecentActivity } from '@/lib/api';
 
-const stats = [
-  { name: 'Tổng thành viên', stat: '127', change: '+12', changeType: 'increase' },
-  { name: 'Lớp học hoạt động', stat: '8', change: '+2', changeType: 'increase' },
-  { name: 'Ca tập hôm nay', stat: '6', change: '0', changeType: 'unchanged' },
-  { name: 'Doanh thu tháng', stat: '45.2M', change: '+4.5%', changeType: 'increase' },
-];
-
-const recentActivities = [
-  {
-    id: 1,
-    user: 'Nguyễn Thị Lan',
-    action: 'đã đăng ký',
-    target: 'Hatha Yoga Cơ bản',
-    time: '5 phút trước',
-  },
-  {
-    id: 2,
-    user: 'Trần Văn Minh',
-    action: 'đã hủy đăng ký',
-    target: 'Vinyasa Flow',
-    time: '15 phút trước',
-  },
-  {
-    id: 3,
-    user: 'Lê Thị Hoa',
-    action: 'đã tham gia',
-    target: 'Power Yoga',
-    time: '1 giờ trước',
-  },
-  {
-    id: 4,
-    user: 'Phạm Quang Huy',
-    action: 'đã đăng ký gói',
-    target: 'Gói Premium',
-    time: '2 giờ trước',
-  },
-];
-
-const upcomingSessions = [
-  {
-    id: 1,
-    className: 'Hatha Yoga Cơ bản',
-    instructor: 'Nguyễn Thị Hương',
-    time: '18:00 - 19:30',
-    registered: 12,
-    capacity: 15,
-  },
-  {
-    id: 2,
-    className: 'Vinyasa Flow',
-    instructor: 'Trần Văn Nam',
-    time: '19:45 - 21:00',
-    registered: 8,
-    capacity: 12,
-  },
-  {
-    id: 3,
-    className: 'Yin Yoga',
-    instructor: 'Lê Thị Mai',
-    time: '20:00 - 21:30',
-    registered: 6,
-    capacity: 10,
-  },
-];
+interface DashboardSession {
+  id: string;
+  className: string;
+  instructor: string;
+  time: string;
+  registered: number;
+  capacity: number;
+  availableSpots: number;
+}
 
 export default function AdminDashboard() {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
+  const [upcomingSessions, setUpcomingSessions] = useState<DashboardSession[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Load all dashboard data in parallel
+        const [statsResult, activitiesResult, sessionsResult] = await Promise.all([
+          dashboardApi.getDashboardStats(),
+          dashboardApi.getRecentActivities(6),
+          dashboardApi.getUpcomingSessionsForDashboard(3)
+        ]);
+
+        // Handle stats
+        if (statsResult.success && statsResult.data) {
+          setStats(statsResult.data);
+        } else {
+          console.error('Error loading stats:', statsResult.error);
+        }
+
+        // Handle activities
+        if (activitiesResult.success && activitiesResult.data) {
+          setRecentActivities(activitiesResult.data);
+        } else {
+          console.error('Error loading activities:', activitiesResult.error);
+        }
+
+        // Handle sessions
+        if (sessionsResult.success && sessionsResult.data) {
+          setUpcomingSessions(sessionsResult.data as DashboardSession[]);
+        } else {
+          console.error('Error loading sessions:', sessionsResult.error);
+        }
+
+      } catch (err) {
+        console.error('Dashboard loading error:', err);
+        setError('Không thể tải dữ liệu dashboard');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, []);
+
+  // Format stats for display
+  const formatStats = () => {
+    if (!stats) return [];
+
+    const formatNumber = (num: number): string => {
+      if (num >= 1000000) {
+        return `${(num / 1000000).toFixed(1)}M`;
+      } else if (num >= 1000) {
+        return `${(num / 1000).toFixed(1)}K`;
+      }
+      return num.toString();
+    };
+
+    const formatGrowth = (growth: number): { text: string; type: 'increase' | 'decrease' | 'unchanged' } => {
+      if (growth > 0) return { text: `+${growth}`, type: 'increase' };
+      if (growth < 0) return { text: `${growth}`, type: 'decrease' };
+      return { text: '0', type: 'unchanged' };
+    };
+
+    return [
+      {
+        name: 'Tổng thành viên',
+        stat: stats.totalMembers.toString(),
+        change: formatGrowth(stats.memberGrowth).text,
+        changeType: formatGrowth(stats.memberGrowth).type,
+      },
+      {
+        name: 'Lớp học hoạt động',
+        stat: stats.activeClasses.toString(),
+        change: formatGrowth(stats.classGrowth).text,
+        changeType: formatGrowth(stats.classGrowth).type,
+      },
+      {
+        name: 'Ca tập hôm nay',
+        stat: stats.todaySessions.toString(),
+        change: formatGrowth(stats.sessionGrowth).text,
+        changeType: formatGrowth(stats.sessionGrowth).type,
+      },
+      {
+        name: 'Doanh thu tháng',
+        stat: formatNumber(stats.monthlyRevenue),
+        change: `+${stats.revenueGrowth}%`,
+        changeType: stats.revenueGrowth > 0 ? 'increase' as const : 'unchanged' as const,
+      },
+    ];
+  };
+
+  // Format time for activities
+  const formatActivityTime = (timestamp: string): string => {
+    const now = new Date();
+    const activityTime = new Date(timestamp);
+    const diffInMinutes = Math.floor((now.getTime() - activityTime.getTime()) / (1000 * 60));
+
+    if (diffInMinutes < 1) return 'Vừa xong';
+    if (diffInMinutes < 60) return `${diffInMinutes} phút trước`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours} giờ trước`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays} ngày trước`;
+  };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="space-y-6">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Tổng quan Yên Yoga</h1>
+            <p className="mt-3 text-lg text-gray-600">
+              Thống kê tổng quan về hoạt động của studio yoga
+            </p>
+            <div className="mt-4 h-1 w-24 bg-gradient-to-r from-primary-400 to-primary-600 rounded-full mx-auto"></div>
+          </div>
+          
+          <div className="flex items-center justify-center h-64">
+            <div className="flex items-center space-x-2">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+              <span className="text-gray-600">Đang tải dữ liệu...</span>
+            </div>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="space-y-6">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Tổng quan Yên Yoga</h1>
+            <p className="mt-3 text-lg text-gray-600">
+              Thống kê tổng quan về hoạt động của studio yoga
+            </p>
+            <div className="mt-4 h-1 w-24 bg-gradient-to-r from-primary-400 to-primary-600 rounded-full mx-auto"></div>
+          </div>
+          
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="text-red-600 mb-2">⚠️</div>
+              <p className="text-gray-600">{error}</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="mt-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+              >
+                Thử lại
+              </button>
+            </div>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  const formattedStats = formatStats();
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -80,7 +199,7 @@ export default function AdminDashboard() {
 
         {/* Stats */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((item) => (
+          {formattedStats.map((item) => (
             <div key={item.name} className="relative overflow-hidden rounded-2xl bg-white/80 backdrop-blur-sm border border-primary-100 px-6 py-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-primary-200">
               <dt>
                 <p className="truncate text-sm font-semibold text-secondary-600 uppercase tracking-wide">{item.name}</p>
@@ -145,29 +264,35 @@ export default function AdminDashboard() {
                 <h3 className="text-xl font-bold text-gray-900">Hoạt động gần đây</h3>
               </div>
               <div className="flow-root">
-                <ul role="list" className="-my-6 divide-y divide-primary-100/50">
-                  {recentActivities.map((activity) => (
-                    <li key={activity.id} className="py-4">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex-shrink-0">
-                          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
-                            <span className="text-primary-700 font-semibold text-sm">
-                              {activity.user.charAt(0)}
-                            </span>
+                {recentActivities.length > 0 ? (
+                  <ul role="list" className="-my-6 divide-y divide-primary-100/50">
+                    {recentActivities.map((activity) => (
+                      <li key={activity.id} className="py-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="flex-shrink-0">
+                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
+                              <span className="text-primary-700 font-semibold text-sm">
+                                {activity.userName.charAt(0)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-gray-900">
+                              <span className="font-semibold text-primary-700">{activity.userName}</span>{' '}
+                              {activity.action}{' '}
+                              <span className="font-semibold text-secondary-700">{activity.target}</span>
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">{formatActivityTime(activity.timestamp)}</p>
                           </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-900">
-                            <span className="font-semibold text-primary-700">{activity.user}</span>{' '}
-                            {activity.action}{' '}
-                            <span className="font-semibold text-secondary-700">{activity.target}</span>
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>Chưa có hoạt động nào</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -181,31 +306,37 @@ export default function AdminDashboard() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">Ca tập hôm nay</h3>
+                <h3 className="text-xl font-bold text-gray-900">Ca tập sắp tới</h3>
               </div>
               <div className="flow-root">
-                <ul role="list" className="-my-6 divide-y divide-primary-100/50">
-                  {upcomingSessions.map((session) => (
-                    <li key={session.id} className="py-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-gray-900 truncate">
-                            {session.className}
-                          </p>
-                          <p className="text-sm text-gray-600 mt-1">
-                            <span className="text-primary-600 font-medium">{session.instructor}</span> • {session.time}
-                          </p>
-                        </div>
-                        <div className="text-right ml-4">
-                          <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-50 text-primary-700 border border-primary-200">
-                            {session.registered}/{session.capacity} người
+                {upcomingSessions.length > 0 ? (
+                  <ul role="list" className="-my-6 divide-y divide-primary-100/50">
+                    {upcomingSessions.map((session) => (
+                      <li key={session.id} className="py-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 truncate">
+                              {session.className}
+                            </p>
+                            <p className="text-sm text-gray-600 mt-1">
+                              <span className="text-primary-600 font-medium">{session.instructor}</span> • {session.time}
+                            </p>
                           </div>
-                          <p className="text-xs text-gray-500 mt-1">đăng ký</p>
+                          <div className="text-right ml-4">
+                            <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-50 text-primary-700 border border-primary-200">
+                              {session.registered}/{session.capacity} người
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">đăng ký</p>
+                          </div>
                         </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>Chưa có ca tập nào</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
