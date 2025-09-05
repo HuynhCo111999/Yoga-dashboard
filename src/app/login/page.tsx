@@ -75,26 +75,6 @@ export default function LoginPage() {
     });
   };
 
-  // Demo login functions - sử dụng test accounts
-  const loginAsAdmin = async () => {
-    setIsLoading(true);
-    setError('');
-    const result = await signIn('admin@yenyoga.com', 'admin123');
-    if (result.error) {
-      setError('Tài khoản admin demo chưa được tạo. Vui lòng tạo tài khoản admin trước.');
-    }
-    setIsLoading(false);
-  };
-
-  const loginAsMember = async () => {
-    setIsLoading(true);
-    setError('');
-    const result = await signIn('member@yenyoga.com', 'member123');
-    if (result.error) {
-      setError('Tài khoản member demo chưa được tạo. Vui lòng tạo tài khoản member trước.');
-    }
-    setIsLoading(false);
-  };
 
   // Show loading if auth is initializing
   if (loading) {
@@ -247,39 +227,6 @@ export default function LoginPage() {
             </div>
           </form>
 
-          {/* Demo login buttons */}
-          <div className="mt-8 pt-6 border-t border-gray-200/50">
-            <div className="text-center mb-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-1">
-                Đăng nhập nhanh (Demo)
-              </h3>
-              <p className="text-xs text-gray-500">
-                Dành cho việc demo và test ứng dụng
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button
-                onClick={loginAsAdmin}
-                className="group flex items-center justify-center py-3 px-4 border border-primary-200 rounded-xl shadow-sm text-sm font-medium text-primary-700 bg-primary-50 hover:bg-primary-100 hover:border-primary-300 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary-500 transition-all duration-200 hover:shadow-md"
-              >
-                <svg className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                Admin
-              </button>
-              
-              <button
-                onClick={loginAsMember}
-                className="group flex items-center justify-center py-3 px-4 border border-secondary-200 rounded-xl shadow-sm text-sm font-medium text-secondary-700 bg-secondary-50 hover:bg-secondary-100 hover:border-secondary-300 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-secondary-500 transition-all duration-200 hover:shadow-md"
-              >
-                <svg className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                Member
-              </button>
-            </div>
-          </div>
 
           {/* Decorative yoga quote */}
           <div className="mt-6 text-center">

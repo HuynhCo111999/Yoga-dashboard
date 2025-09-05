@@ -19,22 +19,26 @@ class SessionsApiService extends BaseApiService {
     sessionData: SessionCreateRequest
   ): Promise<ApiResponse<Session>> {
     // Get class information to populate session details
-    const classResponse = await fetch(`/api/classes/${sessionData.classId}`);
+    const { classesApi } = await import("./classes");
+    const classResult = await classesApi.getById(sessionData.classId);
+
     let className = "Unknown Class";
     let instructor = "Unknown Instructor";
     let defaultCapacity = 10;
+    let difficulty: "beginner" | "intermediate" | "advanced" = "beginner";
 
-    if (classResponse.ok) {
-      const classData = await classResponse.json();
-      className = classData.name || className;
-      instructor = classData.instructor || instructor;
-      defaultCapacity = classData.maxCapacity || defaultCapacity;
+    if (classResult.success && classResult.data) {
+      className = classResult.data.name;
+      instructor = classResult.data.instructor;
+      defaultCapacity = classResult.data.maxCapacity;
+      difficulty = classResult.data.difficulty;
     }
 
     const sessionDoc = {
       ...sessionData,
       className,
       instructor,
+      difficulty,
       capacity: sessionData.capacity || defaultCapacity,
       registeredCount: 0,
       status: "scheduled" as const,
@@ -259,6 +263,18 @@ class SessionsApiService extends BaseApiService {
         };
       }
 
+      // Get member information
+      const { membersApi } = await import("./members");
+      const memberResult = await membersApi.getById(registrationData.memberId);
+
+      let memberName = "Unknown Member";
+      let memberEmail = "unknown@email.com";
+
+      if (memberResult.success && memberResult.data) {
+        memberName = memberResult.data.name;
+        memberEmail = memberResult.data.email;
+      }
+
       // Create registration
       const registration: SessionRegistration = {
         id: `${registrationData.sessionId}_${
@@ -266,8 +282,8 @@ class SessionsApiService extends BaseApiService {
         }_${Date.now()}`,
         sessionId: registrationData.sessionId,
         memberId: registrationData.memberId,
-        memberName: "Unknown Member", // Should be fetched from member data
-        memberEmail: "unknown@email.com", // Should be fetched from member data
+        memberName,
+        memberEmail,
         status: "confirmed",
         registeredAt: new Date().toISOString(),
         notes: registrationData.notes,
