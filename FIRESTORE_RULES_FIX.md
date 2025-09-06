@@ -25,6 +25,16 @@ service cloud.firestore {
     match /{document=**} {
       allow read, write: if request.auth != null;
     }
+    
+    // Specific rules for users collection (role management)
+    match /users/{userId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Specific rules for members collection (member data)
+    match /members/{memberId} {
+      allow read, write: if request.auth != null;
+    }
   }
 }
 ```

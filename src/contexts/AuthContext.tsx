@@ -35,14 +35,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const unsubscribe = authService.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
-        console.log('Auth state changed - user found:', firebaseUser.email);
-        
         // Refresh token to fix "Unknown SID" issue
         try {
           await firebaseUser.getIdToken(true); // Force refresh
-          console.log('Token refreshed successfully');
         } catch (tokenError) {
-          console.error('Token refresh failed:', tokenError);
           // If token refresh fails, sign out and reload
           await authService.signOut();
           window.location.reload();
@@ -52,7 +48,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Get user data from Firestore
         const { data, error } = await authService.getUserData(firebaseUser.uid);
         if (data) {
-          console.log('User data loaded from Firestore:', data.role);
           const userWithData: FirebaseUser = {
             ...firebaseUser,
             role: data.role,
@@ -62,13 +57,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setUser(userWithData);
           setUserData(data);
         } else {
-          console.error('Error getting user data:', error);
           // Check if this is a newly created user (member) without role data yet
           if (firebaseUser && firebaseUser.email) {
-            console.log('New user detected, checking if admin is creating member...');
             // If current user is admin, don't sign out - this might be a new member being created
             if (user && user.role === 'admin') {
-              console.log('Admin creating member, keeping admin session');
               return;
             }
           }
@@ -79,7 +71,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
           await authService.signOut();
         }
       } else {
-        console.log('Auth state changed - no user');
         setUser(null);
         setUserData(null);
       }

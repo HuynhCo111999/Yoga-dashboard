@@ -2,6 +2,7 @@ import {
   collection,
   doc,
   addDoc,
+  setDoc,
   updateDoc,
   deleteDoc,
   getDoc,
@@ -115,6 +116,52 @@ export class BaseApiService {
     }
   }
 
+  async createWithId<T extends DocumentData>(
+    id: string,
+    data: Omit<T, "id" | "createdAt" | "updatedAt">
+  ): Promise<ApiResponse<T & { id: string }>> {
+    try {
+      const now = Timestamp.now();
+      const docData = {
+        ...data,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      const docRef = this.getDoc(id);
+      await setDoc(docRef, docData);
+
+      const createdDoc = await getDoc(docRef);
+      if (!createdDoc.exists()) {
+        return {
+          data: null,
+          error: "Không thể tạo dữ liệu",
+          success: false,
+        };
+      }
+
+      const createdDocData = createdDoc.data();
+      const result = {
+        id: createdDoc.id,
+        ...createdDocData,
+        createdAt: this.timestampToString(createdDocData.createdAt),
+        updatedAt: this.timestampToString(createdDocData.updatedAt),
+      } as unknown as T & { id: string };
+
+      return {
+        data: result,
+        error: null,
+        success: true,
+      };
+    } catch (error) {
+      return {
+        data: null,
+        error: this.handleError(error),
+        success: false,
+      };
+    }
+  }
+
   async getById<T extends DocumentData>(
     id: string
   ): Promise<ApiResponse<T & { id: string }>> {
@@ -157,25 +204,11 @@ export class BaseApiService {
     data: Partial<Omit<T, "id" | "createdAt">>
   ): Promise<ApiResponse<T & { id: string }>> {
     try {
-      console.log(`Updating document ${id} with data:`, data);
-      console.log(`Collection: ${this.collectionName}`);
       const docRef = this.getDoc(id);
-      console.log(`Document reference:`, docRef.path);
 
       // Check if document exists
       const docSnap = await getDoc(docRef);
-      console.log(`Document exists:`, docSnap.exists());
       if (!docSnap.exists()) {
-        console.error(
-          `Document ${id} not found in collection ${this.collectionName}`
-        );
-        // Let's also check what documents exist in the collection
-        const collectionRef = this.getCollection();
-        const snapshot = await getDocs(collectionRef);
-        console.log(
-          `Available documents in ${this.collectionName}:`,
-          snapshot.docs.map((doc) => ({ id: doc.id, data: doc.data() }))
-        );
         return {
           data: null,
           error: "Không tìm thấy dữ liệu để cập nhật",
@@ -188,9 +221,7 @@ export class BaseApiService {
         updatedAt: Timestamp.now(),
       };
 
-      console.log(`Updating document ${id} with:`, updateData);
       await updateDoc(docRef, updateData);
-      console.log(`Document ${id} updated successfully`);
 
       // Get updated document
       const updatedDoc = await getDoc(docRef);

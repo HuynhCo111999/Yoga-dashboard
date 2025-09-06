@@ -51,8 +51,6 @@ export default function MembersPage() {
       ]);
 
       if (membersResult.success && membersResult.data) {
-        console.log('Loaded members:', membersResult.data.length);
-        console.log('Members data:', membersResult.data.map(m => ({ id: m.id, name: m.name, email: m.email })));
         setMembers(membersResult.data);
       } else {
         console.error('Error loading members:', membersResult.error);
@@ -118,17 +116,13 @@ export default function MembersPage() {
           ...(formData.packageId && { currentPackage: formData.packageId }),
         };
 
-        console.log('Updating member with data:', updateData);
         const result = await membersApi.updateMember(editingMember.id, updateData);
-        console.log('Member update result:', result);
         
         if (result.success && result.data) {
-          console.log('Member updated successfully, updating list...');
           setMembers(prev => prev.map(m => m.id === editingMember.id ? result.data! : m));
           setEditingMember(null);
           setShowAddForm(false);
           resetForm();
-          console.log('Member updated in list successfully');
         } else {
           console.error('Member update failed:', result.error);
           setError(result.error || 'Có lỗi xảy ra khi cập nhật thành viên');
@@ -146,16 +140,12 @@ export default function MembersPage() {
           ...(formData.packageId && { packageId: formData.packageId }),
         };
         
-        console.log('Creating member with data:', memberCreateData);
         const result = await membersApi.createMember(memberCreateData);
-        console.log('Member creation result:', result);
 
         if (result.success && result.data) {
-          console.log('Member created successfully, updating list...');
           setMembers(prev => [result.data!, ...prev]);
           setShowAddForm(false);
           resetForm();
-          console.log('Member added to list successfully');
         } else {
           console.error('Member creation failed:', result.error);
           setError(result.error || 'Có lỗi xảy ra khi tạo thành viên');
@@ -170,8 +160,6 @@ export default function MembersPage() {
   };
 
   const handleEdit = (member: Member) => {
-    console.log('Editing member:', member);
-    console.log('Member ID:', member.id);
     setEditingMember(member);
     setFormData({
       name: member.name,

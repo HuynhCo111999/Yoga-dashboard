@@ -1,6 +1,5 @@
-import { WhereFilterOp } from "firebase/firestore";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { WhereFilterOp, query, where, getDocs } from "firebase/firestore";
+import { authService } from "@/lib/firebase";
 import { BaseApiService } from "./base";
 import {
   Member,
@@ -20,25 +19,32 @@ class MembersApiService extends BaseApiService {
     memberData: MemberCreateRequest
   ): Promise<ApiResponse<Member>> {
     try {
-      console.log("Creating member with email:", memberData.email);
-
-      // Create user in Firebase Auth
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        memberData.email,
-        memberData.password
-      );
-
-      console.log("Firebase Auth user created:", userCredential.user.uid);
-
-      const { password: _, ...memberDataWithoutPassword } = memberData;
-
-      // Create member document in Firestore
+      // Step 1: Use authService.signUp to create user (Firebase Auth + users collection)
+      const { password, ...memberDataWithoutPassword } = memberData;
       const { packageId, ...memberDataWithoutPackageId } =
         memberDataWithoutPassword;
+
+      const signUpResult = await authService.signUp(
+        memberData.email,
+        memberData.password,
+        {
+          name: memberData.name,
+          role: "member",
+        }
+      );
+
+      if (signUpResult.error || !signUpResult.user) {
+        return {
+          data: null,
+          error: signUpResult.error || "Không thể tạo tài khoản người dùng",
+          success: false,
+        };
+      }
+
+      // Step 2: Create member document in 'members' collection
       const memberDoc = {
         ...memberDataWithoutPackageId,
-        id: userCredential.user.uid,
+        id: signUpResult.user.uid,
         role: "member" as const,
         membershipStatus: "active" as const,
         remainingClasses: 0,
@@ -51,53 +57,42 @@ class MembersApiService extends BaseApiService {
         Object.entries(memberDoc).filter(([_, value]) => value !== undefined)
       ) as Omit<Member, "createdAt" | "updatedAt" | "id">;
 
-      console.log("Creating member document:", cleanMemberDoc);
-
       try {
-        const result = await this.create<Member>(cleanMemberDoc);
+        // Use setDoc with specific ID instead of addDoc with auto-generated ID
+        const memberResult = await this.createWithId<Member>(
+          signUpResult.user.uid,
+          cleanMemberDoc
+        );
 
-        if (result.success && result.data) {
-          console.log("Member document created successfully:", result.data);
-          // Update the user document with the Firebase Auth UID
-          await this.update(userCredential.user.uid, {
-            id: userCredential.user.uid,
-          });
-
+        if (memberResult.success && memberResult.data) {
           // Keep the auth user for member login
           // The member will be able to sign in with their credentials
 
           return {
-            ...result,
-            data: { ...result.data, id: userCredential.user.uid },
+            ...memberResult,
+            data: { ...memberResult.data, id: signUpResult.user.uid },
           };
         } else {
-          console.error("Failed to create member document:", result.error);
-          // If Firestore document creation fails, delete the Firebase Auth user
+          // If member document creation fails, delete the user (authService handles cleanup)
           try {
-            await userCredential.user.delete();
-            console.log("Firebase Auth user deleted after Firestore failure");
+            await signUpResult.user.delete();
           } catch (deleteError) {
-            console.error("Failed to delete auth user:", deleteError);
+            // Silent fail for cleanup
           }
           return {
             data: null,
             error:
-              result.error ||
+              memberResult.error ||
               "Không thể tạo thông tin thành viên trong cơ sở dữ liệu",
             success: false,
           };
         }
       } catch (firestoreError) {
-        console.error(
-          "Firestore error during member creation:",
-          firestoreError
-        );
-        // If Firestore document creation fails, delete the Firebase Auth user
+        // If any Firestore operation fails, delete the user
         try {
-          await userCredential.user.delete();
-          console.log("Firebase Auth user deleted after Firestore error");
+          await signUpResult.user.delete();
         } catch (deleteError) {
-          console.error("Failed to delete auth user:", deleteError);
+          // Silent fail for cleanup
         }
         return {
           data: null,
@@ -106,40 +101,6 @@ class MembersApiService extends BaseApiService {
         };
       }
     } catch (error: unknown) {
-      console.error("Error creating member:", error);
-
-      // Handle Firebase Auth errors
-      if (error && typeof error === "object" && "code" in error) {
-        switch ((error as { code: string }).code) {
-          case "auth/email-already-in-use":
-            return {
-              data: null,
-              error: "Email này đã được sử dụng",
-              success: false,
-            };
-          case "auth/weak-password":
-            return {
-              data: null,
-              error: "Mật khẩu quá yếu. Vui lòng chọn mật khẩu mạnh hơn",
-              success: false,
-            };
-          case "auth/invalid-email":
-            return {
-              data: null,
-              error: "Email không hợp lệ",
-              success: false,
-            };
-          default:
-            return {
-              data: null,
-              error: `Lỗi tạo tài khoản: ${
-                (error as unknown as { message: string }).message
-              }`,
-              success: false,
-            };
-        }
-      }
-
       return {
         data: null,
         error: this.handleError(error),
@@ -152,11 +113,59 @@ class MembersApiService extends BaseApiService {
     id: string,
     memberData: MemberUpdateRequest
   ): Promise<ApiResponse<Member>> {
-    return this.update<Member>(id, memberData);
+    // First, find the member document by field 'id' instead of document ID
+    const memberResult = await this.findMemberByFieldId(id);
+    if (!memberResult.success || !memberResult.data) {
+      return {
+        data: null,
+        error: "Không tìm thấy thành viên để cập nhật",
+        success: false,
+      };
+    }
+
+    // Update using the actual document ID
+    return this.update<Member>(memberResult.data.documentId, memberData);
   }
 
   async getMember(id: string): Promise<ApiResponse<Member>> {
     return this.getById<Member>(id);
+  }
+
+  // Helper method to find member by field 'id' instead of document ID
+  private async findMemberByFieldId(
+    fieldId: string
+  ): Promise<ApiResponse<{ documentId: string; member: Member }>> {
+    try {
+      const q = query(this.getCollection(), where("id", "==", fieldId));
+
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        return {
+          data: null,
+          error: "Không tìm thấy thành viên",
+          success: false,
+        };
+      }
+
+      const doc = querySnapshot.docs[0];
+      const memberData = doc.data() as Member;
+
+      return {
+        data: {
+          documentId: doc.id,
+          member: memberData,
+        },
+        error: null,
+        success: true,
+      };
+    } catch (error) {
+      return {
+        data: null,
+        error: this.handleError(error),
+        success: false,
+      };
+    }
   }
 
   async deleteMember(id: string): Promise<ApiResponse<boolean>> {
