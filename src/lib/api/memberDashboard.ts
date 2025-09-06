@@ -1,5 +1,6 @@
 import { BaseApiService } from "./base";
 import { ApiResponse, Session, Member } from "./types";
+import { packagesApi } from "./index";
 import {
   query,
   where,
@@ -58,6 +59,15 @@ class MemberDashboardApiService extends BaseApiService {
 
       const member = memberResult.data;
 
+      // Get package name if member has a package
+      let packageName = "Chưa có gói";
+      if (member.currentPackage) {
+        const packageResult = await packagesApi.getById(member.currentPackage);
+        if (packageResult.success && packageResult.data) {
+          packageName = packageResult.data.name;
+        }
+      }
+
       // Get total classes attended
       const attendedCount = await this.getTotalClassesAttended(memberId);
 
@@ -65,7 +75,7 @@ class MemberDashboardApiService extends BaseApiService {
       const registeredCount = await this.getTotalClassesRegistered(memberId);
 
       const stats: MemberDashboardStats = {
-        currentPackage: member.currentPackage || "Chưa có gói",
+        currentPackage: packageName,
         remainingClasses: member.remainingClasses || 0,
         joinDate: member.joinDate,
         membershipStatus: member.membershipStatus,

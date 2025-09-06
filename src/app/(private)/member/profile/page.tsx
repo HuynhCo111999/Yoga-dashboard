@@ -4,29 +4,23 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { UserIcon, KeyIcon, BellIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '@/contexts/AuthContext';
+import { membersApi, packagesApi, Member, Package } from '@/lib/api';
 
-const memberData = {
-  name: 'Nguyễn Thị Lan',
-  email: 'lan.nguyen@email.com',
-  phone: '0901234567',
-  membershipStatus: 'active',
-  currentPackage: 'Gói Premium',
-  remainingClasses: 8,
-  joinDate: '2024-01-15',
-  avatar: 'L',
-  address: 'Quận 1, TP.HCM',
-  emergencyContact: '0907654321',
-  healthNotes: 'Không có vấn đề sức khỏe đặc biệt'
-};
+// Remove mock data - will be replaced with Firebase data
 
 function MemberHeader() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const router = useRouter();
+  const { user, signOut } = useAuth();
 
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userRole');
-    router.push('/login');
+  const handleLogout = async () => {
+    const result = await signOut();
+    if (!result.error) {
+      router.push('/login');
+    } else {
+      console.error('Logout error:', result.error);
+    }
   };
 
   useEffect(() => {
@@ -68,11 +62,11 @@ function MemberHeader() {
             >
               <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center">
                 <span className="text-white font-medium text-sm">
-                  {memberData.name.charAt(0)}
+                  {(user?.name || user?.email || 'U').charAt(0).toUpperCase()}
                 </span>
               </div>
               <div className="hidden sm:block text-left">
-                <p className="text-sm font-semibold text-gray-900">{memberData.name}</p>
+                <p className="text-sm font-semibold text-gray-900">{user?.name || user?.email || 'Thành viên'}</p>
                 <p className="text-xs text-gray-500">Thành viên</p>
               </div>
               <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -133,14 +127,112 @@ function MemberHeader() {
 }
 
 export default function MemberProfile() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState(memberData);
+  const [memberData, setMemberData] = useState<Member | null>(null);
+  const [packageData, setPackageData] = useState<Package | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    emergencyContact: '',
+    healthNotes: '',
+  });
+  const [dataLoading, setDataLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = () => {
-    // Handle save logic here
-    console.log('Saving profile:', formData);
-    setIsEditing(false);
+  // Load member data
+  useEffect(() => {
+    if (user && user.email) {
+      loadMemberData();
+    }
+  }, [user]);
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  const loadMemberData = async () => {
+    if (!user?.email) return;
+
+    try {
+      setDataLoading(true);
+      setError(null);
+
+      // Find member by email
+      const memberResult = await membersApi.getMemberByEmail(user.email);
+      if (!memberResult.success || !memberResult.data) {
+        setError('Không tìm thấy thông tin thành viên');
+        return;
+      }
+
+      const member = memberResult.data;
+      setMemberData(member);
+
+      // Load package data if member has a package
+      if (member.currentPackage) {
+        const packageResult = await packagesApi.getById(member.currentPackage);
+        if (packageResult.success && packageResult.data) {
+          setPackageData(packageResult.data as Package);
+        }
+      }
+
+      // Set form data
+      setFormData({
+        name: member.name,
+        email: member.email,
+        phone: member.phone || '',
+        address: member.address || '',
+        emergencyContact: member.emergencyContact || '',
+        healthNotes: member.healthNotes || '',
+      });
+    } catch (err) {
+      console.error('Error loading member data:', err);
+      setError('Có lỗi xảy ra khi tải dữ liệu');
+    } finally {
+      setDataLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!memberData) return;
+
+    try {
+      setSaving(true);
+      setError(null);
+
+      const updateData = {
+        name: formData.name,
+        phone: formData.phone,
+        address: formData.address,
+        emergencyContact: formData.emergencyContact,
+        healthNotes: formData.healthNotes,
+      };
+
+      const result = await membersApi.updateMember(memberData.id, updateData);
+      
+      if (result.success && result.data) {
+        setMemberData(result.data);
+        setIsEditing(false);
+        // Reload data to get updated information
+        await loadMemberData();
+      } else {
+        setError(result.error || 'Có lỗi xảy ra khi cập nhật thông tin');
+      }
+    } catch (err) {
+      console.error('Error saving profile:', err);
+      setError('Có lỗi xảy ra khi cập nhật thông tin');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const tabs = [
@@ -150,6 +242,23 @@ export default function MemberProfile() {
     { id: 'notifications', name: 'Thông báo', icon: BellIcon },
   ];
 
+  // Show loading if auth is initializing
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-accent-50 to-secondary-50 flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <span className="text-gray-600">Đang tải...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show nothing if not authenticated (will redirect)
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-accent-50 to-secondary-50">
       <MemberHeader />
@@ -157,14 +266,31 @@ export default function MemberProfile() {
       <div className="py-12 sm:py-16">
         <div className="mx-auto max-w-4xl px-6 lg:px-8">
           <div className="space-y-8">
+            {/* Error Display */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                {error}
+                <button 
+                  onClick={() => setError(null)}
+                  className="ml-2 text-red-800 hover:text-red-900"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
             {/* Page header */}
             <div className="text-center">
               <div className="flex justify-center items-center space-x-3 mb-4">
                 <div className="w-16 h-16 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-2xl">{memberData.avatar}</span>
+                  <span className="text-white font-bold text-2xl">
+                    {(memberData?.name || user?.name || user?.email || 'U').charAt(0).toUpperCase()}
+                  </span>
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">{memberData.name}</h1>
+                  <h1 className="text-3xl font-bold text-gray-900">
+                    {memberData?.name || user?.name || user?.email || 'Thành viên'}
+                  </h1>
                   <p className="text-lg text-primary-600 font-medium">Thành viên Yên Yoga</p>
                 </div>
               </div>
@@ -200,9 +326,10 @@ export default function MemberProfile() {
                       <h3 className="text-xl font-bold text-gray-900">Thông tin cá nhân</h3>
                       <button
                         onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-                        className="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                        disabled={saving}
+                        className="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50"
                       >
-                        {isEditing ? 'Lưu thay đổi' : 'Chỉnh sửa'}
+                        {saving ? 'Đang lưu...' : (isEditing ? 'Lưu thay đổi' : 'Chỉnh sửa')}
                       </button>
                     </div>
 
@@ -300,32 +427,43 @@ export default function MemberProfile() {
 
                     <div className="pt-6 border-t border-primary-100">
                       <h4 className="text-lg font-semibold text-gray-900 mb-4">Thông tin thành viên</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Gói tập hiện tại
-                          </label>
-                          <div className="px-4 py-3 bg-primary-50 rounded-xl text-primary-700 font-semibold">
-                            {memberData.currentPackage}
+                      {dataLoading ? (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="animate-pulse">
+                              <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                              <div className="h-12 bg-gray-300 rounded-xl"></div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                              Gói tập hiện tại
+                            </label>
+                            <div className="px-4 py-3 bg-primary-50 rounded-xl text-primary-700 font-semibold">
+                              {packageData?.name || 'Chưa có gói'}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                              Lớp còn lại
+                            </label>
+                            <div className="px-4 py-3 bg-accent-50 rounded-xl text-accent-700 font-semibold">
+                              {memberData?.remainingClasses || 0} lớp
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                              Ngày tham gia
+                            </label>
+                            <div className="px-4 py-3 bg-secondary-50 rounded-xl text-secondary-700 font-medium">
+                              {memberData?.joinDate ? new Date(memberData.joinDate).toLocaleDateString('vi-VN') : 'Chưa có'}
+                            </div>
                           </div>
                         </div>
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Lớp còn lại
-                          </label>
-                          <div className="px-4 py-3 bg-accent-50 rounded-xl text-accent-700 font-semibold">
-                            {memberData.remainingClasses} lớp
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Ngày tham gia
-                          </label>
-                          <div className="px-4 py-3 bg-secondary-50 rounded-xl text-secondary-700 font-medium">
-                            {new Date(memberData.joinDate).toLocaleDateString('vi-VN')}
-                          </div>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 )}

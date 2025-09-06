@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { memberDashboardApi, MemberDashboardStats, UpcomingSession, AttendedSession } from '@/lib/api';
+import { memberDashboardApi, MemberDashboardStats, UpcomingSession, AttendedSession, membersApi } from '@/lib/api';
 
 // Remove mock data - will be replaced with Firebase data
 
@@ -155,18 +155,27 @@ export default function MemberDashboard() {
   }, [user, loading, router]);
 
   const loadMemberData = async () => {
-    if (!user?.uid) return;
+    if (!user?.email) return;
 
     try {
       setDataLoading(true);
       setError(null);
 
-      // Load all data concurrently
+      // First, find member by email
+      const memberResult = await membersApi.getMemberByEmail(user.email);
+      if (!memberResult.success || !memberResult.data) {
+        setError('Không tìm thấy thông tin thành viên');
+        return;
+      }
+
+      const memberId = memberResult.data.id;
+
+      // Load all data concurrently using member ID
       const [statsResult, nextClassResult, upcomingResult, recentResult] = await Promise.all([
-        memberDashboardApi.getMemberStats(user.uid),
-        memberDashboardApi.getNextUpcomingSession(user.uid),
-        memberDashboardApi.getUpcomingSessions(user.uid, 5),
-        memberDashboardApi.getAttendedSessions(user.uid, 5),
+        memberDashboardApi.getMemberStats(memberId),
+        memberDashboardApi.getNextUpcomingSession(memberId),
+        memberDashboardApi.getUpcomingSessions(memberId, 5),
+        memberDashboardApi.getAttendedSessions(memberId, 5),
       ]);
 
       // Handle stats
@@ -205,7 +214,7 @@ export default function MemberDashboard() {
   };
 
   const handleCancelRegistration = async (sessionId: string, registrationId: string) => {
-    if (!user?.uid) return;
+    if (!user?.email) return;
 
     if (!confirm('Bạn có chắc chắn muốn hủy đăng ký lớp học này không?')) {
       return;
@@ -214,7 +223,15 @@ export default function MemberDashboard() {
     try {
       setCancelLoading(registrationId);
       
-      const result = await memberDashboardApi.cancelRegistration(sessionId, user.uid);
+      // Find member by email first
+      const memberResult = await membersApi.getMemberByEmail(user.email);
+      if (!memberResult.success || !memberResult.data) {
+        setError('Không tìm thấy thông tin thành viên');
+        return;
+      }
+
+      const memberId = memberResult.data.id;
+      const result = await memberDashboardApi.cancelRegistration(sessionId, memberId);
       
       if (result.success) {
         // Reload data to reflect changes
@@ -564,11 +581,11 @@ export default function MemberDashboard() {
                                   session.status === 'attended' ? 'text-green-600' : 'text-red-600'
                                 }`} fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                                   {session.status === 'attended' ? (
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                   ) : (
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                                   )}
-                                </svg>
+                              </svg>
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
