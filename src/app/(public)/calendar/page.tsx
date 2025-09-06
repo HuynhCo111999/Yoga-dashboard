@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { sessionsApi, Session, membersApi } from '@/lib/api';
 import { checkSessionCancellationTime } from '@/utils/sessionUtils';
+import Header from '@/components/Header';
 
 // Types
 type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced';
@@ -358,6 +359,7 @@ export default function Calendar() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-accent-50 to-secondary-50">
+      <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
         {/* Header */}

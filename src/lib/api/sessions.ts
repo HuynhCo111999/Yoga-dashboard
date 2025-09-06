@@ -293,26 +293,9 @@ class SessionsApiService extends BaseApiService {
       const updatedRegistrations = [...session.registrations, registration];
       const updatedRegisteredCount = session.registeredCount + 1;
 
-      // Update member's remaining classes if they have a package
-      if (memberResult.success && memberResult.data) {
-        const member = memberResult.data;
-        if (
-          member.currentPackage &&
-          member.remainingClasses !== undefined &&
-          member.remainingClasses > 0
-        ) {
-          const newRemainingClasses = member.remainingClasses - 1;
-          console.log(
-            `📊 Updating member ${member.name} remaining classes: ${member.remainingClasses} → ${newRemainingClasses}`
-          );
-
-          // Update member's remaining classes
-          await membersApi.updateMemberClasses(
-            registrationData.memberId,
-            newRemainingClasses
-          );
-        }
-      }
+      // Note: We don't update remaining classes on registration
+      // Remaining classes are only updated when member actually attends the class
+      // This is handled in the markAttendance method
 
       return this.update<Session>(registrationData.sessionId, {
         registrations: updatedRegistrations,
@@ -357,22 +340,9 @@ class SessionsApiService extends BaseApiService {
         (reg) => reg.status === "confirmed"
       );
 
-      // Update member's remaining classes if they have a package
-      const { membersApi } = await import("./members");
-      const memberResult = await membersApi.getById(memberId);
-
-      if (memberResult.success && memberResult.data) {
-        const member = memberResult.data;
-        if (member.currentPackage && member.remainingClasses !== undefined) {
-          const newRemainingClasses = member.remainingClasses + 1;
-          console.log(
-            `📊 Restoring member ${member.name} remaining classes: ${member.remainingClasses} → ${newRemainingClasses}`
-          );
-
-          // Update member's remaining classes
-          await membersApi.updateMemberClasses(memberId, newRemainingClasses);
-        }
-      }
+      // Note: We don't restore remaining classes on cancellation
+      // Remaining classes are only consumed when member actually attends the class
+      // Cancelling registration before attendance doesn't affect remaining classes
 
       return this.update<Session>(sessionId, {
         registrations: updatedRegistrations,
@@ -416,6 +386,10 @@ class SessionsApiService extends BaseApiService {
         }
         return reg;
       });
+
+      // Note: We don't update remainingClasses in database anymore
+      // Remaining classes are calculated real-time based on package limit - attended classes
+      // This ensures accuracy and consistency across the system
 
       return this.update<Session>(sessionId, {
         registrations: updatedRegistrations,

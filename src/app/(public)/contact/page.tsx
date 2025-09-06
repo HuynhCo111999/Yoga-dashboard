@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import Header from '@/components/Header';
+
 export default function Contact() {
   const [formData, setFormData] = useState({
     name: '',
@@ -25,7 +27,9 @@ export default function Contact() {
   };
 
   return (
-    <div className="py-16 sm:py-20 lg:py-24">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-accent-50 to-secondary-50">
+      <Header />
+      <div className="py-16 sm:py-20 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Hero Section with Map Wireframe */}
           <div className="mb-12 sm:mb-16 lg:mb-20">
@@ -205,8 +209,9 @@ export default function Contact() {
                 </div>
               </form>
             </div>
-          </div>
         </div>
+      </div>
+    </div>
     </div>
   );
 }

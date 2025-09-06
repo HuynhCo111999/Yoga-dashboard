@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { PlusIcon, MagnifyingGlassIcon, PencilIcon } from '@heroicons/react/24/outline';
-import { membersApi, packagesApi, Member, Package } from '@/lib/api';
+import { membersApi, packagesApi, Member, Package, memberDashboardApi } from '@/lib/api';
 
 const statusColors = {
   active: 'bg-green-100 text-green-800 border border-green-200',
@@ -23,6 +23,7 @@ export default function MembersPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [memberRemainingClasses, setMemberRemainingClasses] = useState<Record<string, number>>({});
 
   // Form data
   const [formData, setFormData] = useState({
@@ -52,6 +53,30 @@ export default function MembersPage() {
 
       if (membersResult.success && membersResult.data) {
         setMembers(membersResult.data);
+        
+        // Calculate remaining classes for each member
+        const remainingClassesMap: Record<string, number> = {};
+        for (const member of membersResult.data) {
+          if (member.currentPackage) {
+            const pkg = packagesResult.data?.find(p => p.id === member.currentPackage);
+            if (pkg) {
+              try {
+                // Get member stats to calculate remaining classes
+                const statsResult = await memberDashboardApi.getMemberStats(member.id);
+                if (statsResult.success && statsResult.data) {
+                  remainingClassesMap[member.id] = statsResult.data.remainingClasses;
+                } else {
+                  // Fallback to package limit if stats not available
+                  remainingClassesMap[member.id] = pkg.classLimit;
+                }
+              } catch (err) {
+                console.error(`Error getting stats for member ${member.id}:`, err);
+                remainingClassesMap[member.id] = pkg.classLimit;
+              }
+            }
+          }
+        }
+        setMemberRemainingClasses(remainingClassesMap);
       } else {
         console.error('Error loading members:', membersResult.error);
         setError('Không thể tải danh sách thành viên');
@@ -96,6 +121,7 @@ export default function MembersPage() {
     
     return matchesSearch && matchesStatus;
   });
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -206,6 +232,44 @@ export default function MembersPage() {
     if (!packageId) return 'Chưa có gói';
     const pkg = packages.find(p => p.id === packageId);
     return pkg?.name || 'Không xác định';
+  };
+
+  const getPackageInfo = (member: Member) => {
+    if (!member.currentPackage) {
+      return {
+        name: 'Chưa có gói',
+        remaining: 'Chưa có thông tin',
+        total: 'N/A'
+      };
+    }
+
+    const pkg = packages.find(p => p.id === member.currentPackage);
+    if (!pkg) {
+      return {
+        name: 'Không xác định',
+        remaining: 'Chưa có thông tin',
+        total: 'N/A'
+      };
+    }
+
+    // Use calculated remaining classes from memberRemainingClasses state
+    const remainingClasses = memberRemainingClasses[member.id];
+    let remainingText = '';
+    
+    if (remainingClasses === -1) {
+      remainingText = 'Không giới hạn';
+    } else if (remainingClasses !== undefined) {
+      remainingText = `${remainingClasses} buổi còn lại`;
+    } else {
+      // Fallback to package limit if not calculated yet
+      remainingText = `${pkg.classLimit} buổi còn lại`;
+    }
+
+    return {
+      name: pkg.name,
+      remaining: remainingText,
+      total: pkg.classLimit === -1 ? 'Không giới hạn' : `${pkg.classLimit} buổi`
+    };
   };
 
   if (loading) {
@@ -479,11 +543,20 @@ export default function MembersPage() {
                       <div className="text-sm text-gray-500">{member.address || 'Chưa có địa chỉ'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{getPackageName(member.currentPackage)}</div>
-                      <div className="text-sm text-gray-500">
-                        {member.remainingClasses === -1 ? 'Không giới hạn' : 
-                         member.remainingClasses ? `${member.remainingClasses} buổi còn lại` : 'Hết buổi'}
-                      </div>
+                      {(() => {
+                        const packageInfo = getPackageInfo(member);
+                        return (
+                          <>
+                            <div className="text-sm text-gray-900">{packageInfo.name}</div>
+                            <div className="text-sm text-gray-500">
+                              {packageInfo.remaining}
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              Tổng: {packageInfo.total}
+                            </div>
+                          </>
+                        );
+                      })()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <select

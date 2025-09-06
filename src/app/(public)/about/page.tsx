@@ -1,6 +1,10 @@
+import Header from '@/components/Header';
+
 export default function About() {
   return (
-    <div className="py-16 sm:py-20 lg:py-24">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-accent-50 to-secondary-50">
+      <Header />
+      <div className="py-16 sm:py-20 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Hero Section with Wireframe */}
           <div className="mx-auto max-w-2xl lg:mx-0 relative">
@@ -165,8 +169,9 @@ export default function About() {
                 </div>
               </div>
             </div>
-          </div>
         </div>
+      </div>
+    </div>
     </div>
   );
 }

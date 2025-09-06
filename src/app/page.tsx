@@ -1,8 +1,10 @@
 import Link from 'next/link';
+import Header from '@/components/Header';
 
 export default function Home() {
   return (
     <>
+      <Header />
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-accent-50 to-primary-50 py-12 sm:py-16 lg:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -115,6 +117,33 @@ export default function Home() {
                   </dd>
                 </div>
               </dl>
+            </div>
+          </div>
+        </section>
+
+        {/* Packages Section */}
+        <section className="py-16 sm:py-20 lg:py-24 bg-white">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl text-center lg:text-center">
+              <h2 className="text-base font-semibold leading-7 text-primary-600">Gói tập yoga</h2>
+              <p className="mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl lg:text-4xl">
+                Chọn gói tập phù hợp với bạn
+              </p>
+              <p className="mt-4 text-lg text-gray-600">
+                Từ cơ bản đến nâng cao, chúng tôi có gói tập phù hợp cho mọi trình độ và nhu cầu.
+              </p>
+            </div>
+            
+            <div className="mt-12 text-center">
+              <Link
+                href="/packages"
+                className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-medium rounded-xl text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+                Xem tất cả gói tập
+              </Link>
             </div>
           </div>
         </section>

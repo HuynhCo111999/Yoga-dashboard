@@ -97,23 +97,30 @@ class MemberDashboardApiService extends BaseApiService {
       // Get total classes registered
       const registeredCount = await this.getTotalClassesRegistered(memberId);
 
-      // Calculate remaining classes based on package limit and registered classes
-      let calculatedRemainingClasses = member.remainingClasses || 0;
+      // Calculate remaining classes based on package limit and attended classes
+      // Always calculate from package total, not from database remainingClasses
+      let calculatedRemainingClasses = 0;
 
       if (packageClassLimit !== -1 && packageClassLimit > 0) {
-        // For limited packages, calculate remaining based on package limit and registered classes
+        // For limited packages, calculate remaining based on package limit and attended classes
         calculatedRemainingClasses = Math.max(
           0,
-          packageClassLimit - registeredCount
+          packageClassLimit - attendedCount
         );
         console.log(
-          `🧮 Calculated remaining classes: ${packageClassLimit} (package limit) - ${registeredCount} (registered) = ${calculatedRemainingClasses}`
+          `🧮 Calculated remaining classes: ${packageClassLimit} (package limit) - ${attendedCount} (attended) = ${calculatedRemainingClasses}`
         );
       } else if (packageClassLimit === -1) {
         // For unlimited packages
         calculatedRemainingClasses = -1;
         console.log(
           `♾️ Unlimited package - remaining classes: ${calculatedRemainingClasses}`
+        );
+      } else {
+        // No package or package not found
+        calculatedRemainingClasses = 0;
+        console.log(
+          `❌ No package found - remaining classes: ${calculatedRemainingClasses}`
         );
       }
 

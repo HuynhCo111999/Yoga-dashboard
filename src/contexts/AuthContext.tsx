@@ -89,7 +89,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
 
     return () => unsubscribe();
-  }, [adminSession]);
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     setLoading(true);

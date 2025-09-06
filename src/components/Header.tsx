@@ -11,6 +11,7 @@ const navigation = [
   { name: 'Trang chủ', href: '/' },
   { name: 'Về chúng tôi', href: '/about' },
   { name: 'Lịch học', href: '/calendar' },
+  { name: 'Gói tập', href: '/packages' },
   { name: 'Blog', href: '/blog' },
   { name: 'Liên hệ', href: '/contact' },
 ];
