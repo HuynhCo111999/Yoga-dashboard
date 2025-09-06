@@ -34,7 +34,16 @@ export interface AttendedSession {
   startTime: string;
   endTime: string;
   attendedAt: string;
-  status: "attended" | "no-show";
+  status: "attended" | "no-show" | "cancelled";
+  // Enhanced information about actions
+  registeredAt?: string;
+  cancelledAt?: string;
+  notes?: string;
+  actionHistory: {
+    action: "registered" | "cancelled" | "attended" | "no-show";
+    timestamp: string;
+    notes?: string;
+  }[];
 }
 
 class MemberDashboardApiService extends BaseApiService {
@@ -58,13 +67,27 @@ class MemberDashboardApiService extends BaseApiService {
       }
 
       const member = memberResult.data;
+      console.log("📊 Member data:", {
+        id: member.id,
+        name: member.name,
+        currentPackage: member.currentPackage,
+        remainingClasses: member.remainingClasses,
+      });
 
       // Get package name if member has a package
       let packageName = "Chưa có gói";
+      let packageClassLimit = -1; // -1 means unlimited
+
       if (member.currentPackage) {
         const packageResult = await packagesApi.getById(member.currentPackage);
         if (packageResult.success && packageResult.data) {
           packageName = packageResult.data.name;
+          packageClassLimit = packageResult.data.classLimit;
+          console.log("📦 Package info:", {
+            id: packageResult.data.id,
+            name: packageResult.data.name,
+            classLimit: packageResult.data.classLimit,
+          });
         }
       }
 
@@ -74,14 +97,36 @@ class MemberDashboardApiService extends BaseApiService {
       // Get total classes registered
       const registeredCount = await this.getTotalClassesRegistered(memberId);
 
+      // Calculate remaining classes based on package limit and registered classes
+      let calculatedRemainingClasses = member.remainingClasses || 0;
+
+      if (packageClassLimit !== -1 && packageClassLimit > 0) {
+        // For limited packages, calculate remaining based on package limit and registered classes
+        calculatedRemainingClasses = Math.max(
+          0,
+          packageClassLimit - registeredCount
+        );
+        console.log(
+          `🧮 Calculated remaining classes: ${packageClassLimit} (package limit) - ${registeredCount} (registered) = ${calculatedRemainingClasses}`
+        );
+      } else if (packageClassLimit === -1) {
+        // For unlimited packages
+        calculatedRemainingClasses = -1;
+        console.log(
+          `♾️ Unlimited package - remaining classes: ${calculatedRemainingClasses}`
+        );
+      }
+
       const stats: MemberDashboardStats = {
         currentPackage: packageName,
-        remainingClasses: member.remainingClasses || 0,
+        remainingClasses: calculatedRemainingClasses,
         joinDate: member.joinDate,
         membershipStatus: member.membershipStatus,
         totalClassesAttended: attendedCount,
         totalClassesRegistered: registeredCount,
       };
+
+      console.log("📈 Final stats:", stats);
 
       return {
         data: stats,
@@ -102,24 +147,35 @@ class MemberDashboardApiService extends BaseApiService {
     limitCount: number = 10
   ): Promise<ApiResponse<UpcomingSession[]>> {
     try {
+      console.log("🔍 Getting upcoming sessions for member:", memberId);
       const sessionsCollection = collection(db, "sessions");
       const today = new Date().toISOString().split("T")[0];
 
-      // Query sessions where member is registered and date >= today
+      // Get all sessions with date >= today, then filter by member registration
       const q = query(
         sessionsCollection,
-        where("registrations", "array-contains-any", [memberId]),
         where("date", ">=", today),
         orderBy("date", "asc"),
-        orderBy("startTime", "asc"),
-        limit(limitCount)
+        orderBy("startTime", "asc")
       );
 
       const querySnapshot = await getDocs(q);
+      console.log("📅 Found sessions:", querySnapshot.docs.length);
+
       const upcomingSessions: UpcomingSession[] = [];
 
       querySnapshot.docs.forEach((doc) => {
         const sessionData = { id: doc.id, ...doc.data() } as Session;
+        console.log(
+          "📋 Session:",
+          sessionData.className,
+          "Date:",
+          sessionData.date,
+          "Time:",
+          sessionData.startTime,
+          "Registrations:",
+          sessionData.registrations.length
+        );
 
         // Find member's registration
         const memberRegistration = sessionData.registrations.find(
@@ -127,21 +183,64 @@ class MemberDashboardApiService extends BaseApiService {
         );
 
         if (memberRegistration) {
-          const upcomingSession: UpcomingSession = {
-            ...sessionData,
-            registrationStatus: memberRegistration.status,
-            registrationId: memberRegistration.id,
-          };
-          upcomingSessions.push(upcomingSession);
+          // Additional time check for upcoming sessions
+          const now = new Date();
+          const currentTime = now.toTimeString().split(" ")[0].substring(0, 5);
+
+          // If session is today, check if time hasn't passed
+          if (sessionData.date === today) {
+            if (sessionData.startTime > currentTime) {
+              console.log(
+                "✅ Found upcoming session today:",
+                sessionData.className,
+                "at",
+                sessionData.startTime
+              );
+              const upcomingSession: UpcomingSession = {
+                ...sessionData,
+                registrationStatus: memberRegistration.status,
+                registrationId: memberRegistration.id,
+              };
+              upcomingSessions.push(upcomingSession);
+            } else {
+              console.log(
+                "⏰ Session time has passed:",
+                sessionData.className,
+                "at",
+                sessionData.startTime
+              );
+            }
+          } else {
+            // Session is in the future
+            console.log(
+              "✅ Found future session:",
+              sessionData.className,
+              "on",
+              sessionData.date
+            );
+            const upcomingSession: UpcomingSession = {
+              ...sessionData,
+              registrationStatus: memberRegistration.status,
+              registrationId: memberRegistration.id,
+            };
+            upcomingSessions.push(upcomingSession);
+          }
+        } else {
+          console.log("❌ No registration found for member:", memberId);
         }
       });
 
+      // Limit results
+      const limitedResults = upcomingSessions.slice(0, limitCount);
+      console.log("🎯 Final upcoming sessions:", limitedResults.length);
+
       return {
-        data: upcomingSessions,
+        data: limitedResults,
         error: null,
         success: true,
       };
     } catch (error) {
+      console.error("❌ Error getting upcoming sessions:", error);
       return {
         data: null,
         error: this.handleError(error),
@@ -153,21 +252,113 @@ class MemberDashboardApiService extends BaseApiService {
   async getNextUpcomingSession(
     memberId: string
   ): Promise<ApiResponse<UpcomingSession | null>> {
-    const result = await this.getUpcomingSessions(memberId, 1);
+    try {
+      console.log("🔍 Getting next upcoming session for member:", memberId);
+      const sessionsCollection = collection(db, "sessions");
+      const now = new Date();
+      const today = now.toISOString().split("T")[0];
+      const currentTime = now.toTimeString().split(" ")[0].substring(0, 5); // HH:MM format
 
-    if (!result.success) {
+      console.log("⏰ Current date:", today, "Current time:", currentTime);
+
+      // Get all sessions from today onwards
+      const q = query(
+        sessionsCollection,
+        where("date", ">=", today),
+        orderBy("date", "asc"),
+        orderBy("startTime", "asc")
+      );
+
+      const querySnapshot = await getDocs(q);
+      console.log("📅 Found sessions:", querySnapshot.docs.length);
+
+      const upcomingSessions: UpcomingSession[] = [];
+
+      querySnapshot.docs.forEach((doc) => {
+        const sessionData = { id: doc.id, ...doc.data() } as Session;
+        console.log(
+          "📋 Checking session:",
+          sessionData.className,
+          "Date:",
+          sessionData.date,
+          "Time:",
+          sessionData.startTime
+        );
+
+        // Find member's registration
+        const memberRegistration = sessionData.registrations.find(
+          (reg) => reg.memberId === memberId && reg.status !== "cancelled"
+        );
+
+        if (memberRegistration) {
+          // Check if this session is in the future
+          const sessionDate = new Date(sessionData.date);
+          const sessionTime = sessionData.startTime;
+
+          // If session is today, check if time hasn't passed
+          if (sessionData.date === today) {
+            if (sessionTime > currentTime) {
+              console.log(
+                "✅ Found next session today:",
+                sessionData.className,
+                "at",
+                sessionTime
+              );
+              const upcomingSession: UpcomingSession = {
+                ...sessionData,
+                registrationStatus: memberRegistration.status,
+                registrationId: memberRegistration.id,
+              };
+              upcomingSessions.push(upcomingSession);
+            } else {
+              console.log(
+                "⏰ Session time has passed:",
+                sessionData.className,
+                "at",
+                sessionTime
+              );
+            }
+          } else {
+            // Session is in the future
+            console.log(
+              "✅ Found future session:",
+              sessionData.className,
+              "on",
+              sessionData.date
+            );
+            const upcomingSession: UpcomingSession = {
+              ...sessionData,
+              registrationStatus: memberRegistration.status,
+              registrationId: memberRegistration.id,
+            };
+            upcomingSessions.push(upcomingSession);
+          }
+        } else {
+          console.log("❌ No registration found for member:", memberId);
+        }
+      });
+
+      // Return the first (earliest) upcoming session
+      const nextSession =
+        upcomingSessions.length > 0 ? upcomingSessions[0] : null;
+      console.log(
+        "🎯 Next upcoming session:",
+        nextSession ? nextSession.className : "None"
+      );
+
+      return {
+        data: nextSession,
+        error: null,
+        success: true,
+      };
+    } catch (error) {
+      console.error("❌ Error getting next upcoming session:", error);
       return {
         data: null,
-        error: result.error,
+        error: this.handleError(error),
         success: false,
       };
     }
-
-    return {
-      data: result.data && result.data.length > 0 ? result.data[0] : null,
-      error: null,
-      success: true,
-    };
   }
 
   async getAttendedSessions(
@@ -177,28 +368,81 @@ class MemberDashboardApiService extends BaseApiService {
     try {
       const sessionsCollection = collection(db, "sessions");
 
-      // Query sessions where member attended
-      const q = query(
-        sessionsCollection,
-        where("registrations", "array-contains-any", [memberId]),
-        orderBy("date", "desc"),
-        limit(limitCount * 2) // Get more to filter attended ones
-      );
+      // Get all sessions, then filter by member registration
+      const q = query(sessionsCollection, orderBy("date", "desc"));
 
       const querySnapshot = await getDocs(q);
       const attendedSessions: AttendedSession[] = [];
 
+      console.log(`🔍 Looking for attended sessions for member: ${memberId}`);
+
       querySnapshot.docs.forEach((doc) => {
         const sessionData = { id: doc.id, ...doc.data() } as Session;
 
-        // Find member's registration with attended status
+        // Find member's registration - include confirmed, attended, no-show, and cancelled
         const memberRegistration = sessionData.registrations.find(
           (reg) =>
             reg.memberId === memberId &&
-            (reg.status === "attended" || reg.status === "no-show")
+            (reg.status === "confirmed" ||
+              reg.status === "attended" ||
+              reg.status === "no-show" ||
+              reg.status === "cancelled")
         );
 
         if (memberRegistration) {
+          console.log(
+            `📅 Found session: ${sessionData.className} on ${sessionData.date}, status: ${memberRegistration.status}`
+          );
+
+          // Build action history
+          const actionHistory: AttendedSession["actionHistory"] = [];
+
+          // Add registration action
+          if (memberRegistration.registeredAt) {
+            actionHistory.push({
+              action: "registered",
+              timestamp: memberRegistration.registeredAt,
+              notes: memberRegistration.notes,
+            });
+          }
+
+          // Add cancellation action if cancelled
+          if (
+            memberRegistration.status === "cancelled" &&
+            memberRegistration.cancelledAt
+          ) {
+            actionHistory.push({
+              action: "cancelled",
+              timestamp: memberRegistration.cancelledAt,
+              notes: memberRegistration.notes,
+            });
+          }
+
+          // Add attendance action if attended
+          if (
+            memberRegistration.status === "attended" &&
+            memberRegistration.attendedAt
+          ) {
+            actionHistory.push({
+              action: "attended",
+              timestamp: memberRegistration.attendedAt,
+            });
+          }
+
+          // Add no-show action if no-show
+          if (memberRegistration.status === "no-show") {
+            actionHistory.push({
+              action: "no-show",
+              timestamp: sessionData.date + " " + sessionData.endTime,
+            });
+          }
+
+          // Sort action history by timestamp
+          actionHistory.sort(
+            (a, b) =>
+              new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+          );
+
           const attendedSession: AttendedSession = {
             id: memberRegistration.id,
             sessionId: sessionData.id,
@@ -207,12 +451,30 @@ class MemberDashboardApiService extends BaseApiService {
             date: sessionData.date,
             startTime: sessionData.startTime,
             endTime: sessionData.endTime,
-            attendedAt: memberRegistration.attendedAt || sessionData.date,
-            status: memberRegistration.status as "attended" | "no-show",
+            attendedAt:
+              memberRegistration.attendedAt ||
+              memberRegistration.registeredAt ||
+              sessionData.date,
+            status:
+              memberRegistration.status === "confirmed"
+                ? "attended"
+                : (memberRegistration.status as
+                    | "attended"
+                    | "no-show"
+                    | "cancelled"),
+            // Enhanced information
+            registeredAt: memberRegistration.registeredAt,
+            cancelledAt: memberRegistration.cancelledAt,
+            notes: memberRegistration.notes,
+            actionHistory: actionHistory,
           };
           attendedSessions.push(attendedSession);
         }
       });
+
+      console.log(
+        `📊 Total attended sessions found: ${attendedSessions.length}`
+      );
 
       // Sort by date descending and limit
       attendedSessions.sort(
@@ -226,6 +488,7 @@ class MemberDashboardApiService extends BaseApiService {
         success: true,
       };
     } catch (error) {
+      console.error("Error getting attended sessions:", error);
       return {
         data: null,
         error: this.handleError(error),
@@ -239,48 +502,27 @@ class MemberDashboardApiService extends BaseApiService {
     memberId: string
   ): Promise<ApiResponse<Session>> {
     try {
-      // Get session
-      const sessionResult = await this.getById<Session>(sessionId);
-
-      if (!sessionResult.success || !sessionResult.data) {
-        return {
-          data: null,
-          error: "Không tìm thấy ca tập",
-          success: false,
-        };
-      }
-
-      const session = sessionResult.data;
-
-      // Find registration to cancel
-      const registrationIndex = session.registrations.findIndex(
-        (reg) => reg.memberId === memberId && reg.status === "confirmed"
+      console.log(
+        `🚫 Cancelling registration for member ${memberId} in session ${sessionId}`
       );
 
-      if (registrationIndex === -1) {
-        return {
-          data: null,
-          error: "Không tìm thấy đăng ký để hủy",
-          success: false,
-        };
+      // Import sessions API to handle session operations
+      const { sessionsApi } = await import("./sessions");
+
+      // Use sessions API to cancel registration
+      const result = await sessionsApi.cancelRegistration(sessionId, memberId);
+
+      if (result.success) {
+        console.log(
+          `✅ Successfully cancelled registration for member ${memberId}`
+        );
+      } else {
+        console.error(`❌ Failed to cancel registration:`, result.error);
       }
 
-      // Update registration status to cancelled
-      const updatedRegistrations = [...session.registrations];
-      updatedRegistrations[registrationIndex] = {
-        ...updatedRegistrations[registrationIndex],
-        status: "cancelled",
-        cancelledAt: new Date().toISOString(),
-      };
-
-      // Update session
-      const updateResult = await this.update<Session>(sessionId, {
-        registrations: updatedRegistrations,
-        registeredCount: session.registeredCount - 1,
-      });
-
-      return updateResult;
+      return result;
     } catch (error) {
+      console.error("Error cancelling registration:", error);
       return {
         data: null,
         error: this.handleError(error),
@@ -293,24 +535,27 @@ class MemberDashboardApiService extends BaseApiService {
     try {
       const sessionsCollection = collection(db, "sessions");
 
-      const q = query(
-        sessionsCollection,
-        where("registrations", "array-contains-any", [memberId])
-      );
+      const q = query(sessionsCollection);
 
       const querySnapshot = await getDocs(q);
       let attendedCount = 0;
 
       querySnapshot.docs.forEach((doc) => {
         const sessionData = doc.data() as Session;
+        // Count both confirmed and attended registrations as "attended"
         const memberRegistration = sessionData.registrations.find(
-          (reg) => reg.memberId === memberId && reg.status === "attended"
+          (reg) =>
+            reg.memberId === memberId &&
+            (reg.status === "confirmed" || reg.status === "attended")
         );
         if (memberRegistration) {
           attendedCount++;
         }
       });
 
+      console.log(
+        `📊 Total classes attended for member ${memberId}: ${attendedCount}`
+      );
       return attendedCount;
     } catch (error) {
       console.error("Error getting attended classes count:", error);
@@ -322,10 +567,7 @@ class MemberDashboardApiService extends BaseApiService {
     try {
       const sessionsCollection = collection(db, "sessions");
 
-      const q = query(
-        sessionsCollection,
-        where("registrations", "array-contains-any", [memberId])
-      );
+      const q = query(sessionsCollection);
 
       const querySnapshot = await getDocs(q);
       let registeredCount = 0;
@@ -340,6 +582,9 @@ class MemberDashboardApiService extends BaseApiService {
         }
       });
 
+      console.log(
+        `📊 Total classes registered for member ${memberId}: ${registeredCount}`
+      );
       return registeredCount;
     } catch (error) {
       console.error("Error getting registered classes count:", error);

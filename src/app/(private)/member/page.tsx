@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { memberDashboardApi, MemberDashboardStats, UpcomingSession, AttendedSession, membersApi } from '@/lib/api';
+import { checkSessionCancellationTime } from '@/utils/sessionUtils';
 
 // Remove mock data - will be replaced with Firebase data
 
@@ -138,6 +139,8 @@ export default function MemberDashboard() {
   const [dataLoading, setDataLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cancelLoading, setCancelLoading] = useState<string | null>(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelSessionData, setCancelSessionData] = useState<{sessionId: string, registrationId: string, className: string, date: string, startTime: string} | null>(null);
 
   // Load member data
   useEffect(() => {
@@ -161,67 +164,76 @@ export default function MemberDashboard() {
       setDataLoading(true);
       setError(null);
 
+      console.log('🔍 Loading member data for email:', user.email);
+
       // First, find member by email
       const memberResult = await membersApi.getMemberByEmail(user.email);
       if (!memberResult.success || !memberResult.data) {
+        console.error('❌ Member not found:', memberResult.error);
         setError('Không tìm thấy thông tin thành viên');
         return;
       }
 
       const memberId = memberResult.data.id;
+      console.log('✅ Member found:', memberId, memberResult.data.name);
 
       // Load all data concurrently using member ID
       const [statsResult, nextClassResult, upcomingResult, recentResult] = await Promise.all([
         memberDashboardApi.getMemberStats(memberId),
         memberDashboardApi.getNextUpcomingSession(memberId),
-        memberDashboardApi.getUpcomingSessions(memberId, 5),
-        memberDashboardApi.getAttendedSessions(memberId, 5),
+        memberDashboardApi.getUpcomingSessions(memberId, 10),
+        memberDashboardApi.getAttendedSessions(memberId, 10),
       ]);
 
       // Handle stats
       if (statsResult.success && statsResult.data) {
+        console.log('✅ Member stats loaded:', statsResult.data);
         setMemberStats(statsResult.data);
       } else {
-        console.error('Error loading member stats:', statsResult.error);
+        console.error('❌ Error loading member stats:', statsResult.error);
       }
 
       // Handle next class
       if (nextClassResult.success) {
+        console.log('✅ Next class result:', nextClassResult.data);
         setNextClass(nextClassResult.data);
       } else {
-        console.error('Error loading next class:', nextClassResult.error);
+        console.error('❌ Error loading next class:', nextClassResult.error);
       }
 
       // Handle upcoming classes
       if (upcomingResult.success && upcomingResult.data) {
+        console.log('✅ Upcoming classes loaded:', upcomingResult.data.length, 'classes');
         setUpcomingClasses(upcomingResult.data);
       } else {
-        console.error('Error loading upcoming classes:', upcomingResult.error);
+        console.error('❌ Error loading upcoming classes:', upcomingResult.error);
       }
 
       // Handle recent classes
       if (recentResult.success && recentResult.data) {
+        console.log('✅ Recent classes loaded:', recentResult.data.length, 'classes');
         setRecentClasses(recentResult.data);
       } else {
-        console.error('Error loading recent classes:', recentResult.error);
+        console.error('❌ Error loading recent classes:', recentResult.error);
       }
     } catch (err) {
-      console.error('Error loading member data:', err);
+      console.error('❌ Error loading member data:', err);
       setError('Có lỗi xảy ra khi tải dữ liệu');
     } finally {
       setDataLoading(false);
     }
   };
 
-  const handleCancelRegistration = async (sessionId: string, registrationId: string) => {
-    if (!user?.email) return;
+  const handleCancelRegistration = (sessionId: string, registrationId: string, className: string, date: string, startTime: string) => {
+    setCancelSessionData({ sessionId, registrationId, className, date, startTime });
+    setShowCancelModal(true);
+  };
 
-    if (!confirm('Bạn có chắc chắn muốn hủy đăng ký lớp học này không?')) {
-      return;
-    }
+  const confirmCancelRegistration = async () => {
+    if (!user?.email || !cancelSessionData) return;
 
     try {
-      setCancelLoading(registrationId);
+      setCancelLoading(cancelSessionData.registrationId);
       
       // Find member by email first
       const memberResult = await membersApi.getMemberByEmail(user.email);
@@ -231,11 +243,13 @@ export default function MemberDashboard() {
       }
 
       const memberId = memberResult.data.id;
-      const result = await memberDashboardApi.cancelRegistration(sessionId, memberId);
+      const result = await memberDashboardApi.cancelRegistration(cancelSessionData.sessionId, memberId);
       
       if (result.success) {
         // Reload data to reflect changes
         await loadMemberData();
+        setShowCancelModal(false);
+        setCancelSessionData(null);
       } else {
         setError(result.error || 'Có lỗi xảy ra khi hủy đăng ký');
       }
@@ -245,6 +259,11 @@ export default function MemberDashboard() {
     } finally {
       setCancelLoading(null);
     }
+  };
+
+  const cancelCancelRegistration = () => {
+    setShowCancelModal(false);
+    setCancelSessionData(null);
   };
 
   // Show loading if auth is initializing
@@ -334,7 +353,15 @@ export default function MemberDashboard() {
                       </dt>
                         <dd className="text-xl font-bold text-gray-900 mt-1">
                           {memberStats?.currentPackage || 'Chưa có gói'}
+                        </dd>
+                        {memberStats?.currentPackage && memberStats?.remainingClasses !== undefined && (
+                          <dd className="text-sm text-primary-600 mt-1">
+                            {memberStats.remainingClasses === -1 
+                              ? 'Không giới hạn' 
+                              : `${memberStats.remainingClasses} buổi còn lại`
+                            }
                       </dd>
+                        )}
                     </dl>
                   </div>
                 </div>
@@ -357,8 +384,16 @@ export default function MemberDashboard() {
                         Lớp còn lại
                       </dt>
                         <dd className="text-xl font-bold text-gray-900 mt-1">
-                          {memberStats?.remainingClasses || 0} lớp
+                          {memberStats?.remainingClasses === -1 
+                            ? 'Không giới hạn' 
+                            : `${memberStats?.remainingClasses || 0} buổi`
+                          }
+                        </dd>
+                        {memberStats?.currentPackage && (
+                          <dd className="text-sm text-accent-600 mt-1">
+                            Trong gói {memberStats.currentPackage}
                       </dd>
+                        )}
                     </dl>
                   </div>
                 </div>
@@ -516,13 +551,28 @@ export default function MemberDashboard() {
                             {session.registrationStatus === 'confirmed' ? '✓ Đã xác nhận' : '⏳ Chờ xác nhận'}
                           </span>
                         </div>
-                        <button 
-                          onClick={() => handleCancelRegistration(session.id, session.registrationId)}
-                          disabled={cancelLoading === session.registrationId}
-                          className="text-red-600 hover:text-red-800 text-xs font-medium px-3 py-1 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
-                        >
-                          {cancelLoading === session.registrationId ? 'Đang hủy...' : 'Hủy'}
+                        {(() => {
+                          const timeInfo = checkSessionCancellationTime(session.date, session.startTime);
+                          return (
+                            <button 
+                              onClick={() => handleCancelRegistration(session.id, session.registrationId, session.className, session.date, session.startTime)}
+                              disabled={cancelLoading === session.registrationId || !timeInfo.canCancel}
+                              className={`text-xs font-medium px-3 py-1 rounded-lg transition-colors disabled:opacity-50 ${
+                                timeInfo.canCancel 
+                                  ? 'text-red-600 hover:text-red-800 hover:bg-red-50' 
+                                  : 'text-gray-400 cursor-not-allowed'
+                              }`}
+                              title={timeInfo.canCancel ? 'Hủy đăng ký' : `Chỉ được hủy trước 1 tiếng. ${timeInfo.timeUntilSessionText}`}
+                            >
+                              {cancelLoading === session.registrationId 
+                                ? 'Đang hủy...' 
+                                : timeInfo.canCancel 
+                                  ? 'Hủy' 
+                                  : 'Không thể hủy'
+                              }
                       </button>
+                          );
+                        })()}
                     </div>
                   ))}
                 </div>
@@ -570,18 +620,26 @@ export default function MemberDashboard() {
                     <ul role="list" className="divide-y divide-primary-100/50">
                       {recentClasses.map((session) => (
                         <li key={session.id} className="py-5">
-                          <div className="flex items-center space-x-4">
+                          <div className="flex items-start space-x-4">
                             <div className="flex-shrink-0">
                               <div className={`h-12 w-12 rounded-full flex items-center justify-center ${
                                 session.status === 'attended' 
                                   ? 'bg-gradient-to-br from-green-100 to-green-200' 
+                                  : session.status === 'cancelled'
+                                  ? 'bg-gradient-to-br from-gray-100 to-gray-200'
                                   : 'bg-gradient-to-br from-red-100 to-red-200'
                               }`}>
                                 <svg className={`h-6 w-6 ${
-                                  session.status === 'attended' ? 'text-green-600' : 'text-red-600'
+                                  session.status === 'attended' 
+                                    ? 'text-green-600' 
+                                    : session.status === 'cancelled'
+                                    ? 'text-gray-600'
+                                    : 'text-red-600'
                                 }`} fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                                   {session.status === 'attended' ? (
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  ) : session.status === 'cancelled' ? (
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                   ) : (
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                                   )}
@@ -589,21 +647,65 @@ export default function MemberDashboard() {
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                              <p className="text-base font-semibold text-gray-900 truncate">
-                                {session.className}
-                            </p>
+                              <div className="flex items-center justify-between">
+                                <p className="text-base font-semibold text-gray-900 truncate">
+                                  {session.className}
+                                </p>
+                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${
+                                  session.status === 'attended'
+                                    ? 'bg-green-100 text-green-800 border-green-200'
+                                    : session.status === 'cancelled'
+                                    ? 'bg-gray-100 text-gray-800 border-gray-200'
+                                    : 'bg-red-100 text-red-800 border-red-200'
+                                }`}>
+                                  {session.status === 'attended' 
+                                    ? '✓ Đã tham gia' 
+                                    : session.status === 'cancelled'
+                                    ? '🚫 Đã hủy'
+                                    : '✗ Vắng mặt'
+                                  }
+                                </span>
+                              </div>
                               <p className="text-sm text-gray-600 truncate mt-1">
                                 <span className="text-primary-600 font-medium">{session.instructor}</span> • {new Date(session.date).toLocaleDateString('vi-VN')} • {session.startTime} - {session.endTime}
-                            </p>
+                              </p>
+                              
+                              {/* Action History */}
+                              {session.actionHistory && session.actionHistory.length > 0 && (
+                                <div className="mt-3 space-y-2">
+                                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Lịch sử hành động:</p>
+                                  <div className="space-y-1">
+                                    {session.actionHistory.map((action, index) => (
+                                      <div key={index} className="flex items-center space-x-2 text-xs">
+                                        <div className={`w-2 h-2 rounded-full ${
+                                          action.action === 'registered' ? 'bg-blue-400' :
+                                          action.action === 'cancelled' ? 'bg-red-400' :
+                                          action.action === 'attended' ? 'bg-green-400' :
+                                          'bg-gray-400'
+                                        }`}></div>
+                                        <span className="text-gray-600">
+                                          {action.action === 'registered' ? '📝 Đăng ký' :
+                                           action.action === 'cancelled' ? '🚫 Hủy đăng ký' :
+                                           action.action === 'attended' ? '✅ Tham gia' :
+                                           '❌ Vắng mặt'}
+                                        </span>
+                                        <span className="text-gray-400">
+                                          {new Date(action.timestamp).toLocaleString('vi-VN', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                          })}
+                                        </span>
+                                        {action.notes && (
+                                          <span className="text-gray-500 italic">- {action.notes}</span>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
                           </div>
-                          <div>
-                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${
-                                session.status === 'attended'
-                                  ? 'bg-green-100 text-green-800 border-green-200'
-                                  : 'bg-red-100 text-red-800 border-red-200'
-                              }`}>
-                                {session.status === 'attended' ? '✓ Đã tham gia' : '✗ Vắng mặt'}
-                            </span>
+                              )}
                           </div>
                         </div>
                       </li>
@@ -662,6 +764,62 @@ export default function MemberDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Cancel Registration Modal */}
+      {showCancelModal && cancelSessionData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
+              <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            
+            <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
+              Xác nhận hủy đăng ký
+            </h3>
+            
+            <div className="text-center mb-6">
+              <p className="text-gray-600 mb-2">
+                Bạn có chắc chắn muốn hủy đăng ký lớp học này không?
+              </p>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="font-medium text-gray-900">{cancelSessionData.className}</p>
+                <p className="text-sm text-gray-600">{cancelSessionData.date}</p>
+                {(() => {
+                  const timeInfo = checkSessionCancellationTime(cancelSessionData.date, cancelSessionData.startTime);
+                  return (
+                    <p className={`text-xs mt-1 ${
+                      timeInfo.canCancel ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {timeInfo.canCancel 
+                        ? `✓ Có thể hủy (${timeInfo.timeUntilSessionText})` 
+                        : `✗ Không thể hủy (${timeInfo.timeUntilSessionText})`
+                      }
+                    </p>
+                  );
+                })()}
+              </div>
+            </div>
+            
+            <div className="flex space-x-3">
+              <button
+                onClick={cancelCancelRegistration}
+                className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmCancelRegistration}
+                disabled={cancelLoading === cancelSessionData.registrationId}
+                className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {cancelLoading === cancelSessionData.registrationId ? 'Đang hủy...' : 'Xác nhận hủy'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

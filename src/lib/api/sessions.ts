@@ -293,6 +293,27 @@ class SessionsApiService extends BaseApiService {
       const updatedRegistrations = [...session.registrations, registration];
       const updatedRegisteredCount = session.registeredCount + 1;
 
+      // Update member's remaining classes if they have a package
+      if (memberResult.success && memberResult.data) {
+        const member = memberResult.data;
+        if (
+          member.currentPackage &&
+          member.remainingClasses !== undefined &&
+          member.remainingClasses > 0
+        ) {
+          const newRemainingClasses = member.remainingClasses - 1;
+          console.log(
+            `📊 Updating member ${member.name} remaining classes: ${member.remainingClasses} → ${newRemainingClasses}`
+          );
+
+          // Update member's remaining classes
+          await membersApi.updateMemberClasses(
+            registrationData.memberId,
+            newRemainingClasses
+          );
+        }
+      }
+
       return this.update<Session>(registrationData.sessionId, {
         registrations: updatedRegistrations,
         registeredCount: updatedRegisteredCount,
@@ -335,6 +356,23 @@ class SessionsApiService extends BaseApiService {
       const activeRegistrations = updatedRegistrations.filter(
         (reg) => reg.status === "confirmed"
       );
+
+      // Update member's remaining classes if they have a package
+      const { membersApi } = await import("./members");
+      const memberResult = await membersApi.getById(memberId);
+
+      if (memberResult.success && memberResult.data) {
+        const member = memberResult.data;
+        if (member.currentPackage && member.remainingClasses !== undefined) {
+          const newRemainingClasses = member.remainingClasses + 1;
+          console.log(
+            `📊 Restoring member ${member.name} remaining classes: ${member.remainingClasses} → ${newRemainingClasses}`
+          );
+
+          // Update member's remaining classes
+          await membersApi.updateMemberClasses(memberId, newRemainingClasses);
+        }
+      }
 
       return this.update<Session>(sessionId, {
         registrations: updatedRegistrations,

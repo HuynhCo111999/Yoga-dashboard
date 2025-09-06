@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { sessionsApi, Session } from '@/lib/api';
+import { sessionsApi, Session, membersApi } from '@/lib/api';
+import { checkSessionCancellationTime } from '@/utils/sessionUtils';
 
 // Types
 type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced';
@@ -150,19 +151,32 @@ export default function Calendar() {
   };
 
   const loadUserRegistrations = async () => {
-    if (!user) return;
+    if (!user || !user.email) return;
 
     try {
+      // Find member by email first
+      const memberResult = await membersApi.getMemberByEmail(user.email);
+      if (!memberResult.success || !memberResult.data) {
+        console.log('No member found for user:', user.email);
+        setUserRegistrations([]);
+        return;
+      }
+
+      const memberId = memberResult.data.id;
+      console.log('Loading registrations for member:', memberId);
+
       // Get user's registrations from sessions
       const registrationIds: string[] = [];
       sessions.forEach(session => {
         const userRegistration = session.registrations.find(
-          reg => reg.memberId === user.uid && reg.status === 'confirmed'
+          reg => reg.memberId === memberId && reg.status === 'confirmed'
         );
         if (userRegistration) {
           registrationIds.push(session.id);
         }
       });
+      
+      console.log('Found registrations:', registrationIds);
       setUserRegistrations(registrationIds);
     } catch (err) {
       console.error('Error loading user registrations:', err);
@@ -188,17 +202,25 @@ export default function Calendar() {
   };
 
   const handleRegistrationConfirm = async () => {
-    if (!selectedSession || !user) return;
+    if (!selectedSession || !user || !user.email) return;
 
     try {
       setActionLoading(true);
       setError(null);
 
+      // Find member by email first
+      const memberResult = await membersApi.getMemberByEmail(user.email);
+      if (!memberResult.success || !memberResult.data) {
+        setError('Không tìm thấy thông tin thành viên');
+        return;
+      }
+
+      const memberId = memberResult.data.id;
       const isRegistered = userRegistrations.includes(selectedSession.id);
 
       if (isRegistered) {
         // Cancel registration
-        const result = await sessionsApi.cancelRegistration(selectedSession.id, user.uid);
+        const result = await sessionsApi.cancelRegistration(selectedSession.id, memberId);
         
         if (result.success && result.data) {
           // Update local state
@@ -213,19 +235,29 @@ export default function Calendar() {
         // Register for session
         const registrationData = {
           sessionId: selectedSession.id,
-          memberId: user.uid,
+          memberId: memberId,
           notes: '',
         };
+
+        console.log('📝 Registering for session:', {
+          sessionId: selectedSession.id,
+          memberId: memberId,
+          memberEmail: user.email,
+          className: selectedSession.className,
+          date: selectedSession.date
+        });
 
         const result = await sessionsApi.registerMemberForSession(registrationData);
         
         if (result.success && result.data) {
+          console.log('✅ Registration successful:', result.data);
           // Update local state
           setSessions(prev => prev.map(s => s.id === selectedSession.id ? result.data! : s));
           setUserRegistrations(prev => [...prev, selectedSession.id]);
           setShowPopup(false);
           setSelectedSession(null);
     } else {
+          console.error('❌ Registration failed:', result.error);
           setError(result.error || 'Có lỗi xảy ra khi đăng ký');
         }
       }
@@ -505,7 +537,9 @@ export default function Calendar() {
                 {filteredSessions.map((session) => {
                       const isRegistered = userRegistrations.includes(session.id);
                   const isFull = session.registeredCount >= session.capacity;
+                      const timeInfo = checkSessionCancellationTime(session.date, session.startTime);
                       const canRegister = user && (!isFull || isRegistered);
+                      const canCancel = isRegistered && timeInfo.canCancel;
 
                   return (
                     <div
@@ -571,21 +605,26 @@ export default function Calendar() {
 
                           <button
                             onClick={() => handleRegisterClick(session)}
-                            disabled={!canRegister || actionLoading}
+                            disabled={!canRegister || actionLoading || (isRegistered && !canCancel)}
                             className={`w-full py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-200 ${
                               !user
                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 : isRegistered
-                                ? 'bg-red-500 hover:bg-red-600 text-white'
+                                ? canCancel
+                                  ? 'bg-red-500 hover:bg-red-600 text-white'
+                                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 : isFull
                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 : 'bg-primary-500 hover:bg-primary-600 text-white hover:scale-105'
                             }`}
+                            title={isRegistered && !canCancel ? `Chỉ được hủy trước 1 tiếng. ${timeInfo.timeUntilSessionText}` : ''}
                           >
                             {!user
                               ? 'Cần đăng nhập'
                               : isRegistered
+                              ? canCancel
                               ? 'Hủy đăng ký' 
+                                : 'Không thể hủy'
                               : isFull 
                               ? 'Đã đầy' 
                               : 'Đăng ký'}
