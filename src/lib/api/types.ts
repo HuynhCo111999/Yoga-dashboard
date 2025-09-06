@@ -79,7 +79,6 @@ export interface SessionRegistration {
   status: "confirmed" | "cancelled" | "attended" | "no-show";
   registeredAt: string;
   attendedAt?: string;
-  cancelledAt?: string;
   notes?: string;
 }
 

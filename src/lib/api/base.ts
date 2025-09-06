@@ -32,6 +32,17 @@ export class BaseApiService {
     return collection(db, this.collectionName);
   }
 
+  protected generateId(): string {
+    // Generate a unique ID similar to Firebase Auth UID format
+    const chars =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < 28; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+
   protected getDoc(id: string) {
     return doc(db, this.collectionName, id);
   }

@@ -1,5 +1,4 @@
 import { WhereFilterOp, query, where, getDocs } from "firebase/firestore";
-import { authService } from "@/lib/firebase";
 import { BaseApiService } from "./base";
 import {
   Member,
@@ -19,32 +18,20 @@ class MembersApiService extends BaseApiService {
     memberData: MemberCreateRequest
   ): Promise<ApiResponse<Member>> {
     try {
-      // Step 1: Use authService.signUp to create user (Firebase Auth + users collection)
-      const { password, ...memberDataWithoutPassword } = memberData;
-      const { packageId, ...memberDataWithoutPackageId } =
-        memberDataWithoutPassword;
+      const { packageId, ...memberDataWithoutPackageId } = memberData;
 
-      const signUpResult = await authService.signUp(
-        memberData.email,
-        memberData.password,
-        {
-          name: memberData.name,
-          role: "member",
-        }
-      );
+      // Always generate a unique ID for the member (without creating Firebase Auth user)
+      // This prevents admin from being switched to member account
+      const memberId = this.generateId();
 
-      if (signUpResult.error || !signUpResult.user) {
-        return {
-          data: null,
-          error: signUpResult.error || "Không thể tạo tài khoản người dùng",
-          success: false,
-        };
-      }
+      // Note: Firebase Auth user creation is disabled to prevent admin session switching
+      // Members can be created without login credentials
+      // If login is needed later, it can be added through a separate process
 
-      // Step 2: Create member document in 'members' collection
+      // Create member document in 'members' collection
       const memberDoc = {
         ...memberDataWithoutPackageId,
-        id: signUpResult.user.uid,
+        id: memberId,
         role: "member" as const,
         membershipStatus: "active" as const,
         remainingClasses: 0,
@@ -57,46 +44,23 @@ class MembersApiService extends BaseApiService {
         Object.entries(memberDoc).filter(([_, value]) => value !== undefined)
       ) as Omit<Member, "createdAt" | "updatedAt" | "id">;
 
-      try {
-        // Use setDoc with specific ID instead of addDoc with auto-generated ID
-        const memberResult = await this.createWithId<Member>(
-          signUpResult.user.uid,
-          cleanMemberDoc
-        );
+      // Create member document with generated ID
+      const memberResult = await this.createWithId<Member>(
+        memberId,
+        cleanMemberDoc
+      );
 
-        if (memberResult.success && memberResult.data) {
-          // Keep the auth user for member login
-          // The member will be able to sign in with their credentials
-
-          return {
-            ...memberResult,
-            data: { ...memberResult.data, id: signUpResult.user.uid },
-          };
-        } else {
-          // If member document creation fails, delete the user (authService handles cleanup)
-          try {
-            await signUpResult.user.delete();
-          } catch (deleteError) {
-            // Silent fail for cleanup
-          }
-          return {
-            data: null,
-            error:
-              memberResult.error ||
-              "Không thể tạo thông tin thành viên trong cơ sở dữ liệu",
-            success: false,
-          };
-        }
-      } catch (firestoreError) {
-        // If any Firestore operation fails, delete the user
-        try {
-          await signUpResult.user.delete();
-        } catch (deleteError) {
-          // Silent fail for cleanup
-        }
+      if (memberResult.success && memberResult.data) {
+        return {
+          ...memberResult,
+          data: { ...memberResult.data, id: memberId },
+        };
+      } else {
         return {
           data: null,
-          error: "Lỗi kết nối cơ sở dữ liệu. Vui lòng kiểm tra quyền truy cập.",
+          error:
+            memberResult.error ||
+            "Không thể tạo thông tin thành viên trong cơ sở dữ liệu",
           success: false,
         };
       }

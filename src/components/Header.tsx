@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
+import Image from 'next/image';
 
 const navigation = [
   { name: 'Trang chủ', href: '/' },
@@ -46,9 +47,9 @@ export default function Header() {
           <Link href="/" className="-m-1.5 p-1.5 flex items-center space-x-3">
             {/* Logo wireframe placeholder */}
             <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-lg">Y</span>
+              <Image src="/logo.jpeg" alt="Yên Yoga" width={50} height={50} className="rounded-full" />
             </div>
-            <span className="text-xl sm:text-2xl font-bold text-primary-600">Yên Yoga</span>
+            <span className="text-xl sm:text-2xl font-bold text-primary-600">Yên Yoga Studio</span>
           </Link>
         </div>
         <div className="flex lg:hidden">

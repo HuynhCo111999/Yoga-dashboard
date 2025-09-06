@@ -31,6 +31,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [adminSession, setAdminSession] = useState<FirebaseUser | null>(null);
 
   useEffect(() => {
     const unsubscribe = authService.onAuthStateChanged(async (firebaseUser) => {
@@ -56,29 +57,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
           };
           setUser(userWithData);
           setUserData(data);
+          
+          // Store admin session for preservation
+          if (data.role === 'admin') {
+            setAdminSession(userWithData);
+          }
         } else {
           // Check if this is a newly created user (member) without role data yet
           if (firebaseUser && firebaseUser.email) {
-            // If current user is admin, don't sign out - this might be a new member being created
-            if (user && user.role === 'admin') {
+            // If we have an admin session and this is a different user (new member), keep admin session
+            if (adminSession && adminSession.uid !== firebaseUser.uid) {
+              // This is a new member being created, restore admin session
+              setUser(adminSession);
+              setUserData(adminSession.userData || null);
               return;
             }
           }
           // Don't set user without role data to prevent login loops
           setUser(null);
           setUserData(null);
+          setAdminSession(null);
           // Sign out if user data is missing
           await authService.signOut();
         }
       } else {
         setUser(null);
         setUserData(null);
+        setAdminSession(null);
       }
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [adminSession]);
 
   const signIn = async (email: string, password: string) => {
     setLoading(true);

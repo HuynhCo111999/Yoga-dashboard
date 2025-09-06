@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 const navigation = {
   main: [
@@ -44,10 +45,10 @@ export default function Footer() {
         {/* Logo and Company Info */}
         <div className="text-center mb-8 sm:mb-12">
           <div className="flex justify-center items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-lg sm:text-xl">Y</span>
+            <div className="w-10 h-10 sm:w-12 sm:h-12 from-primary-400 to-primary-600 rounded-full flex items-center justify-center">
+              <Image src="/logo.jpeg" alt="Yên Yoga" width={60} height={60} className="rounded-full" />
             </div>
-            <span className="text-xl sm:text-2xl font-bold text-white">Yên Yoga</span>
+            <span className="text-xl sm:text-2xl font-bold text-white">Yên Yoga Studio</span>
           </div>
           <p className="text-sm sm:text-base text-secondary-300 max-w-md mx-auto px-4 sm:px-0">
             Không gian yoga thanh tịnh, nơi bạn tìm thấy sự cân bằng giữa cơ thể và tâm hồn.
@@ -75,7 +76,7 @@ export default function Footer() {
         
         <div className="mt-6 sm:mt-10 pt-6 sm:pt-8 border-t border-secondary-700">
           <p className="text-center text-xs sm:text-sm leading-5 text-secondary-400 px-4 sm:px-0">
-            &copy; 2024 Yên Yoga. Bản quyền thuộc về chúng tôi.
+            &copy; 2024 Yên Yoga Studio. Bản quyền thuộc về chúng tôi.
           </p>
         </div>
       </div>
