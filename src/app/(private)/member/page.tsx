@@ -143,6 +143,8 @@ export default function MemberDashboard() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelSessionData, setCancelSessionData] = useState<{sessionId: string, registrationId: string, className: string, date: string, startTime: string} | null>(null);
   const [packageValidity, setPackageValidity] = useState<string | null>(null);
+  const [packageStartDate, setPackageStartDate] = useState<string | null>(null);
+  const [packageEndDate, setPackageEndDate] = useState<string | null>(null);
 
   // Load member data
   useEffect(() => {
@@ -233,6 +235,8 @@ export default function MemberDashboard() {
     try {
       if (!member.currentPackage) {
         setPackageValidity('Chưa có gói tập');
+        setPackageStartDate(null);
+        setPackageEndDate(null);
         return;
       }
 
@@ -240,15 +244,28 @@ export default function MemberDashboard() {
       const packageResult = await packagesApi.getById(member.currentPackage);
       if (!packageResult.success || !packageResult.data) {
         setPackageValidity('Không tìm thấy thông tin gói tập');
+        setPackageStartDate(null);
+        setPackageEndDate(null);
         return;
       }
 
       // Check package validity
       const validity = checkPackageValidity(member, packageResult.data as Package);
       setPackageValidity(formatPackageValidity(validity));
+      setPackageStartDate(member.packageStartDate || null);
+      if (validity.expiryDate) {
+        const y = validity.expiryDate.getFullYear();
+        const m = String(validity.expiryDate.getMonth() + 1).padStart(2, '0');
+        const d = String(validity.expiryDate.getDate()).padStart(2, '0');
+        setPackageEndDate(`${y}-${m}-${d}`);
+      } else {
+        setPackageEndDate(null);
+      }
     } catch (err) {
       console.error('Error loading package validity:', err);
       setPackageValidity('Lỗi khi kiểm tra gói tập');
+      setPackageStartDate(null);
+      setPackageEndDate(null);
     }
   };
 
@@ -399,6 +416,16 @@ export default function MemberDashboard() {
                               : 'text-green-600'
                           }`}>
                             {packageValidity}
+                          </dd>
+                        )}
+                        {packageStartDate && (
+                          <dd className="text-xs text-gray-500 mt-1">
+                            Bắt đầu: {new Date(packageStartDate).toLocaleDateString('vi-VN')}
+                          </dd>
+                        )}
+                        {packageEndDate && (
+                          <dd className="text-xs text-gray-500">
+                            Kết thúc: {new Date(packageEndDate).toLocaleDateString('vi-VN')}
                           </dd>
                         )}
                     </dl>

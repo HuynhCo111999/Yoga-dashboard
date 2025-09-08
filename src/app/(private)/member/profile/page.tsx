@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { UserIcon, KeyIcon, BellIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
-import { membersApi, packagesApi, Member, Package } from '@/lib/api';
+import { membersApi, packagesApi, memberDashboardApi, Member, Package } from '@/lib/api';
+import { checkPackageValidity } from '@/utils/packageUtils';
 
 // Remove mock data - will be replaced with Firebase data
 
@@ -134,6 +135,9 @@ export default function MemberProfile() {
   const [isEditing, setIsEditing] = useState(false);
   const [memberData, setMemberData] = useState<Member | null>(null);
   const [packageData, setPackageData] = useState<Package | null>(null);
+  const [remainingClasses, setRemainingClasses] = useState<number | null>(null);
+  const [packageStartDate, setPackageStartDate] = useState<string | null>(null);
+  const [packageEndDate, setPackageEndDate] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -177,12 +181,33 @@ export default function MemberProfile() {
       const member = memberResult.data;
       setMemberData(member);
 
-      // Load package data if member has a package
+      // Load package data and calculated stats if member has a package
       if (member.currentPackage) {
         const packageResult = await packagesApi.getById(member.currentPackage);
         if (packageResult.success && packageResult.data) {
-          setPackageData(packageResult.data as Package);
+          const pkg = packageResult.data as Package;
+          setPackageData(pkg);
+          // Remaining classes from dashboard stats (attended-based)
+          const stats = await memberDashboardApi.getMemberStats(member.id);
+          if (stats.success && stats.data) {
+            setRemainingClasses(stats.data.remainingClasses);
+          }
+          // Package dates
+          setPackageStartDate(member.packageStartDate || null);
+          const validity = checkPackageValidity(member, pkg);
+          if (validity.expiryDate) {
+            const y = validity.expiryDate.getFullYear();
+            const m = String(validity.expiryDate.getMonth() + 1).padStart(2, '0');
+            const d = String(validity.expiryDate.getDate()).padStart(2, '0');
+            setPackageEndDate(`${y}-${m}-${d}`);
+          } else {
+            setPackageEndDate(null);
+          }
         }
+      } else {
+        setRemainingClasses(null);
+        setPackageStartDate(null);
+        setPackageEndDate(null);
       }
 
       // Set form data
@@ -451,7 +476,23 @@ export default function MemberProfile() {
                               Lớp còn lại
                             </label>
                             <div className="px-4 py-3 bg-accent-50 rounded-xl text-accent-700 font-semibold">
-                              {memberData?.remainingClasses || 0} lớp
+                              {remainingClasses !== null ? remainingClasses : 0} lớp
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                              Ngày bắt đầu gói
+                            </label>
+                            <div className="px-4 py-3 bg-gray-50 rounded-xl text-gray-700 font-medium">
+                              {packageStartDate ? new Date(packageStartDate).toLocaleDateString('vi-VN') : 'Chưa có'}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                              Ngày kết thúc gói
+                            </label>
+                            <div className="px-4 py-3 bg-gray-50 rounded-xl text-gray-700 font-medium">
+                              {packageEndDate ? new Date(packageEndDate).toLocaleDateString('vi-VN') : 'Chưa có'}
                             </div>
                           </div>
                           <div>
