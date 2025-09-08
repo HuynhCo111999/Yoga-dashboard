@@ -8,6 +8,7 @@ import {
   SessionRegistrationRequest,
   SessionFilters,
   ApiResponse,
+  PaginatedResponse,
   Member,
   Package,
 } from "./types";
@@ -81,6 +82,35 @@ class SessionsApiService extends BaseApiService {
     } catch (error) {
       return { data: null, error: this.handleError(error), success: false };
     }
+  }
+
+  async getSessionsPaginated(
+    _page: number = 1,
+    limit: number = 10,
+    filters?: { status?: Session["status"]; date?: string }
+  ): Promise<PaginatedResponse<Session>> {
+    const queryFilters: Array<{
+      field: string;
+      operator: WhereFilterOp;
+      value: unknown;
+    }> = [];
+    if (filters?.status) {
+      queryFilters.push({
+        field: "status",
+        operator: "==",
+        value: filters.status,
+      });
+    }
+    if (filters?.date) {
+      queryFilters.push({ field: "date", operator: "==", value: filters.date });
+    }
+
+    // Use BaseApiService pagination helper
+    return this.getPaginated<Session>(limit, undefined, {
+      orderByField: "date",
+      orderDirection: "desc",
+      filters: queryFilters,
+    });
   }
 
   async updateSession(
