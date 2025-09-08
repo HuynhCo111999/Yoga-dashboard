@@ -36,7 +36,10 @@ class MembersApiService extends BaseApiService {
         membershipStatus: "active" as const,
         remainingClasses: 0,
         joinDate: new Date().toISOString().split("T")[0], // YYYY-MM-DD format
-        ...(packageId && { currentPackage: packageId }),
+        ...(packageId && {
+          currentPackage: packageId,
+          packageStartDate: new Date().toISOString().split("T")[0], // Set package start date
+        }),
       };
 
       // Remove undefined fields to prevent Firestore errors
@@ -306,6 +309,7 @@ class MembersApiService extends BaseApiService {
   ): Promise<ApiResponse<Member>> {
     return this.update<Member>(memberId, {
       currentPackage: packageId,
+      packageStartDate: new Date().toISOString().split("T")[0], // Set current date as package start date
       remainingClasses: classLimit,
       membershipStatus: "active",
     });

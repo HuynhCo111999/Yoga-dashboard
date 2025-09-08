@@ -8,6 +8,8 @@ import {
   SessionRegistrationRequest,
   SessionFilters,
   ApiResponse,
+  Member,
+  Package,
 } from "./types";
 
 class SessionsApiService extends BaseApiService {
@@ -267,12 +269,74 @@ class SessionsApiService extends BaseApiService {
       const { membersApi } = await import("./members");
       const memberResult = await membersApi.getById(registrationData.memberId);
 
-      let memberName = "Unknown Member";
-      let memberEmail = "unknown@email.com";
+      if (!memberResult.success || !memberResult.data) {
+        return {
+          data: null,
+          error: "Không tìm thấy thông tin thành viên",
+          success: false,
+        };
+      }
 
-      if (memberResult.success && memberResult.data) {
-        memberName = memberResult.data.name;
-        memberEmail = memberResult.data.email;
+      const member = memberResult.data;
+      const memberName = member.name;
+      const memberEmail = member.email;
+
+      // Check package validity if member has a package
+      if (member.currentPackage) {
+        const { packagesApi } = await import("./packages");
+        const packageResult = await packagesApi.getById(member.currentPackage);
+
+        if (packageResult.success && packageResult.data) {
+          const { canMemberRegisterForClass } = await import(
+            "@/utils/packageUtils"
+          );
+          const registrationCheck = canMemberRegisterForClass(
+            member as Member,
+            packageResult.data as Package
+          );
+
+          if (!registrationCheck.canRegister) {
+            return {
+              data: null,
+              error:
+                registrationCheck.reason ||
+                "Không thể đăng ký do gói tập không hợp lệ",
+              success: false,
+            };
+          }
+        }
+      } else {
+        return {
+          data: null,
+          error: "Thành viên chưa có gói tập để đăng ký lớp học",
+          success: false,
+        };
+      }
+
+      // Validate package validity against session date
+      // session.date is assumed in YYYY-MM-DD format
+      if (member.currentPackage) {
+        const { packagesApi } = await import("./packages");
+        const packageResult = await packagesApi.getById(member.currentPackage);
+        if (packageResult.success && packageResult.data) {
+          const { checkPackageValidityOnDate } = await import(
+            "@/utils/packageUtils"
+          );
+          const packageValidity = checkPackageValidityOnDate(
+            member as Member,
+            packageResult.data as Package,
+            session.date
+          );
+          if (!packageValidity.isValid) {
+            return {
+              data: null,
+              error:
+                packageValidity.errorMessage ||
+                "Gói tập không còn hiệu lực vào ngày diễn ra lớp",
+              success: false,
+            };
+          }
+        }
       }
 
       // Create registration

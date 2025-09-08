@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { memberDashboardApi, MemberDashboardStats, UpcomingSession, AttendedSession, membersApi } from '@/lib/api';
+import { memberDashboardApi, MemberDashboardStats, UpcomingSession, AttendedSession, membersApi, packagesApi, Member, Package } from '@/lib/api';
 import { checkSessionCancellationTime } from '@/utils/sessionUtils';
+import { checkPackageValidity, formatPackageValidity } from '@/utils/packageUtils';
 
 // Remove mock data - will be replaced with Firebase data
 
@@ -141,6 +142,7 @@ export default function MemberDashboard() {
   const [cancelLoading, setCancelLoading] = useState<string | null>(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelSessionData, setCancelSessionData] = useState<{sessionId: string, registrationId: string, className: string, date: string, startTime: string} | null>(null);
+  const [packageValidity, setPackageValidity] = useState<string | null>(null);
 
   // Load member data
   useEffect(() => {
@@ -185,6 +187,9 @@ export default function MemberDashboard() {
         memberDashboardApi.getAttendedSessions(memberId, 10),
       ]);
 
+      // Load package validity
+      await loadPackageValidity(memberResult.data);
+
       // Handle stats
       if (statsResult.success && statsResult.data) {
         console.log('✅ Member stats loaded:', statsResult.data);
@@ -221,6 +226,29 @@ export default function MemberDashboard() {
       setError('Có lỗi xảy ra khi tải dữ liệu');
     } finally {
       setDataLoading(false);
+    }
+  };
+
+  const loadPackageValidity = async (member: Member) => {
+    try {
+      if (!member.currentPackage) {
+        setPackageValidity('Chưa có gói tập');
+        return;
+      }
+
+      // Get package information
+      const packageResult = await packagesApi.getById(member.currentPackage);
+      if (!packageResult.success || !packageResult.data) {
+        setPackageValidity('Không tìm thấy thông tin gói tập');
+        return;
+      }
+
+      // Check package validity
+      const validity = checkPackageValidity(member, packageResult.data as Package);
+      setPackageValidity(formatPackageValidity(validity));
+    } catch (err) {
+      console.error('Error loading package validity:', err);
+      setPackageValidity('Lỗi khi kiểm tra gói tập');
     }
   };
 
@@ -361,6 +389,17 @@ export default function MemberDashboard() {
                               : `${memberStats.remainingClasses} buổi còn lại`
                             }
                       </dd>
+                        )}
+                        {packageValidity && (
+                          <dd className={`text-xs mt-1 ${
+                            packageValidity.includes('hết hạn') || packageValidity.includes('Chưa có gói')
+                              ? 'text-red-600'
+                              : packageValidity.includes('còn') && parseInt(packageValidity.match(/\d+/)?.[0] || '0') <= 7
+                              ? 'text-yellow-600'
+                              : 'text-green-600'
+                          }`}>
+                            {packageValidity}
+                          </dd>
                         )}
                     </dl>
                   </div>

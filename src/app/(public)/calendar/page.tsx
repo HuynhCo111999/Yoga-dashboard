@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { sessionsApi, Session, membersApi } from '@/lib/api';
+import { sessionsApi, Session, membersApi, packagesApi, Package } from '@/lib/api';
 import { checkSessionCancellationTime } from '@/utils/sessionUtils';
+import { checkPackageValidity, checkPackageValidityOnDate, formatPackageValidity } from '@/utils/packageUtils';
 import Header from '@/components/Header';
 
 // Types
@@ -106,6 +107,9 @@ export default function Calendar() {
   const [showPopup, setShowPopup] = useState(false);
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [packageValidity, setPackageValidity] = useState<string | null>(null);
+  const [packageExpiryDateStr, setPackageExpiryDateStr] = useState<string | null>(null);
+  const [canRegisterOnDate, setCanRegisterOnDate] = useState<boolean | null>(null);
 
   useEffect(() => {
     loadSessions();
@@ -114,8 +118,16 @@ export default function Calendar() {
   useEffect(() => {
     if (user) {
       loadUserRegistrations();
+      loadPackageValidity();
     }
   }, [user]);
+
+  // Recompute package validity when the selected date changes
+  useEffect(() => {
+    if (user) {
+      loadPackageValidity();
+    }
+  }, [selectedDate, user]);
 
   const loadSessions = async () => {
     try {
@@ -181,6 +193,52 @@ export default function Calendar() {
       setUserRegistrations(registrationIds);
     } catch (err) {
       console.error('Error loading user registrations:', err);
+    }
+  };
+
+  const loadPackageValidity = async () => {
+    if (!user || !user.email) return;
+
+    try {
+      // Find member by email first
+      const memberResult = await membersApi.getMemberByEmail(user.email);
+      if (!memberResult.success || !memberResult.data) {
+        setPackageValidity(null);
+        return;
+      }
+
+      const member = memberResult.data;
+      if (!member.currentPackage) {
+        setPackageValidity('Chưa có gói tập');
+        return;
+      }
+
+      // Get package information
+      const packageResult = await packagesApi.getById(member.currentPackage);
+      if (!packageResult.success || !packageResult.data) {
+        setPackageValidity('Không tìm thấy thông tin gói tập');
+        return;
+      }
+
+      // Check package validity as of today (summary)
+      const validity = checkPackageValidity(member, packageResult.data as Package);
+      setPackageValidity(formatPackageValidity(validity));
+      // Store expiry date string for calendar disabling
+      if (validity.expiryDate) {
+        const y = validity.expiryDate.getFullYear();
+        const m = String(validity.expiryDate.getMonth() + 1).padStart(2, '0');
+        const d = String(validity.expiryDate.getDate()).padStart(2, '0');
+        setPackageExpiryDateStr(`${y}-${m}-${d}`);
+      } else {
+        setPackageExpiryDateStr(null);
+      }
+
+      // Check validity for selected date
+      const validityOnDate = checkPackageValidityOnDate(member, packageResult.data as Package, selectedDate);
+      setCanRegisterOnDate(validityOnDate.isValid);
+    } catch (err) {
+      console.error('Error loading package validity:', err);
+      setPackageValidity('Lỗi khi kiểm tra gói tập');
     }
   };
 
@@ -343,6 +401,7 @@ export default function Calendar() {
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
       const dateStr = formatDate(date);
+      const isDisabledByPackage = packageExpiryDateStr ? (dateStr > packageExpiryDateStr) : false;
       const sessionsForDay = getSessionsForDate(dateStr);
       
       days.push({
@@ -350,7 +409,8 @@ export default function Calendar() {
         day,
         sessions: sessionsForDay,
         isToday: isToday(dateStr),
-        isSelected: dateStr === selectedDate
+        isSelected: dateStr === selectedDate,
+        isDisabledByPackage,
       });
     }
 
@@ -375,8 +435,29 @@ export default function Calendar() {
             <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-3 max-w-md mx-auto">
               <p className="text-sm text-amber-700">
                 💡 Bạn cần <a href="/login" className="font-medium text-amber-800 hover:text-amber-900 underline">đăng nhập</a> để đăng ký lớp học
-            </p>
-          </div>
+              </p>
+            </div>
+          )}
+
+          {/* Package validity status */}
+          {user && packageValidity && (
+            <div className={`mt-4 rounded-lg p-3 max-w-md mx-auto ${
+              packageValidity.includes('hết hạn') || packageValidity.includes('Chưa có gói')
+                ? 'bg-red-50 border border-red-200'
+                : packageValidity.includes('còn') && parseInt(packageValidity.match(/\d+/)?.[0] || '0') <= 7
+                ? 'bg-yellow-50 border border-yellow-200'
+                : 'bg-green-50 border border-green-200'
+            }`}>
+              <p className={`text-sm ${
+                packageValidity.includes('hết hạn') || packageValidity.includes('Chưa có gói')
+                  ? 'text-red-700'
+                  : packageValidity.includes('còn') && parseInt(packageValidity.match(/\d+/)?.[0] || '0') <= 7
+                  ? 'text-yellow-700'
+                  : 'text-green-700'
+              }`}>
+                📦 {packageValidity}
+              </p>
+            </div>
           )}
         </div>
 
@@ -455,7 +536,12 @@ export default function Calendar() {
                           {day ? (
                             <button
                               onClick={() => setSelectedDate(day.date)}
-                              className={`w-full h-full rounded-xl p-2 transition-all duration-200 hover:scale-105 ${
+                              title={day.isDisabledByPackage ? 'Gói tập không còn hiệu lực vào ngày này' : ''}
+                              className={`w-full h-full rounded-xl p-2 transition-all duration-200 ${
+                                day.isDisabledByPackage
+                                  ? 'bg-gray-100 text-gray-300'
+                                  : 'hover:scale-105'
+                              } ${
                                 day.isSelected
                                   ? 'bg-primary-500 text-white shadow-lg'
                                   : day.isToday
@@ -468,10 +554,13 @@ export default function Calendar() {
                               <div className="text-sm font-semibold">{day.day}</div>
                               {day.sessions.length > 0 && (
                                 <div className={`text-xs mt-1 ${
-                                  day.isSelected ? 'text-white' : 'text-primary-600'
+                                  day.isSelected ? 'text-white' : (day.isDisabledByPackage ? 'text-gray-400' : 'text-primary-600')
                                 }`}>
                                   {day.sessions.length} lớp
                                 </div>
+                              )}
+                              {day.isDisabledByPackage && (
+                                <div className="mt-1 text-[10px] font-medium text-gray-400">Hết hạn</div>
                               )}
                             </button>
                           ) : (
@@ -540,7 +629,7 @@ export default function Calendar() {
                       const isRegistered = userRegistrations.includes(session.id);
                   const isFull = session.registeredCount >= session.capacity;
                       const timeInfo = checkSessionCancellationTime(session.date, session.startTime);
-                      const canRegister = user && (!isFull || isRegistered);
+                      const canRegister = user && (!isFull || isRegistered) && (canRegisterOnDate ?? true);
                       const canCancel = isRegistered && timeInfo.canCancel;
 
                   return (
@@ -619,7 +708,15 @@ export default function Calendar() {
                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 : 'bg-primary-500 hover:bg-primary-600 text-white hover:scale-105'
                             }`}
-                            title={isRegistered && !canCancel ? `Chỉ được hủy trước 1 tiếng. ${timeInfo.timeUntilSessionText}` : ''}
+                            title={
+                              !user
+                                ? ''
+                                : isRegistered && !canCancel
+                                ? `Chỉ được hủy trước 1 tiếng. ${timeInfo.timeUntilSessionText}`
+                                : canRegisterOnDate === false
+                                ? 'Gói tập không còn hiệu lực vào ngày này'
+                                : ''
+                            }
                           >
                             {!user
                               ? 'Cần đăng nhập'
@@ -629,6 +726,8 @@ export default function Calendar() {
                                 : 'Không thể hủy'
                               : isFull 
                               ? 'Đã đầy' 
+                              : canRegisterOnDate === false
+                              ? 'Gói hết hạn'
                               : 'Đăng ký'}
                           </button>
                         </div>

@@ -13,6 +13,7 @@ export interface Member {
   joinDate: string;
   membershipStatus: "active" | "inactive" | "suspended";
   currentPackage?: string;
+  packageStartDate?: string; // When the current package was activated
   remainingClasses?: number;
   role: "member";
   createdAt: string;
