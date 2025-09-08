@@ -50,6 +50,39 @@ class SessionsApiService extends BaseApiService {
     return this.create<Session>(sessionDoc);
   }
 
+  // Create multiple sessions at once from arrays of dates and time ranges
+  async createSessionsBulk(
+    base: Omit<SessionCreateRequest, "date" | "startTime" | "endTime">,
+    dates: string[],
+    timeRanges: Array<{ startTime: string; endTime: string }>
+  ): Promise<ApiResponse<Session[]>> {
+    try {
+      const created: Session[] = [];
+      for (const date of dates) {
+        for (const tr of timeRanges) {
+          const res = await this.createSession({
+            ...base,
+            date,
+            startTime: tr.startTime,
+            endTime: tr.endTime,
+          } as SessionCreateRequest);
+          if (res.success && res.data) {
+            created.push(res.data);
+          } else {
+            return {
+              data: null,
+              error: res.error || "Tạo ca tập thất bại",
+              success: false,
+            };
+          }
+        }
+      }
+      return { data: created, error: null, success: true };
+    } catch (error) {
+      return { data: null, error: this.handleError(error), success: false };
+    }
+  }
+
   async updateSession(
     id: string,
     sessionData: SessionUpdateRequest

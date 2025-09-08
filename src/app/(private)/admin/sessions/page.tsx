@@ -26,10 +26,13 @@ export default function SessionsPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'scheduled' | 'completed' | 'cancelled'>('all');
   const [dateFilter, setDateFilter] = useState<string>('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showBulkForm, setShowBulkForm] = useState(false);
   const [editingSession, setEditingSession] = useState<Session | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [showRegistrations, setShowRegistrations] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Form data
   const [formData, setFormData] = useState({
@@ -39,6 +42,22 @@ export default function SessionsPage() {
     endTime: '',
     capacity: '',
     notes: '',
+  });
+  const [bulkData, setBulkData] = useState({
+    classId: '',
+    startDate: '',
+    endDate: '',
+    weekdays: {
+      mon: true,
+      tue: true,
+      wed: true,
+      thu: true,
+      fri: true,
+      sat: false,
+      sun: false,
+    } as Record<string, boolean>,
+    timeRanges: '' as string, // each line HH:MM-HH:MM
+    capacity: '',
   });
 
   useEffect(() => {
@@ -89,6 +108,12 @@ export default function SessionsPage() {
     
     return matchesStatus && matchesDate;
   });
+  const totalItems = filteredSessions.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const startIdx = (currentPage - 1) * pageSize;
+  const endIdx = startIdx + pageSize;
+  const paginatedSessions = filteredSessions.slice(startIdx, endIdx);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -268,6 +293,7 @@ export default function SessionsPage() {
             />
           </div>
 
+          <div className="flex items-center gap-4">
           <button
             onClick={() => {
               setShowAddForm(true);
@@ -279,6 +305,15 @@ export default function SessionsPage() {
             <PlusIcon className="h-5 w-5 mr-2" />
             Thêm ca tập
           </button>
+          <button
+            onClick={() => setShowBulkForm(true)}
+            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-gradient-to-r from-secondary-600 to-secondary-700 hover:from-secondary-700 hover:to-secondary-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-500 transition-all duration-200"
+          >
+            <CalendarIcon className="h-5 w-5 mr-2" />
+            Tạo nhiều ca
+          </button>
+          </div>
+          
         </div>
 
         {/* Add/Edit Form */}
@@ -399,12 +434,170 @@ export default function SessionsPage() {
           </div>
         )}
 
+        {showBulkForm && (
+          <div className="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-primary-100 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Tạo nhiều ca tập</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Lớp học</label>
+                <select
+                  value={bulkData.classId}
+                  onChange={(e) => setBulkData(prev => ({ ...prev, classId: e.target.value }))}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+                  <option value="">Chọn lớp</option>
+                  {classes.map(cls => (
+                    <option key={cls.id} value={cls.id}>{cls.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sức chứa</label>
+                <input
+                  type="number"
+                  value={bulkData.capacity}
+                  onChange={(e) => setBulkData(prev => ({ ...prev, capacity: e.target.value }))}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu</label>
+                <input
+                  type="date"
+                  value={bulkData.startDate}
+                  onChange={(e) => setBulkData(prev => ({ ...prev, startDate: e.target.value }))}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Ngày kết thúc</label>
+                <input
+                  type="date"
+                  value={bulkData.endDate}
+                  onChange={(e) => setBulkData(prev => ({ ...prev, endDate: e.target.value }))}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Các ngày trong tuần</label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { key: 'mon', label: 'T2' },
+                    { key: 'tue', label: 'T3' },
+                    { key: 'wed', label: 'T4' },
+                    { key: 'thu', label: 'T5' },
+                    { key: 'fri', label: 'T6' },
+                    { key: 'sat', label: 'T7' },
+                    { key: 'sun', label: 'CN' },
+                  ].map(w => (
+                    <label key={w.key} className={`px-3 py-1 rounded-full border cursor-pointer text-sm ${bulkData.weekdays[w.key] ? 'bg-primary-50 border-primary-200 text-primary-700' : 'bg-white border-gray-300 text-gray-600'}`}>
+                      <input
+                        type="checkbox"
+                        className="sr-only"
+                        checked={bulkData.weekdays[w.key]}
+                        onChange={(e) => setBulkData(prev => ({ ...prev, weekdays: { ...prev.weekdays, [w.key]: e.target.checked } }))}
+                      />
+                      {w.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Khung giờ (HH:MM-HH:MM)</label>
+                <textarea
+                  rows={3}
+                  placeholder="Mỗi dòng một khung giờ, ví dụ: 06:00-07:00"
+                  value={bulkData.timeRanges}
+                  onChange={(e) => setBulkData(prev => ({ ...prev, timeRanges: e.target.value }))}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+              </div>
+            </div>
+            <div className="mt-4 flex justify-end space-x-3">
+              <button
+                onClick={() => setShowBulkForm(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              >Huỷ</button>
+              <button
+                onClick={async () => {
+                  if (!bulkData.classId || !bulkData.startDate || !bulkData.endDate) { setError('Vui lòng chọn lớp và khoảng ngày'); return; }
+                  // Build dates between range filtered by weekdays
+                  const start = new Date(bulkData.startDate);
+                  const end = new Date(bulkData.endDate);
+                  const selectedWeekdays = new Set<string>(Object.entries(bulkData.weekdays).filter(([,v]) => v).map(([k]) => k));
+                  const dates: string[] = [];
+                  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                    const jsIdx = d.getDay(); // 0=Sun
+                    const match = (
+                      (jsIdx === 1 && selectedWeekdays.has('mon')) ||
+                      (jsIdx === 2 && selectedWeekdays.has('tue')) ||
+                      (jsIdx === 3 && selectedWeekdays.has('wed')) ||
+                      (jsIdx === 4 && selectedWeekdays.has('thu')) ||
+                      (jsIdx === 5 && selectedWeekdays.has('fri')) ||
+                      (jsIdx === 6 && selectedWeekdays.has('sat')) ||
+                      (jsIdx === 0 && selectedWeekdays.has('sun'))
+                    );
+                    if (match) {
+                      const y = d.getFullYear();
+                      const m = String(d.getMonth() + 1).padStart(2, '0');
+                      const dd = String(d.getDate()).padStart(2, '0');
+                      dates.push(`${y}-${m}-${dd}`);
+                    }
+                  }
+                  const timeRanges = bulkData.timeRanges.split(/\n/).map(s => s.trim()).filter(Boolean).map(line => {
+                    const [startTime, endTime] = line.split('-').map(s => s.trim());
+                    return { startTime, endTime };
+                  });
+                  try {
+                    setSubmitting(true);
+                    const base = {
+                      classId: bulkData.classId,
+                      // date/time overridden per session in bulk API
+                      date: dates[0] || '',
+                      startTime: timeRanges[0]?.startTime || '06:00',
+                      endTime: timeRanges[0]?.endTime || '07:00',
+                      capacity: bulkData.capacity ? parseInt(bulkData.capacity) : undefined,
+                    } as { classId: string; date: string; startTime: string; endTime: string; capacity?: number };
+                    const res = await sessionsApi.createSessionsBulk(base, dates, timeRanges);
+                    if (res.success && res.data) {
+                      setShowBulkForm(false);
+                      setBulkData({ classId: '', startDate: '', endDate: '', weekdays: { mon: true, tue: true, wed: true, thu: true, fri: true, sat: false, sun: false }, timeRanges: '', capacity: '' });
+                      await loadData();
+                    } else {
+                      setError(res.error || 'Không thể tạo nhiều ca tập');
+                    }
+                  } catch (e) {
+                    console.error(e);
+                    setError('Có lỗi xảy ra khi tạo nhiều ca tập');
+                  } finally {
+                    setSubmitting(false);
+                  }
+                }}
+                disabled={submitting}
+                className="px-4 py-2 text-sm font-medium text-white bg-secondary-600 border border-transparent rounded-lg hover:bg-secondary-700 disabled:opacity-50"
+              >{submitting ? 'Đang tạo...' : 'Tạo ca tập hàng loạt'}</button>
+            </div>
+          </div>
+        )}
+
         {/* Sessions Table */}
         <div className="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-primary-100 overflow-hidden">
           <div className="px-6 py-4 border-b border-primary-100">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Danh sách ca tập ({filteredSessions.length})
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Danh sách ca tập ({filteredSessions.length})</h3>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span>Hiển thị</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => { setPageSize(parseInt(e.target.value)); setPage(1); }}
+                  className="px-2 py-1 border border-gray-300 rounded-lg bg-white"
+                >
+                  {[10, 20, 50].map(s => (
+                    <option key={s} value={s}>{s}/trang</option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
           
           <div className="overflow-x-auto">
@@ -429,7 +622,7 @@ export default function SessionsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white/50 divide-y divide-primary-100">
-                {filteredSessions.map((session) => (
+                {paginatedSessions.map((session) => (
                   <tr key={session.id} className="hover:bg-primary-50/30 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -510,6 +703,37 @@ export default function SessionsPage() {
               <div className="text-center py-12">
                 <div className="text-gray-500">
                   {statusFilter !== 'all' || dateFilter ? 'Không tìm thấy ca tập nào' : 'Chưa có ca tập nào'}
+                </div>
+              </div>
+            )}
+
+            {filteredSessions.length > 0 && (
+              <div className="flex items-center justify-between px-6 py-4 border-t border-primary-100">
+                <div className="text-sm text-gray-600">
+                  Hiển thị {startIdx + 1}-{Math.min(endIdx, totalItems)} / {totalItems}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setPage(1)}
+                    disabled={currentPage === 1}
+                    className={`px-3 py-1 text-sm rounded-lg border ${currentPage === 1 ? 'text-gray-400 border-gray-200' : 'text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                  >«</button>
+                  <button
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className={`px-3 py-1 text-sm rounded-lg border ${currentPage === 1 ? 'text-gray-400 border-gray-200' : 'text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                  >Trước</button>
+                  <span className="text-sm text-gray-700">Trang {currentPage}/{totalPages}</span>
+                  <button
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className={`px-3 py-1 text-sm rounded-lg border ${currentPage === totalPages ? 'text-gray-400 border-gray-200' : 'text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                  >Sau</button>
+                  <button
+                    onClick={() => setPage(totalPages)}
+                    disabled={currentPage === totalPages}
+                    className={`px-3 py-1 text-sm rounded-lg border ${currentPage === totalPages ? 'text-gray-400 border-gray-200' : 'text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                  >»</button>
                 </div>
               </div>
             )}
