@@ -137,7 +137,7 @@ export interface MemberCreateRequest {
   address?: string;
   emergencyContact?: string;
   healthNotes?: string;
-  password: string;
+  password?: string; // Optional now since admin creates members without auth
   packageId?: string;
 }
 
@@ -255,4 +255,37 @@ export interface SessionFilters {
   dateFrom?: string;
   dateTo?: string;
   status?: "scheduled" | "completed" | "cancelled";
+}
+
+// User interfaces
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  phone?: string;
+  createdAt: string;
+  updatedAt: string;
+  // Admin specific fields
+  department?: string;
+  location?: string;
+}
+
+export interface UserCreateRequest {
+  email: string;
+  name: string;
+  password: string;
+  role: UserRole;
+  phone?: string;
+  department?: string;
+  location?: string;
+}
+
+export interface UserUpdateRequest {
+  name?: string;
+  phone?: string;
+  department?: string;
+  location?: string;
+  role?: UserRole;
+  authSetupRequired?: boolean;
 }

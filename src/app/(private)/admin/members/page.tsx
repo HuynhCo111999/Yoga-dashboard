@@ -30,7 +30,6 @@ export default function MembersPage() {
     name: '',
     email: '',
     phone: '',
-    password: '',
     address: '',
     emergencyContact: '',
     healthNotes: '',
@@ -96,23 +95,6 @@ export default function MembersPage() {
     }
   };
 
-
-  const refreshMembers = async () => {
-    try {
-      console.log('Refreshing members list...');
-      const membersResult = await membersApi.getAllMembers();
-      
-      if (membersResult.success && membersResult.data) {
-        console.log('Refreshed members:', membersResult.data.length);
-        setMembers(membersResult.data);
-      } else {
-        console.error('Error refreshing members:', membersResult.error);
-      }
-    } catch (err) {
-      console.error('Error refreshing members:', err);
-    }
-  };
-
   const filteredMembers = members.filter(member => {
     const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -160,7 +142,6 @@ export default function MembersPage() {
           email: formData.email,
           name: formData.name,
           phone: formData.phone,
-          password: formData.password,
           address: formData.address,
           emergencyContact: formData.emergencyContact,
           healthNotes: formData.healthNotes,
@@ -192,7 +173,6 @@ export default function MembersPage() {
       name: member.name,
       email: member.email,
       phone: member.phone || '',
-      password: '',
       address: member.address || '',
       emergencyContact: member.emergencyContact || '',
       healthNotes: member.healthNotes || '',
@@ -221,18 +201,11 @@ export default function MembersPage() {
       name: '',
       email: '',
       phone: '',
-      password: '',
       address: '',
       emergencyContact: '',
       healthNotes: '',
       packageId: '',
     });
-  };
-
-  const getPackageName = (packageId?: string) => {
-    if (!packageId) return 'Chưa có gói';
-    const pkg = packages.find(p => p.id === packageId);
-    return pkg?.name || 'Không xác định';
   };
 
   const getPackageInfo = (member: Member) => {
@@ -358,6 +331,15 @@ export default function MembersPage() {
               {editingMember ? 'Chỉnh sửa thành viên' : 'Thêm thành viên mới'}
             </h3>
             
+            {!editingMember && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-700">
+                  <strong>Lưu ý:</strong> Thành viên sẽ được tạo mà chưa có tài khoản đăng nhập. 
+                  Thành viên có thể liên hệ admin để được hỗ trợ thiết lập tài khoản sau.
+                </p>
+              </div>
+            )}
+            
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -397,21 +379,6 @@ export default function MembersPage() {
                   className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
-
-              {!editingMember && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Mật khẩu *
-                  </label>
-                  <input
-                    type="password"
-                    required={!editingMember}
-                    value={formData.password}
-                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                  />
-                </div>
-              )}
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">

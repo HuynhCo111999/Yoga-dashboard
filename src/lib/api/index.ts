@@ -7,6 +7,7 @@ export * from "./classes";
 export * from "./sessions";
 export * from "./dashboard";
 export * from "./memberDashboard";
+export * from "./users";
 
 // Export API instances for easy import
 export { membersApi } from "./members";
@@ -15,6 +16,7 @@ export { classesApi } from "./classes";
 export { sessionsApi } from "./sessions";
 export { dashboardApi } from "./dashboard";
 export { memberDashboardApi } from "./memberDashboard";
+export { usersApi } from "./users";
 
 // Utility function to handle API responses consistently
 export const handleApiResponse = <T>(

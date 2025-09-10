@@ -1,5 +1,6 @@
 import { WhereFilterOp, query, where, getDocs } from "firebase/firestore";
 import { BaseApiService } from "./base";
+import { authService } from "@/lib/firebase";
 import {
   Member,
   MemberCreateRequest,
@@ -20,13 +21,25 @@ class MembersApiService extends BaseApiService {
     try {
       const { packageId, ...memberDataWithoutPackageId } = memberData;
 
-      // Always generate a unique ID for the member (without creating Firebase Auth user)
-      // This prevents admin from being switched to member account
-      const memberId = this.generateId();
+      // Create user document first (without Firebase Auth to avoid admin logout)
+      const userResult = await authService.createUserDocument(
+        memberData.email,
+        {
+          name: memberData.name,
+          role: "member",
+          phone: memberData.phone,
+        }
+      );
 
-      // Note: Firebase Auth user creation is disabled to prevent admin session switching
-      // Members can be created without login credentials
-      // If login is needed later, it can be added through a separate process
+      if (userResult.error) {
+        return {
+          data: null,
+          error: userResult.error,
+          success: false,
+        };
+      }
+
+      const memberId = userResult.uid;
 
       // Create member document in 'members' collection
       const memberDoc = {
@@ -44,10 +57,10 @@ class MembersApiService extends BaseApiService {
 
       // Remove undefined fields to prevent Firestore errors
       const cleanMemberDoc = Object.fromEntries(
-        Object.entries(memberDoc).filter(([_, value]) => value !== undefined)
+        Object.entries(memberDoc).filter(([, value]) => value !== undefined)
       ) as Omit<Member, "createdAt" | "updatedAt" | "id">;
 
-      // Create member document with generated ID
+      // Create member document with user document ID
       const memberResult = await this.createWithId<Member>(
         memberId,
         cleanMemberDoc
