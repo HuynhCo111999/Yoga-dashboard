@@ -15,7 +15,7 @@ export interface MemberDashboardStats {
   currentPackage: string;
   remainingClasses: number;
   joinDate: string;
-  membershipStatus: "active" | "inactive" | "suspended";
+  membershipStatus: "active" | "inactive" | "suspended" | "expired";
   totalClassesAttended: number;
   totalClassesRegistered: number;
 }
