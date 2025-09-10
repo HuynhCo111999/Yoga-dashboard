@@ -143,7 +143,10 @@ export default function Calendar() {
   };
 
   const loadUserRegistrations = async () => {
-    if (!user || !user.email) return;
+    if (!user || !user.email) {
+      setUserRegistrations([]);
+      return;
+    }
 
     try {
       // Find member by email first
@@ -174,7 +177,12 @@ export default function Calendar() {
   };
 
   const loadPackageValidity = async () => {
-    if (!user || !user.email) return;
+    if (!user || !user.email) {
+      setPackageValidity(null);
+      setPackageExpiryDateStr(null);
+      setCanRegisterOnDate(null);
+      return;
+    }
 
     try {
       // Find member by email first
@@ -223,7 +231,8 @@ export default function Calendar() {
 
   const handleRegisterClick = (session: Session) => {
     if (!user) {
-      setError('Bạn cần đăng nhập để đăng ký lớp học');
+      // Redirect to login page for guest users
+      window.location.href = '/login';
       return;
     }
 
@@ -378,7 +387,8 @@ export default function Calendar() {
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
       const dateStr = formatDate(date);
-      const isDisabledByPackage = packageExpiryDateStr ? dateStr > packageExpiryDateStr : false;
+      // Only disable dates by package for logged in users
+      const isDisabledByPackage = user && packageExpiryDateStr ? dateStr > packageExpiryDateStr : false;
       const sessionsForDay = getSessionsForDate(dateStr);
 
       days.push({
@@ -390,7 +400,6 @@ export default function Calendar() {
         isDisabledByPackage,
       });
     }
-
     return days;
   };
 
@@ -591,7 +600,8 @@ export default function Calendar() {
                             </div>
                           </div>
 
-                          {isRegistered && (
+                          {/* Registration status for logged in users */}
+                          {user && isRegistered && (
                             <div className='mb-3 bg-green-50 border border-green-200 rounded-lg p-2'>
                               <p className='text-xs text-green-700 flex items-center'>
                                 <svg className='w-3 h-3 mr-1' fill='currentColor' viewBox='0 0 20 20'>
@@ -602,15 +612,33 @@ export default function Calendar() {
                             </div>
                           )}
 
+                          {/* Login prompt for guests */}
+                          {!user && (
+                            <div className='mb-3 bg-blue-50 border border-blue-200 rounded-lg p-3'>
+                              <p className='text-xs text-blue-700 flex items-center mb-2'>
+                                <svg className='w-4 h-4 mr-1' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+                                </svg>
+                                Đăng nhập để đăng ký lớp học
+                              </p>
+                              <a href='/login' className='inline-flex items-center text-xs font-medium text-blue-800 hover:text-blue-900 underline'>
+                                Đăng nhập ngay
+                                <svg className='w-3 h-3 ml-1' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M9 5l7 7-7 7' />
+                                </svg>
+                              </a>
+                            </div>
+                          )}
+
                           <button
                             onClick={() => handleRegisterClick(session)}
                             disabled={!canRegister || actionLoading || (isRegistered && !canCancel)}
                             className={`w-full py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-200 ${
-                              !user ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : isRegistered ? (canCancel ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed') : isFull ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-primary-500 hover:bg-primary-600 text-white hover:scale-105'
+                              !user ? 'bg-blue-500 hover:bg-blue-600 text-white hover:scale-105' : isRegistered ? (canCancel ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed') : isFull ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-primary-500 hover:bg-primary-600 text-white hover:scale-105'
                             }`}
-                            title={!user ? '' : isRegistered && !canCancel ? `Chỉ được hủy trước 1 tiếng. ${timeInfo.timeUntilSessionText}` : canRegisterOnDate === false ? 'Gói tập không còn hiệu lực vào ngày này' : ''}
+                            title={!user ? 'Nhấn để đăng nhập' : isRegistered && !canCancel ? `Chỉ được hủy trước 1 tiếng. ${timeInfo.timeUntilSessionText}` : canRegisterOnDate === false ? 'Gói tập không còn hiệu lực vào ngày này' : ''}
                           >
-                            {!user ? 'Cần đăng nhập' : isRegistered ? (canCancel ? 'Hủy đăng ký' : 'Không thể hủy') : isFull ? 'Đã đầy' : canRegisterOnDate === false ? 'Gói hết hạn' : 'Đăng ký'}
+                            {!user ? '🔐 Đăng nhập để đăng ký' : isRegistered ? (canCancel ? 'Hủy đăng ký' : 'Không thể hủy') : isFull ? 'Đã đầy' : canRegisterOnDate === false ? 'Gói hết hạn' : 'Đăng ký'}
                           </button>
                         </div>
                       );
