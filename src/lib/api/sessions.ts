@@ -1,34 +1,21 @@
-import { WhereFilterOp } from "firebase/firestore";
-import { BaseApiService } from "./base";
-import {
-  Session,
-  SessionRegistration,
-  SessionCreateRequest,
-  SessionUpdateRequest,
-  SessionRegistrationRequest,
-  SessionFilters,
-  ApiResponse,
-  PaginatedResponse,
-  Member,
-  Package,
-} from "./types";
+import { WhereFilterOp } from 'firebase/firestore';
+import { BaseApiService } from './base';
+import { Session, SessionRegistration, SessionCreateRequest, SessionUpdateRequest, SessionRegistrationRequest, SessionFilters, ApiResponse, PaginatedResponse, Member, Package } from './types';
 
 class SessionsApiService extends BaseApiService {
   constructor() {
-    super("sessions");
+    super('sessions');
   }
 
-  async createSession(
-    sessionData: SessionCreateRequest
-  ): Promise<ApiResponse<Session>> {
+  async createSession(sessionData: SessionCreateRequest): Promise<ApiResponse<Session>> {
     // Get class information to populate session details
-    const { classesApi } = await import("./classes");
+    const { classesApi } = await import('./classes');
     const classResult = await classesApi.getById(sessionData.classId);
 
-    let className = "Unknown Class";
-    let instructor = "Unknown Instructor";
+    let className = 'Unknown Class';
+    let instructor = 'Unknown Instructor';
     let defaultCapacity = 10;
-    let difficulty: "beginner" | "intermediate" | "advanced" = "beginner";
+    let difficulty: 'beginner' | 'intermediate' | 'advanced' = 'beginner';
 
     if (classResult.success && classResult.data) {
       className = classResult.data.name;
@@ -44,7 +31,7 @@ class SessionsApiService extends BaseApiService {
       difficulty,
       capacity: sessionData.capacity || defaultCapacity,
       registeredCount: 0,
-      status: "scheduled" as const,
+      status: 'scheduled' as const,
       registrations: [],
     };
 
@@ -52,11 +39,7 @@ class SessionsApiService extends BaseApiService {
   }
 
   // Create multiple sessions at once from arrays of dates and time ranges
-  async createSessionsBulk(
-    base: Omit<SessionCreateRequest, "date" | "startTime" | "endTime">,
-    dates: string[],
-    timeRanges: Array<{ startTime: string; endTime: string }>
-  ): Promise<ApiResponse<Session[]>> {
+  async createSessionsBulk(base: Omit<SessionCreateRequest, 'date' | 'startTime' | 'endTime'>, dates: string[], timeRanges: Array<{ startTime: string; endTime: string }>): Promise<ApiResponse<Session[]>> {
     try {
       const created: Session[] = [];
       for (const date of dates) {
@@ -72,7 +55,7 @@ class SessionsApiService extends BaseApiService {
           } else {
             return {
               data: null,
-              error: res.error || "Tạo ca tập thất bại",
+              error: res.error || 'Tạo ca tập thất bại',
               success: false,
             };
           }
@@ -84,11 +67,7 @@ class SessionsApiService extends BaseApiService {
     }
   }
 
-  async getSessionsPaginated(
-    _page: number = 1,
-    limit: number = 10,
-    filters?: { status?: Session["status"]; date?: string }
-  ): Promise<PaginatedResponse<Session>> {
+  async getSessionsPaginated(_page: number = 1, limit: number = 10, filters?: { status?: Session['status']; date?: string }): Promise<PaginatedResponse<Session>> {
     const queryFilters: Array<{
       field: string;
       operator: WhereFilterOp;
@@ -96,27 +75,24 @@ class SessionsApiService extends BaseApiService {
     }> = [];
     if (filters?.status) {
       queryFilters.push({
-        field: "status",
-        operator: "==",
+        field: 'status',
+        operator: '==',
         value: filters.status,
       });
     }
     if (filters?.date) {
-      queryFilters.push({ field: "date", operator: "==", value: filters.date });
+      queryFilters.push({ field: 'date', operator: '==', value: filters.date });
     }
 
     // Use BaseApiService pagination helper
     return this.getPaginated<Session>(limit, undefined, {
-      orderByField: "date",
-      orderDirection: "desc",
+      orderByField: 'date',
+      orderDirection: 'desc',
       filters: queryFilters,
     });
   }
 
-  async updateSession(
-    id: string,
-    sessionData: SessionUpdateRequest
-  ): Promise<ApiResponse<Session>> {
+  async updateSession(id: string, sessionData: SessionUpdateRequest): Promise<ApiResponse<Session>> {
     return this.update<Session>(id, sessionData);
   }
 
@@ -128,9 +104,7 @@ class SessionsApiService extends BaseApiService {
     return this.delete(id);
   }
 
-  async getAllSessions(
-    filters?: SessionFilters
-  ): Promise<ApiResponse<Session[]>> {
+  async getAllSessions(filters?: SessionFilters): Promise<ApiResponse<Session[]>> {
     const queryFilters: Array<{
       field: string;
       operator: WhereFilterOp;
@@ -139,79 +113,75 @@ class SessionsApiService extends BaseApiService {
 
     if (filters?.classId) {
       queryFilters.push({
-        field: "classId",
-        operator: "==",
+        field: 'classId',
+        operator: '==',
         value: filters.classId,
       });
     }
 
     if (filters?.instructor) {
       queryFilters.push({
-        field: "instructor",
-        operator: "==",
+        field: 'instructor',
+        operator: '==',
         value: filters.instructor,
       });
     }
 
     if (filters?.status) {
       queryFilters.push({
-        field: "status",
-        operator: "==",
+        field: 'status',
+        operator: '==',
         value: filters.status,
       });
     }
 
     if (filters?.dateFrom) {
       queryFilters.push({
-        field: "date",
-        operator: ">=",
+        field: 'date',
+        operator: '>=',
         value: filters.dateFrom,
       });
     }
 
     if (filters?.dateTo) {
       queryFilters.push({
-        field: "date",
-        operator: "<=",
+        field: 'date',
+        operator: '<=',
         value: filters.dateTo,
       });
     }
 
     const result = await this.getAll<Session>({
-      orderByField: "date",
-      orderDirection: "desc",
+      orderByField: 'date',
+      orderDirection: 'desc',
       filters: queryFilters,
     });
 
     // Apply search filter (client-side)
     if (result.success && result.data && filters?.search) {
       const searchTerm = filters.search.toLowerCase();
-      result.data = result.data.filter(
-        (session) =>
-          session.className.toLowerCase().includes(searchTerm) ||
-          session.instructor.toLowerCase().includes(searchTerm)
-      );
+      result.data = result.data.filter((session) => session.className.toLowerCase().includes(searchTerm) || session.instructor.toLowerCase().includes(searchTerm));
     }
 
     return result;
   }
 
   async getUpcomingSessions(limit?: number): Promise<ApiResponse<Session[]>> {
-    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
 
     return this.getAll<Session>({
-      orderByField: "date",
-      orderDirection: "asc",
+      orderByField: 'date',
+      orderDirection: 'asc',
       filters: [
         {
-          field: "date",
-          operator: ">=",
+          field: 'date',
+          operator: '>=',
           value: today,
         },
         {
-          field: "status",
-          operator: "==",
-          value: "scheduled",
+          field: 'status',
+          operator: '==',
+          value: 'scheduled',
         },
       ],
       limitCount: limit,
@@ -219,37 +189,34 @@ class SessionsApiService extends BaseApiService {
   }
 
   async getTodaySessions(): Promise<ApiResponse<Session[]>> {
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toISOString().split('T')[0];
 
     return this.getAll<Session>({
-      orderByField: "startTime",
-      orderDirection: "asc",
+      orderByField: 'startTime',
+      orderDirection: 'asc',
       filters: [
         {
-          field: "date",
-          operator: "==",
+          field: 'date',
+          operator: '==',
           value: today,
         },
       ],
     });
   }
 
-  async getSessionsByDateRange(
-    startDate: string,
-    endDate: string
-  ): Promise<ApiResponse<Session[]>> {
+  async getSessionsByDateRange(startDate: string, endDate: string): Promise<ApiResponse<Session[]>> {
     return this.getAll<Session>({
-      orderByField: "date",
-      orderDirection: "asc",
+      orderByField: 'date',
+      orderDirection: 'asc',
       filters: [
         {
-          field: "date",
-          operator: ">=",
+          field: 'date',
+          operator: '>=',
           value: startDate,
         },
         {
-          field: "date",
-          operator: "<=",
+          field: 'date',
+          operator: '<=',
           value: endDate,
         },
       ],
@@ -258,46 +225,40 @@ class SessionsApiService extends BaseApiService {
 
   async getSessionsByClass(classId: string): Promise<ApiResponse<Session[]>> {
     return this.getAll<Session>({
-      orderByField: "date",
-      orderDirection: "desc",
+      orderByField: 'date',
+      orderDirection: 'desc',
       filters: [
         {
-          field: "classId",
-          operator: "==",
+          field: 'classId',
+          operator: '==',
           value: classId,
         },
       ],
     });
   }
 
-  async getSessionsByInstructor(
-    instructor: string
-  ): Promise<ApiResponse<Session[]>> {
+  async getSessionsByInstructor(instructor: string): Promise<ApiResponse<Session[]>> {
     return this.getAll<Session>({
-      orderByField: "date",
-      orderDirection: "desc",
+      orderByField: 'date',
+      orderDirection: 'desc',
       filters: [
         {
-          field: "instructor",
-          operator: "==",
+          field: 'instructor',
+          operator: '==',
           value: instructor,
         },
       ],
     });
   }
 
-  async registerMemberForSession(
-    registrationData: SessionRegistrationRequest
-  ): Promise<ApiResponse<Session>> {
+  async registerMemberForSession(registrationData: SessionRegistrationRequest): Promise<ApiResponse<Session>> {
     try {
-      const sessionResult = await this.getById<Session>(
-        registrationData.sessionId
-      );
+      const sessionResult = await this.getById<Session>(registrationData.sessionId);
 
       if (!sessionResult.success || !sessionResult.data) {
         return {
           data: null,
-          error: sessionResult.error || "Không tìm thấy ca tập",
+          error: sessionResult.error || 'Không tìm thấy ca tập',
           success: false,
         };
       }
@@ -308,34 +269,30 @@ class SessionsApiService extends BaseApiService {
       if (session.registeredCount >= session.capacity) {
         return {
           data: null,
-          error: "Ca tập đã đầy",
+          error: 'Ca tập đã đầy',
           success: false,
         };
       }
 
       // Check if member is already registered
-      const existingRegistration = session.registrations.find(
-        (reg) =>
-          reg.memberId === registrationData.memberId &&
-          reg.status !== "cancelled"
-      );
+      const existingRegistration = session.registrations.find((reg) => reg.memberId === registrationData.memberId && reg.status !== 'cancelled');
 
       if (existingRegistration) {
         return {
           data: null,
-          error: "Thành viên đã đăng ký ca tập này",
+          error: 'Thành viên đã đăng ký ca tập này',
           success: false,
         };
       }
 
       // Get member information
-      const { membersApi } = await import("./members");
+      const { membersApi } = await import('./members');
       const memberResult = await membersApi.getById(registrationData.memberId);
 
       if (!memberResult.success || !memberResult.data) {
         return {
           data: null,
-          error: "Không tìm thấy thông tin thành viên",
+          error: 'Không tìm thấy thông tin thành viên',
           success: false,
         };
       }
@@ -346,24 +303,17 @@ class SessionsApiService extends BaseApiService {
 
       // Check package validity if member has a package
       if (member.currentPackage) {
-        const { packagesApi } = await import("./packages");
+        const { packagesApi } = await import('./packages');
         const packageResult = await packagesApi.getById(member.currentPackage);
 
         if (packageResult.success && packageResult.data) {
-          const { canMemberRegisterForClass } = await import(
-            "@/utils/packageUtils"
-          );
-          const registrationCheck = canMemberRegisterForClass(
-            member as Member,
-            packageResult.data as Package
-          );
+          const { canMemberRegisterForClass } = await import('@/utils/packageUtils');
+          const registrationCheck = canMemberRegisterForClass(member as Member, packageResult.data as Package);
 
           if (!registrationCheck.canRegister) {
             return {
               data: null,
-              error:
-                registrationCheck.reason ||
-                "Không thể đăng ký do gói tập không hợp lệ",
+              error: registrationCheck.reason || 'Không thể đăng ký do gói tập không hợp lệ',
               success: false,
             };
           }
@@ -371,7 +321,7 @@ class SessionsApiService extends BaseApiService {
       } else {
         return {
           data: null,
-          error: "Thành viên chưa có gói tập để đăng ký lớp học",
+          error: 'Thành viên chưa có gói tập để đăng ký lớp học',
           success: false,
         };
       }
@@ -379,23 +329,15 @@ class SessionsApiService extends BaseApiService {
       // Validate package validity against session date
       // session.date is assumed in YYYY-MM-DD format
       if (member.currentPackage) {
-        const { packagesApi } = await import("./packages");
+        const { packagesApi } = await import('./packages');
         const packageResult = await packagesApi.getById(member.currentPackage);
         if (packageResult.success && packageResult.data) {
-          const { checkPackageValidityOnDate } = await import(
-            "@/utils/packageUtils"
-          );
-          const packageValidity = checkPackageValidityOnDate(
-            member as Member,
-            packageResult.data as Package,
-            session.date
-          );
+          const { checkPackageValidityOnDate } = await import('@/utils/packageUtils');
+          const packageValidity = checkPackageValidityOnDate(member as Member, packageResult.data as Package, session.date);
           if (!packageValidity.isValid) {
             return {
               data: null,
-              error:
-                packageValidity.errorMessage ||
-                "Gói tập không còn hiệu lực vào ngày diễn ra lớp",
+              error: packageValidity.errorMessage || 'Gói tập không còn hiệu lực vào ngày diễn ra lớp',
               success: false,
             };
           }
@@ -404,14 +346,12 @@ class SessionsApiService extends BaseApiService {
 
       // Create registration
       const registration: SessionRegistration = {
-        id: `${registrationData.sessionId}_${
-          registrationData.memberId
-        }_${Date.now()}`,
+        id: `${registrationData.sessionId}_${registrationData.memberId}_${Date.now()}`,
         sessionId: registrationData.sessionId,
         memberId: registrationData.memberId,
         memberName,
         memberEmail,
-        status: "confirmed",
+        status: 'confirmed',
         registeredAt: new Date().toISOString(),
         notes: registrationData.notes,
       };
@@ -420,9 +360,13 @@ class SessionsApiService extends BaseApiService {
       const updatedRegistrations = [...session.registrations, registration];
       const updatedRegisteredCount = session.registeredCount + 1;
 
-      // Note: We don't update remaining classes on registration
-      // Remaining classes are only updated when member actually attends the class
-      // This is handled in the markAttendance method
+      // Update member's remaining classes
+      if (member.remainingClasses !== undefined && member.remainingClasses > 0) {
+        const newRemainingClasses = member.remainingClasses === -1 ? -1 : member.remainingClasses - 1;
+        await membersApi.updateMember(registrationData.memberId, {
+          remainingClasses: newRemainingClasses,
+        });
+      }
 
       return this.update<Session>(registrationData.sessionId, {
         registrations: updatedRegistrations,
@@ -437,17 +381,14 @@ class SessionsApiService extends BaseApiService {
     }
   }
 
-  async cancelRegistration(
-    sessionId: string,
-    memberId: string
-  ): Promise<ApiResponse<Session>> {
+  async cancelRegistration(sessionId: string, memberId: string): Promise<ApiResponse<Session>> {
     try {
       const sessionResult = await this.getById<Session>(sessionId);
 
       if (!sessionResult.success || !sessionResult.data) {
         return {
           data: null,
-          error: sessionResult.error || "Không tìm thấy ca tập",
+          error: sessionResult.error || 'Không tìm thấy ca tập',
           success: false,
         };
       }
@@ -456,20 +397,30 @@ class SessionsApiService extends BaseApiService {
 
       // Find and update registration status
       const updatedRegistrations = session.registrations.map((reg) => {
-        if (reg.memberId === memberId && reg.status === "confirmed") {
-          return { ...reg, status: "cancelled" as const };
+        if (reg.memberId === memberId && reg.status === 'confirmed') {
+          return { ...reg, status: 'cancelled' as const };
         }
         return reg;
       });
 
       // Count active registrations
-      const activeRegistrations = updatedRegistrations.filter(
-        (reg) => reg.status === "confirmed"
-      );
+      const activeRegistrations = updatedRegistrations.filter((reg) => reg.status === 'confirmed');
 
-      // Note: We don't restore remaining classes on cancellation
-      // Remaining classes are only consumed when member actually attends the class
-      // Cancelling registration before attendance doesn't affect remaining classes
+      // Get member information to update remaining classes
+      const { membersApi } = await import('./members');
+      const memberResult = await membersApi.getById(memberId);
+
+      if (memberResult.success && memberResult.data) {
+        const member = memberResult.data;
+
+        // Restore member's remaining classes if they had a package
+        if (member.remainingClasses !== undefined && member.remainingClasses !== -1) {
+          const newRemainingClasses = member.remainingClasses + 1;
+          await membersApi.updateMember(memberId, {
+            remainingClasses: newRemainingClasses,
+          });
+        }
+      }
 
       return this.update<Session>(sessionId, {
         registrations: updatedRegistrations,
@@ -484,18 +435,14 @@ class SessionsApiService extends BaseApiService {
     }
   }
 
-  async markAttendance(
-    sessionId: string,
-    memberId: string,
-    attended: boolean
-  ): Promise<ApiResponse<Session>> {
+  async markAttendance(sessionId: string, memberId: string, attended: boolean): Promise<ApiResponse<Session>> {
     try {
       const sessionResult = await this.getById<Session>(sessionId);
 
       if (!sessionResult.success || !sessionResult.data) {
         return {
           data: null,
-          error: sessionResult.error || "Không tìm thấy ca tập",
+          error: sessionResult.error || 'Không tìm thấy ca tập',
           success: false,
         };
       }
@@ -507,7 +454,7 @@ class SessionsApiService extends BaseApiService {
         if (reg.memberId === memberId) {
           return {
             ...reg,
-            status: attended ? ("attended" as const) : ("no-show" as const),
+            status: attended ? ('attended' as const) : ('no-show' as const),
             attendedAt: attended ? new Date().toISOString() : undefined,
           };
         }
@@ -532,16 +479,13 @@ class SessionsApiService extends BaseApiService {
 
   async completeSession(sessionId: string): Promise<ApiResponse<Session>> {
     return this.update<Session>(sessionId, {
-      status: "completed",
+      status: 'completed',
     });
   }
 
-  async cancelSession(
-    sessionId: string,
-    reason?: string
-  ): Promise<ApiResponse<Session>> {
+  async cancelSession(sessionId: string, reason?: string): Promise<ApiResponse<Session>> {
     return this.update<Session>(sessionId, {
-      status: "cancelled",
+      status: 'cancelled',
       notes: reason,
     });
   }
@@ -559,28 +503,21 @@ class SessionsApiService extends BaseApiService {
     }>
   > {
     try {
-      const today = new Date().toISOString().split("T")[0];
+      const today = new Date().toISOString().split('T')[0];
 
-      const [
-        totalResult,
-        scheduledResult,
-        completedResult,
-        cancelledResult,
-        todayResult,
-        allSessionsResult,
-      ] = await Promise.all([
+      const [totalResult, scheduledResult, completedResult, cancelledResult, todayResult, allSessionsResult] = await Promise.all([
         this.count(),
-        this.count([{ field: "status", operator: "==", value: "scheduled" }]),
-        this.count([{ field: "status", operator: "==", value: "completed" }]),
-        this.count([{ field: "status", operator: "==", value: "cancelled" }]),
-        this.count([{ field: "date", operator: "==", value: today }]),
+        this.count([{ field: 'status', operator: '==', value: 'scheduled' }]),
+        this.count([{ field: 'status', operator: '==', value: 'completed' }]),
+        this.count([{ field: 'status', operator: '==', value: 'cancelled' }]),
+        this.count([{ field: 'date', operator: '==', value: today }]),
         this.getAll<Session>(),
       ]);
 
       if (!totalResult.success || !allSessionsResult.success) {
         return {
           data: null,
-          error: "Không thể lấy thống kê ca tập",
+          error: 'Không thể lấy thống kê ca tập',
           success: false,
         };
       }
@@ -595,19 +532,14 @@ class SessionsApiService extends BaseApiService {
 
       sessions.forEach((session) => {
         totalRegistrations += session.registeredCount;
-        if (session.status === "completed") {
+        if (session.status === 'completed') {
           totalCapacity += session.capacity;
-          const attendedCount = session.registrations.filter(
-            (reg) => reg.status === "attended"
-          ).length;
+          const attendedCount = session.registrations.filter((reg) => reg.status === 'attended').length;
           totalAttended += attendedCount;
         }
       });
 
-      const avgAttendance =
-        totalCapacity > 0
-          ? Math.round((totalAttended / totalCapacity) * 100)
-          : 0;
+      const avgAttendance = totalCapacity > 0 ? Math.round((totalAttended / totalCapacity) * 100) : 0;
 
       return {
         data: {
@@ -616,8 +548,7 @@ class SessionsApiService extends BaseApiService {
           completed: completedResult.data || 0,
           cancelled: cancelledResult.data || 0,
           todayTotal: todayResult.data || 0,
-          todayCompleted: todaySessions.filter((s) => s.status === "completed")
-            .length,
+          todayCompleted: todaySessions.filter((s) => s.status === 'completed').length,
           avgAttendance,
           totalRegistrations,
         },
@@ -633,31 +564,20 @@ class SessionsApiService extends BaseApiService {
     }
   }
 
-  async duplicateSession(
-    sessionId: string,
-    newDate: string,
-    newStartTime?: string
-  ): Promise<ApiResponse<Session>> {
+  async duplicateSession(sessionId: string, newDate: string, newStartTime?: string): Promise<ApiResponse<Session>> {
     try {
       const originalResult = await this.getById<Session>(sessionId);
 
       if (!originalResult.success || !originalResult.data) {
         return {
           data: null,
-          error: originalResult.error || "Không tìm thấy ca tập để sao chép",
+          error: originalResult.error || 'Không tìm thấy ca tập để sao chép',
           success: false,
         };
       }
 
       const original = originalResult.data;
-      const {
-        id: _originalId,
-        createdAt: _createdAt,
-        updatedAt: _updatedAt,
-        registrations: _registrations,
-        registeredCount: _registeredCount,
-        ...sessionData
-      } = original;
+      const { id: _originalId, createdAt: _createdAt, updatedAt: _updatedAt, registrations: _registrations, registeredCount: _registeredCount, ...sessionData } = original;
 
       const duplicatedSession = {
         ...sessionData,
@@ -665,7 +585,7 @@ class SessionsApiService extends BaseApiService {
         startTime: newStartTime || original.startTime,
         registrations: [],
         registeredCount: 0,
-        status: "scheduled" as const,
+        status: 'scheduled' as const,
       };
 
       return this.create<Session>(duplicatedSession);
@@ -685,7 +605,7 @@ class SessionsApiService extends BaseApiService {
       if (!sessionResult.success || !sessionResult.data) {
         return {
           data: 0,
-          error: sessionResult.error || "Không tìm thấy ca tập",
+          error: sessionResult.error || 'Không tìm thấy ca tập',
           success: false,
         };
       }

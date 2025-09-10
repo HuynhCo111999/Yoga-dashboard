@@ -1,6 +1,6 @@
 // Firebase API Types for Yoga Dashboard
 
-export type UserRole = "admin" | "member";
+export type UserRole = 'admin' | 'member';
 
 export interface Member {
   id: string;
@@ -11,11 +11,11 @@ export interface Member {
   emergencyContact?: string;
   healthNotes?: string;
   joinDate: string;
-  membershipStatus: "active" | "inactive" | "suspended";
+  membershipStatus: 'active' | 'inactive' | 'suspended' | 'expired';
   currentPackage?: string;
   packageStartDate?: string; // When the current package was activated
   remainingClasses?: number;
-  role: "member";
+  role: 'member';
   createdAt: string;
   updatedAt: string;
   avatar?: string;
@@ -41,7 +41,7 @@ export interface YogaClass {
   instructor: string;
   instructorId?: string;
   duration: number; // minutes
-  difficulty: "beginner" | "intermediate" | "advanced";
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
   maxCapacity: number;
   price?: number; // if drop-in class
   isActive: boolean;
@@ -63,9 +63,9 @@ export interface Session {
   endTime: string; // HH:MM
   capacity: number;
   registeredCount: number;
-  status: "scheduled" | "completed" | "cancelled";
+  status: 'scheduled' | 'completed' | 'cancelled';
   registrations: SessionRegistration[];
-  difficulty: "beginner" | "intermediate" | "advanced";
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -77,7 +77,7 @@ export interface SessionRegistration {
   memberId: string;
   memberName: string;
   memberEmail: string;
-  status: "confirmed" | "cancelled" | "attended" | "no-show";
+  status: 'confirmed' | 'cancelled' | 'attended' | 'no-show';
   registeredAt: string;
   attendedAt?: string;
   cancelledAt?: string;
@@ -98,12 +98,7 @@ export interface DashboardStats {
 
 export interface RecentActivity {
   id: string;
-  type:
-    | "registration"
-    | "cancellation"
-    | "attendance"
-    | "package_purchase"
-    | "member_join";
+  type: 'registration' | 'cancellation' | 'attendance' | 'package_purchase' | 'member_join';
   userId: string;
   userName: string;
   action: string;
@@ -147,7 +142,7 @@ export interface MemberUpdateRequest {
   address?: string;
   emergencyContact?: string;
   healthNotes?: string;
-  membershipStatus?: "active" | "inactive" | "suspended";
+  membershipStatus?: 'active' | 'inactive' | 'suspended' | 'expired';
   currentPackage?: string;
   remainingClasses?: number;
 }
@@ -177,7 +172,7 @@ export interface ClassCreateRequest {
   instructor: string;
   instructorId?: string;
   duration: number;
-  difficulty: "beginner" | "intermediate" | "advanced";
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
   maxCapacity: number;
   price?: number;
   category?: string;
@@ -191,7 +186,7 @@ export interface ClassUpdateRequest {
   instructor?: string;
   instructorId?: string;
   duration?: number;
-  difficulty?: "beginner" | "intermediate" | "advanced";
+  difficulty?: 'beginner' | 'intermediate' | 'advanced';
   maxCapacity?: number;
   price?: number;
   isActive?: boolean;
@@ -214,7 +209,7 @@ export interface SessionUpdateRequest {
   startTime?: string;
   endTime?: string;
   capacity?: number;
-  status?: "scheduled" | "completed" | "cancelled";
+  status?: 'scheduled' | 'completed' | 'cancelled';
   notes?: string;
 }
 
@@ -227,7 +222,7 @@ export interface SessionRegistrationRequest {
 // Query filters
 export interface MemberFilters {
   search?: string;
-  status?: "active" | "inactive" | "suspended";
+  status?: 'active' | 'inactive' | 'suspended';
   package?: string;
   joinDateFrom?: string;
   joinDateTo?: string;
@@ -243,7 +238,7 @@ export interface PackageFilters {
 export interface ClassFilters {
   search?: string;
   instructor?: string;
-  difficulty?: "beginner" | "intermediate" | "advanced";
+  difficulty?: 'beginner' | 'intermediate' | 'advanced';
   active?: boolean;
   category?: string;
 }
@@ -254,7 +249,7 @@ export interface SessionFilters {
   instructor?: string;
   dateFrom?: string;
   dateTo?: string;
-  status?: "scheduled" | "completed" | "cancelled";
+  status?: 'scheduled' | 'completed' | 'cancelled';
 }
 
 // User interfaces
