@@ -11,8 +11,6 @@ const statusColors = {
   suspended: 'bg-red-100 text-red-800 border border-red-200',
 };
 
-
-
 export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [packages, setPackages] = useState<Package[]>([]);
@@ -24,6 +22,9 @@ export default function MembersPage() {
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [memberRemainingClasses, setMemberRemainingClasses] = useState<Record<string, number>>({});
+  const [showSetupLink, setShowSetupLink] = useState(false);
+  const [setupLinkInfo, setSetupLinkInfo] = useState<{ email: string; link: string } | null>(null);
+  const [showCopyToast, setShowCopyToast] = useState(false);
 
   // Form data
   const [formData, setFormData] = useState({
@@ -45,19 +46,16 @@ export default function MembersPage() {
       setLoading(true);
       setError(null);
 
-      const [membersResult, packagesResult] = await Promise.all([
-        membersApi.getAllMembers(),
-        packagesApi.getActivePackages()
-      ]);
+      const [membersResult, packagesResult] = await Promise.all([membersApi.getAllMembers(), packagesApi.getActivePackages()]);
 
       if (membersResult.success && membersResult.data) {
         setMembers(membersResult.data);
-        
+
         // Calculate remaining classes for each member
         const remainingClassesMap: Record<string, number> = {};
         for (const member of membersResult.data) {
           if (member.currentPackage) {
-            const pkg = packagesResult.data?.find(p => p.id === member.currentPackage);
+            const pkg = packagesResult.data?.find((p) => p.id === member.currentPackage);
             if (pkg) {
               try {
                 // Get member stats to calculate remaining classes
@@ -86,7 +84,6 @@ export default function MembersPage() {
       } else {
         console.error('Error loading packages:', packagesResult.error);
       }
-
     } catch (err) {
       console.error('Error loading data:', err);
       setError('Có lỗi xảy ra khi tải dữ liệu');
@@ -95,16 +92,13 @@ export default function MembersPage() {
     }
   };
 
-  const filteredMembers = members.filter(member => {
-    const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (member.phone && member.phone.includes(searchTerm));
-    
+  const filteredMembers = members.filter((member) => {
+    const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) || member.email.toLowerCase().includes(searchTerm.toLowerCase()) || (member.phone && member.phone.includes(searchTerm));
+
     const matchesStatus = statusFilter === 'all' || member.membershipStatus === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   });
-  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,9 +120,9 @@ export default function MembersPage() {
         };
 
         const result = await membersApi.updateMember(editingMember.id, updateData);
-        
+
         if (result.success && result.data) {
-          setMembers(prev => prev.map(m => m.id === editingMember.id ? result.data! : m));
+          setMembers((prev) => prev.map((m) => (m.id === editingMember.id ? result.data! : m)));
           setEditingMember(null);
           setShowAddForm(false);
           resetForm();
@@ -147,13 +141,21 @@ export default function MembersPage() {
           healthNotes: formData.healthNotes,
           ...(formData.packageId && { packageId: formData.packageId }),
         };
-        
+
         const result = await membersApi.createMember(memberCreateData);
 
         if (result.success && result.data) {
-          setMembers(prev => [result.data!, ...prev]);
+          setMembers((prev) => [result.data!, ...prev]);
           setShowAddForm(false);
           resetForm();
+
+          // Show setup link for new member
+          const setupLink = `${window.location.origin}/setup-auth?email=${encodeURIComponent(formData.email)}`;
+          setSetupLinkInfo({
+            email: formData.email,
+            link: setupLink,
+          });
+          setShowSetupLink(true);
         } else {
           console.error('Member creation failed:', result.error);
           setError(result.error || 'Có lỗi xảy ra khi tạo thành viên');
@@ -184,9 +186,9 @@ export default function MembersPage() {
   const handleStatusChange = async (memberId: string, newStatus: 'active' | 'inactive' | 'suspended') => {
     try {
       const result = await membersApi.updateMember(memberId, { membershipStatus: newStatus });
-      
+
       if (result.success && result.data) {
-        setMembers(prev => prev.map(m => m.id === memberId ? result.data! : m));
+        setMembers((prev) => prev.map((m) => (m.id === memberId ? result.data! : m)));
       } else {
         setError(result.error || 'Có lỗi xảy ra khi cập nhật trạng thái');
       }
@@ -208,28 +210,47 @@ export default function MembersPage() {
     });
   };
 
+  const handleCopyLink = async (link: string) => {
+    try {
+      await navigator.clipboard.writeText(link);
+      setShowCopyToast(true);
+      setTimeout(() => setShowCopyToast(false), 3000);
+    } catch (err) {
+      console.error('Failed to copy link:', err);
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = link;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setShowCopyToast(true);
+      setTimeout(() => setShowCopyToast(false), 3000);
+    }
+  };
+
   const getPackageInfo = (member: Member) => {
     if (!member.currentPackage) {
       return {
         name: 'Chưa có gói',
         remaining: 'Chưa có thông tin',
-        total: 'N/A'
+        total: 'N/A',
       };
     }
 
-    const pkg = packages.find(p => p.id === member.currentPackage);
+    const pkg = packages.find((p) => p.id === member.currentPackage);
     if (!pkg) {
       return {
         name: 'Không xác định',
         remaining: 'Chưa có thông tin',
-        total: 'N/A'
+        total: 'N/A',
       };
     }
 
     // Use calculated remaining classes from memberRemainingClasses state
     const remainingClasses = memberRemainingClasses[member.id];
     let remainingText = '';
-    
+
     if (remainingClasses === -1) {
       remainingText = 'Không giới hạn';
     } else if (remainingClasses !== undefined) {
@@ -242,18 +263,18 @@ export default function MembersPage() {
     return {
       name: pkg.name,
       remaining: remainingText,
-      total: pkg.classLimit === -1 ? 'Không giới hạn' : `${pkg.classLimit} buổi`
+      total: pkg.classLimit === -1 ? 'Không giới hạn' : `${pkg.classLimit} buổi`,
     };
   };
 
   if (loading) {
     return (
       <AdminLayout>
-        <div className="space-y-6">
-          <div className="flex items-center justify-center h-64">
-            <div className="flex items-center space-x-2">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-              <span className="text-gray-600">Đang tải danh sách thành viên...</span>
+        <div className='space-y-6'>
+          <div className='flex items-center justify-center h-64'>
+            <div className='flex items-center space-x-2'>
+              <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600'></div>
+              <span className='text-gray-600'>Đang tải danh sách thành viên...</span>
             </div>
           </div>
         </div>
@@ -263,49 +284,32 @@ export default function MembersPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        
+      <div className='space-y-6'>
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Quản lý Thành viên</h1>
-          <p className="mt-3 text-lg text-gray-600">
-            Danh sách và thông tin chi tiết của các thành viên
-          </p>
-          <div className="mt-4 h-1 w-24 bg-gradient-to-r from-primary-400 to-primary-600 rounded-full mx-auto"></div>
+        <div className='text-center mb-8'>
+          <h1 className='text-3xl font-bold text-gray-900'>Quản lý Thành viên</h1>
+          <p className='mt-3 text-lg text-gray-600'>Danh sách và thông tin chi tiết của các thành viên</p>
+          <div className='mt-4 h-1 w-24 bg-gradient-to-r from-primary-400 to-primary-600 rounded-full mx-auto'></div>
         </div>
 
         {/* Error Display */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            {error}
-          </div>
-        )}
+        {error && <div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg'>{error}</div>}
 
         {/* Controls */}
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="flex items-center space-x-4 w-full sm:w-auto">
-            <div className="relative flex-grow sm:w-80">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+        <div className='flex flex-col sm:flex-row gap-4 items-center justify-between'>
+          <div className='flex items-center space-x-4 w-full sm:w-auto'>
+            <div className='relative flex-grow sm:w-80'>
+              <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                <MagnifyingGlassIcon className='h-5 w-5 text-gray-400' />
               </div>
-              <input
-                type="text"
-                placeholder="Tìm kiếm thành viên..."
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+              <input type='text' placeholder='Tìm kiếm thành viên...' className='block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500' value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
-            
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive' | 'suspended')}
-              className="block w-full sm:w-auto px-4 py-3 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="active">Hoạt động</option>
-              <option value="inactive">Không hoạt động</option>
-              <option value="suspended">Bị đình chỉ</option>
+
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive' | 'suspended')} className='block w-full sm:w-auto px-4 py-3 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500'>
+              <option value='all'>Tất cả trạng thái</option>
+              <option value='active'>Hoạt động</option>
+              <option value='inactive'>Không hoạt động</option>
+              <option value='suspended'>Bị đình chỉ</option>
             </select>
           </div>
 
@@ -315,106 +319,57 @@ export default function MembersPage() {
               setEditingMember(null);
               resetForm();
             }}
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200"
+            className='inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200'
           >
-            <PlusIcon className="h-5 w-5 mr-2" />
+            <PlusIcon className='h-5 w-5 mr-2' />
             Thêm thành viên
           </button>
-
-          
         </div>
 
         {/* Add/Edit Form */}
         {showAddForm && (
-          <div className="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-primary-100 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {editingMember ? 'Chỉnh sửa thành viên' : 'Thêm thành viên mới'}
-            </h3>
-            
+          <div className='bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-primary-100 p-6'>
+            <h3 className='text-lg font-semibold text-gray-900 mb-4'>{editingMember ? 'Chỉnh sửa thành viên' : 'Thêm thành viên mới'}</h3>
+
             {!editingMember && (
-              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-700">
-                  <strong>Lưu ý:</strong> Thành viên sẽ được tạo mà chưa có tài khoản đăng nhập. 
-                  Thành viên có thể liên hệ admin để được hỗ trợ thiết lập tài khoản sau.
+              <div className='mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg'>
+                <p className='text-sm text-blue-700'>
+                  <strong>Lưu ý:</strong> Thành viên sẽ được tạo mà chưa có tài khoản đăng nhập. Thành viên có thể liên hệ admin để được hỗ trợ thiết lập tài khoản sau.
                 </p>
               </div>
             )}
-            
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <form onSubmit={handleSubmit} className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Họ và tên *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                />
+                <label className='block text-sm font-medium text-gray-700 mb-1'>Họ và tên *</label>
+                <input type='text' required value={formData.name} onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))} className='block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500' />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  required
-                  disabled={!!editingMember}
-                  value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-100"
-                />
+                <label className='block text-sm font-medium text-gray-700 mb-1'>Email *</label>
+                <input type='email' required disabled={!!editingMember} value={formData.email} onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))} className='block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-100' />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Số điện thoại
-                </label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                />
+                <label className='block text-sm font-medium text-gray-700 mb-1'>Số điện thoại</label>
+                <input type='tel' value={formData.phone} onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))} className='block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500' />
               </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Địa chỉ
-                </label>
-                <input
-                  type="text"
-                  value={formData.address}
-                  onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                />
+              <div className='md:col-span-2'>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>Địa chỉ</label>
+                <input type='text' value={formData.address} onChange={(e) => setFormData((prev) => ({ ...prev, address: e.target.value }))} className='block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500' />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Liên hệ khẩn cấp
-                </label>
-                <input
-                  type="text"
-                  value={formData.emergencyContact}
-                  onChange={(e) => setFormData(prev => ({ ...prev, emergencyContact: e.target.value }))}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                />
+                <label className='block text-sm font-medium text-gray-700 mb-1'>Liên hệ khẩn cấp</label>
+                <input type='text' value={formData.emergencyContact} onChange={(e) => setFormData((prev) => ({ ...prev, emergencyContact: e.target.value }))} className='block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500' />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Gói tập
-                </label>
-                <select
-                  value={formData.packageId}
-                  onChange={(e) => setFormData(prev => ({ ...prev, packageId: e.target.value }))}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                >
-                  <option value="">Chọn gói tập</option>
-                  {packages.map(pkg => (
+                <label className='block text-sm font-medium text-gray-700 mb-1'>Gói tập</label>
+                <select value={formData.packageId} onChange={(e) => setFormData((prev) => ({ ...prev, packageId: e.target.value }))} className='block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500'>
+                  <option value=''>Chọn gói tập</option>
+                  {packages.map((pkg) => (
                     <option key={pkg.id} value={pkg.id}>
                       {pkg.name} - {pkg.price.toLocaleString()}đ
                     </option>
@@ -422,144 +377,174 @@ export default function MembersPage() {
                 </select>
               </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Ghi chú sức khỏe
-                </label>
-                <textarea
-                  rows={3}
-                  value={formData.healthNotes}
-                  onChange={(e) => setFormData(prev => ({ ...prev, healthNotes: e.target.value }))}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                />
+              <div className='md:col-span-2'>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>Ghi chú sức khỏe</label>
+                <textarea rows={3} value={formData.healthNotes} onChange={(e) => setFormData((prev) => ({ ...prev, healthNotes: e.target.value }))} className='block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500' />
               </div>
 
-              <div className="md:col-span-2 flex justify-end space-x-3">
+              <div className='md:col-span-2 flex justify-end space-x-3'>
                 <button
-                  type="button"
+                  type='button'
                   onClick={() => {
                     setShowAddForm(false);
                     setEditingMember(null);
                     resetForm();
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                  className='px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500'
                 >
                   Hủy
                 </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
-                >
-                  {submitting ? 'Đang xử lý...' : (editingMember ? 'Cập nhật' : 'Thêm mới')}
+                <button type='submit' disabled={submitting} className='px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50'>
+                  {submitting ? 'Đang xử lý...' : editingMember ? 'Cập nhật' : 'Thêm mới'}
                 </button>
               </div>
             </form>
           </div>
         )}
 
-        {/* Members Table */}
-        <div className="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-primary-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-primary-100">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Danh sách thành viên ({filteredMembers.length})
-            </h3>
+        {/* Setup Link Modal */}
+        {showSetupLink && setupLinkInfo && (
+          <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50'>
+            <div className='bg-white rounded-2xl shadow-xl max-w-md w-full p-6'>
+              <div className='text-center mb-4'>
+                <div className='mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4'>
+                  <svg className='h-6 w-6 text-green-600' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5 13l4 4L19 7' />
+                  </svg>
+                </div>
+                <h3 className='text-lg font-semibold text-gray-900 mb-2'>Thành viên đã được tạo thành công!</h3>
+                <p className='text-sm text-gray-600 mb-4'>Gửi đường link dưới đây cho thành viên để họ thiết lập tài khoản:</p>
+              </div>
+
+              <div className='mb-4'>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>Email thành viên:</label>
+                <div className='p-3 bg-gray-50 rounded-lg text-sm text-gray-900 font-mono'>{setupLinkInfo.email}</div>
+              </div>
+
+              <div className='mb-6'>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>Đường link thiết lập tài khoản:</label>
+                <div className='flex items-center space-x-2'>
+                  <div className='flex-1 p-3 bg-gray-50 rounded-lg text-sm text-gray-900 font-mono break-all'>{setupLinkInfo.link}</div>
+                  <button onClick={() => handleCopyLink(setupLinkInfo.link)} className='px-3 py-2 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors' title='Copy link'>
+                    <svg className='h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z' />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div className='bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4'>
+                <p className='text-sm text-blue-700'>
+                  <strong>Hướng dẫn:</strong> Gửi đường link này cho thành viên qua email hoặc tin nhắn. Thành viên sẽ sử dụng link để thiết lập mật khẩu và đăng nhập lần đầu.
+                </p>
+              </div>
+
+              <div className='flex justify-end space-x-3'>
+                <button
+                  onClick={() => {
+                    handleCopyLink(setupLinkInfo.link);
+                    setShowSetupLink(false);
+                    setSetupLinkInfo(null);
+                  }}
+                  className='px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500'
+                >
+                  Copy & Đóng
+                </button>
+                <button
+                  onClick={() => {
+                    setShowSetupLink(false);
+                    setSetupLinkInfo(null);
+                  }}
+                  className='px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500'
+                >
+                  Đóng
+                </button>
+              </div>
+            </div>
           </div>
-          
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-primary-100">
-              <thead className="bg-primary-50/50">
+        )}
+
+        {/* Copy Success Toast */}
+        {showCopyToast && (
+          <div className='fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2'>
+            <svg className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5 13l4 4L19 7' />
+            </svg>
+            <span>Đã copy link thành công!</span>
+          </div>
+        )}
+
+        {/* Members Table */}
+        <div className='bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-primary-100 overflow-hidden'>
+          <div className='px-6 py-4 border-b border-primary-100'>
+            <h3 className='text-lg font-semibold text-gray-900'>Danh sách thành viên ({filteredMembers.length})</h3>
+          </div>
+
+          <div className='overflow-x-auto'>
+            <table className='min-w-full divide-y divide-primary-100'>
+              <thead className='bg-primary-50/50'>
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Thành viên
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Liên hệ
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Gói tập
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Trạng thái
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ngày tham gia
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Thao tác
-                  </th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Thành viên</th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Liên hệ</th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Gói tập</th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Trạng thái</th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Ngày tham gia</th>
+                  <th className='px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider'>Thao tác</th>
                 </tr>
               </thead>
-              <tbody className="bg-white/50 divide-y divide-primary-100">
+              <tbody className='bg-white/50 divide-y divide-primary-100'>
                 {filteredMembers.map((member) => (
-                  <tr key={member.id} className="hover:bg-primary-50/30 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0">
-                          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
-                            <span className="text-primary-700 font-semibold text-sm">
-                              {member.name.charAt(0)}
-                            </span>
+                  <tr key={member.id} className='hover:bg-primary-50/30 transition-colors'>
+                    <td className='px-6 py-4 whitespace-nowrap'>
+                      <div className='flex items-center'>
+                        <div className='h-10 w-10 flex-shrink-0'>
+                          <div className='h-10 w-10 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center'>
+                            <span className='text-primary-700 font-semibold text-sm'>{member.name.charAt(0)}</span>
                           </div>
                         </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{member.name}</div>
-                          <div className="text-sm text-gray-500">{member.email}</div>
+                        <div className='ml-4'>
+                          <div className='text-sm font-medium text-gray-900'>{member.name}</div>
+                          <div className='text-sm text-gray-500'>{member.email}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{member.phone || 'Chưa có'}</div>
-                      <div className="text-sm text-gray-500">{member.address || 'Chưa có địa chỉ'}</div>
+                    <td className='px-6 py-4 whitespace-nowrap'>
+                      <div className='text-sm text-gray-900'>{member.phone || 'Chưa có'}</div>
+                      <div className='text-sm text-gray-500'>{member.address || 'Chưa có địa chỉ'}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className='px-6 py-4 whitespace-nowrap'>
                       {(() => {
                         const packageInfo = getPackageInfo(member);
                         return (
                           <>
-                            <div className="text-sm text-gray-900">{packageInfo.name}</div>
-                            <div className="text-sm text-gray-500">
-                              {packageInfo.remaining}
-                            </div>
-                            <div className="text-xs text-gray-400">
-                              Tổng: {packageInfo.total}
-                            </div>
+                            <div className='text-sm text-gray-900'>{packageInfo.name}</div>
+                            <div className='text-sm text-gray-500'>{packageInfo.remaining}</div>
+                            <div className='text-xs text-gray-400'>Tổng: {packageInfo.total}</div>
                           </>
                         );
                       })()}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <select
-                        value={member.membershipStatus}
-                        onChange={(e) => handleStatusChange(member.id, e.target.value as 'active' | 'inactive' | 'suspended')}
-                        className={`text-xs font-medium px-2 py-1 rounded-full border-0 focus:ring-2 focus:ring-primary-500 ${statusColors[member.membershipStatus]}`}
-                      >
-                        <option value="active">Hoạt động</option>
-                        <option value="inactive">Không hoạt động</option>
-                        <option value="suspended">Bị đình chỉ</option>
+                    <td className='px-6 py-4 whitespace-nowrap'>
+                      <select value={member.membershipStatus} onChange={(e) => handleStatusChange(member.id, e.target.value as 'active' | 'inactive' | 'suspended')} className={`text-xs font-medium px-2 py-1 rounded-full border-0 focus:ring-2 focus:ring-primary-500 ${statusColors[member.membershipStatus]}`}>
+                        <option value='active'>Hoạt động</option>
+                        <option value='inactive'>Không hoạt động</option>
+                        <option value='suspended'>Bị đình chỉ</option>
                       </select>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(member.joinDate).toLocaleDateString('vi-VN')}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                      <button
-                        onClick={() => handleEdit(member)}
-                        className="text-primary-600 hover:text-primary-900 transition-colors"
-                      >
-                        <PencilIcon className="h-4 w-4" />
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>{new Date(member.joinDate).toLocaleDateString('vi-VN')}</td>
+                    <td className='px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2'>
+                      <button onClick={() => handleEdit(member)} className='text-primary-600 hover:text-primary-900 transition-colors'>
+                        <PencilIcon className='h-4 w-4' />
                       </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            
+
             {filteredMembers.length === 0 && (
-              <div className="text-center py-12">
-                <div className="text-gray-500">
-                  {searchTerm || statusFilter !== 'all' ? 'Không tìm thấy thành viên nào' : 'Chưa có thành viên nào'}
-                </div>
+              <div className='text-center py-12'>
+                <div className='text-gray-500'>{searchTerm || statusFilter !== 'all' ? 'Không tìm thấy thành viên nào' : 'Chưa có thành viên nào'}</div>
               </div>
             )}
           </div>
