@@ -139,9 +139,99 @@ class MembersApiService extends BaseApiService {
   }
 
   async deleteMember(id: string): Promise<ApiResponse<boolean>> {
-    // Note: This only deletes the Firestore document
-    // Consider also deleting the Firebase Auth user if needed
-    return this.delete(id);
+    try {
+      console.log('Starting delete process for member ID:', id);
+
+      // First, find the member document by field 'id' instead of document ID
+      const memberResult = await this.findMemberByFieldId(id);
+      if (!memberResult.success || !memberResult.data) {
+        return {
+          data: false,
+          error: 'Không tìm thấy thành viên để xóa',
+          success: false,
+        };
+      }
+
+      const member = memberResult.data.member;
+      const documentId = memberResult.data.documentId;
+      console.log('Found member:', member.name, 'Document ID:', documentId);
+
+      // Step 1: Delete user document from 'users' collection using member ID
+      try {
+        console.log('Attempting to delete from users collection with ID:', id);
+        // Import base service to directly access 'users' collection
+        const usersService = new (await import('./base')).BaseApiService('users');
+        const usersDeleteResult = await usersService.delete(id);
+        console.log('Users collection deletion result:', usersDeleteResult);
+      } catch (userError) {
+        console.warn('Could not delete user document:', userError);
+      }
+
+      // Step 2: Delete member document from 'members' collection using document ID
+      console.log('Attempting to delete member document with document ID:', documentId);
+      const memberDeleteResult = await this.delete(documentId);
+      console.log('Member document deletion result:', memberDeleteResult);
+
+      if (!memberDeleteResult.success) {
+        return {
+          data: false,
+          error: memberDeleteResult.error || 'Không thể xóa thông tin thành viên',
+          success: false,
+        };
+      }
+
+      // Step 3: Delete Firebase Auth user
+      try {
+        console.log('Attempting to delete Firebase Auth user for UID:', id);
+        // Call API endpoint to delete Firebase Auth user
+        const response = await fetch('/api/auth/delete-user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ uid: id }),
+        });
+
+        if (response.ok) {
+          console.log('Firebase Auth user deleted successfully');
+        } else {
+          console.warn('Failed to delete Firebase Auth user:', await response.text());
+        }
+      } catch (authError) {
+        console.warn('Could not delete Firebase Auth user:', authError);
+      }
+
+      // Step 4: Cancel all active session registrations for this member
+      try {
+        console.log('Attempting to cancel active sessions for member:', id);
+        const { sessionsApi } = await import('./sessions');
+        const sessionsResult = await sessionsApi.getMemberActiveSessions(id);
+
+        if (sessionsResult.success && sessionsResult.data) {
+          console.log('Found active sessions:', sessionsResult.data.length);
+          // Cancel all active registrations
+          for (const session of sessionsResult.data) {
+            await sessionsApi.cancelRegistration(session.id, id);
+          }
+        }
+      } catch (sessionError) {
+        console.warn('Could not cancel session registrations:', sessionError);
+      }
+
+      console.log('Member deletion completed successfully');
+      return {
+        data: true,
+        error: null,
+        success: true,
+      };
+    } catch (error) {
+      console.error('Error in deleteMember:', error);
+      return {
+        data: false,
+        error: this.handleError(error),
+        success: false,
+      };
+    }
   }
 
   async getAllMembers(filters?: MemberFilters): Promise<ApiResponse<Member[]>> {

@@ -626,6 +626,40 @@ class SessionsApiService extends BaseApiService {
       };
     }
   }
+
+  async getMemberActiveSessions(memberId: string): Promise<ApiResponse<Session[]>> {
+    try {
+      const allSessions = await this.getAll<Session>();
+      
+      if (!allSessions.success || !allSessions.data) {
+        return {
+          data: [],
+          error: allSessions.error,
+          success: false,
+        };
+      }
+
+      // Filter sessions where member has active registrations
+      const activeSessions = allSessions.data.filter(session => {
+        return session.registrations.some(registration => 
+          registration.memberId === memberId && 
+          registration.status === 'confirmed'
+        );
+      });
+
+      return {
+        data: activeSessions,
+        error: null,
+        success: true,
+      };
+    } catch (error) {
+      return {
+        data: [],
+        error: this.handleError(error),
+        success: false,
+      };
+    }
+  }
 }
 
 export const sessionsApi = new SessionsApiService();

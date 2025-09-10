@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { PlusIcon, MagnifyingGlassIcon, PencilIcon, ArrowPathIcon, ClockIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, MagnifyingGlassIcon, PencilIcon, ArrowPathIcon, ClockIcon, ExclamationTriangleIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { membersApi, packagesApi, Member, Package } from '@/lib/api';
 
 const statusColors = {
@@ -32,6 +32,9 @@ export default function MembersPage() {
   const [renewSubmitting, setRenewSubmitting] = useState(false);
   const [renewMode, setRenewMode] = useState<'add' | 'replace'>('add'); // 'add' = cộng dồn, 'replace' = thay thế
   const [checkingAllExpiry, setCheckingAllExpiry] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingMember, setDeletingMember] = useState<Member | null>(null);
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
 
   // Form data
   const [formData, setFormData] = useState({
@@ -371,6 +374,42 @@ export default function MembersPage() {
       setError('Có lỗi xảy ra khi kiểm tra hết hạn');
     } finally {
       setCheckingAllExpiry(false);
+    }
+  };
+
+  const handleDeleteMember = (member: Member) => {
+    setDeletingMember(member);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteSubmit = async () => {
+    if (!deletingMember || deleteSubmitting) return;
+
+    try {
+      setDeleteSubmitting(true);
+      setError(null);
+
+      // Call API to delete member (this will handle deleting auth, members, and users data)
+      const result = await membersApi.deleteMember(deletingMember.id);
+
+      if (result.success) {
+        // Remove member from the list
+        setMembers((prev) => prev.filter((m) => m.id !== deletingMember.id));
+
+        // Close modal and reset
+        setShowDeleteModal(false);
+        setDeletingMember(null);
+
+        // Show success message
+        alert(`Đã xóa thành viên ${deletingMember.name} thành công!`);
+      } else {
+        setError(result.error || 'Có lỗi xảy ra khi xóa thành viên');
+      }
+    } catch (err) {
+      console.error('Delete member error:', err);
+      setError('Có lỗi xảy ra khi xóa thành viên');
+    } finally {
+      setDeleteSubmitting(false);
     }
   };
 
@@ -835,6 +874,9 @@ export default function MembersPage() {
                           <ArrowPathIcon className='h-4 w-4' />
                         </button>
                       )}
+                      <button onClick={() => handleDeleteMember(member)} className='text-red-600 hover:text-red-900 transition-colors cursor-pointer' title='Xóa thành viên'>
+                        <TrashIcon className='h-4 w-4' />
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -848,6 +890,81 @@ export default function MembersPage() {
             )}
           </div>
         </div>
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && deletingMember && (
+          <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50'>
+            <div className='bg-white rounded-2xl shadow-xl max-w-md w-full p-6'>
+              <div className='text-center mb-6'>
+                <div className='mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4'>
+                  <TrashIcon className='h-6 w-6 text-red-600' />
+                </div>
+                <h3 className='text-lg font-semibold text-gray-900 mb-2'>Xác nhận xóa thành viên</h3>
+                <p className='text-sm text-gray-600 mb-4'>
+                  Bạn có chắc chắn muốn xóa thành viên <strong>{deletingMember.name}</strong>?
+                </p>
+              </div>
+
+              <div className='mb-6 p-4 bg-red-50 border border-red-200 rounded-lg'>
+                <div className='text-sm text-red-700 space-y-2'>
+                  <p className='font-medium'>⚠️ Cảnh báo: Hành động này không thể hoàn tác!</p>
+                  <p>Dữ liệu sẽ bị xóa bao gồm:</p>
+                  <ul className='list-disc list-inside space-y-1 ml-2'>
+                    <li>Thông tin thành viên trong database</li>
+                    <li>Tài khoản đăng nhập (Firebase Auth)</li>
+                    <li>Dữ liệu người dùng liên quan</li>
+                    <li>Lịch sử đăng ký lớp học (nếu có)</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className='mb-4'>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>Thông tin thành viên:</label>
+                <div className='p-3 bg-gray-50 rounded-lg space-y-1'>
+                  <p className='text-sm'>
+                    <strong>Tên:</strong> {deletingMember.name}
+                  </p>
+                  <p className='text-sm'>
+                    <strong>Email:</strong> {deletingMember.email}
+                  </p>
+                  <p className='text-sm'>
+                    <strong>Trạng thái:</strong>
+                    <span className={`ml-2 px-2 py-1 text-xs rounded-full ${statusColors[deletingMember.membershipStatus]}`}>
+                      {deletingMember.membershipStatus === 'active' && 'Hoạt động'}
+                      {deletingMember.membershipStatus === 'inactive' && 'Không hoạt động'}
+                      {deletingMember.membershipStatus === 'suspended' && 'Bị đình chỉ'}
+                      {deletingMember.membershipStatus === 'expired' && 'Hết hạn'}
+                    </span>
+                  </p>
+                  {deletingMember.currentPackage && (
+                    <p className='text-sm'>
+                      <strong>Gói hiện tại:</strong>{' '}
+                      {(() => {
+                        const pkg = packages.find((p) => p.id === deletingMember.currentPackage);
+                        return pkg ? pkg.name : 'Không xác định';
+                      })()}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className='flex justify-end space-x-3'>
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setDeletingMember(null);
+                  }}
+                  className='px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 cursor-pointer'
+                >
+                  Hủy
+                </button>
+                <button onClick={handleDeleteSubmit} disabled={deleteSubmitting} className='px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'>
+                  {deleteSubmitting ? 'Đang xóa...' : 'Xóa thành viên'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AdminLayout>
   );
