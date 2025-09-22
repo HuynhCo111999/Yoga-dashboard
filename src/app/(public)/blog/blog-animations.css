@@ -1,0 +1,222 @@
+/* Blog Page Custom Animations */
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(249, 115, 22, 0.6);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+.animate-scale-x {
+  animation: scale-x 1s ease-out 0.8s forwards;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* Delays for staggered animations */
+.delay-300 {
+  animation-delay: 0.3s;
+}
+
+.delay-500 {
+  animation-delay: 0.5s;
+}
+
+.delay-700 {
+  animation-delay: 0.7s;
+}
+
+.delay-1000 {
+  animation-delay: 1s;
+}
+
+/* Custom gradients */
+.gradient-purple-blue {
+  background: linear-gradient(135deg, #f97316 0%, #eab308 100%);
+}
+
+.gradient-pink-orange {
+  background: linear-gradient(135deg, #f97316 0%, #fbbf24 100%);
+}
+
+/* Custom shadows */
+.shadow-3xl {
+  box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Glassmorphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Hover effects */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Blog card entrance animation */
+.blog-card-enter {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+/* Custom clip paths for unique shapes */
+.clip-path-polygon {
+  clip-path: polygon(0% 0%, 100% 0%, 95% 100%, 0% 100%);
+}
+
+/* Animated background elements */
+.bg-animated {
+  background: linear-gradient(-45deg, #f97316, #ea580c, #eab308, #fbbf24);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Text gradient animations */
+.text-gradient-animated {
+  background: linear-gradient(-45deg, #f97316, #ea580c, #eab308, #fbbf24);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient 3s ease infinite;
+}
+
+/* Pulse glow effect */
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-glow {
+  from {
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+  }
+  to {
+    box-shadow: 0 0 40px rgba(249, 115, 22, 0.8);
+  }
+}
+
+/* Smooth reveal animations */
+.reveal {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: all 0.6s ease;
+}
+
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Cursor pointer for interactive elements */
+button,
+.cursor-pointer,
+[role="button"],
+.clickable,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+select,
+a[href] {
+  cursor: pointer !important;
+}
+
+/* Specific blog page interactive elements */
+.tag-button,
+.read-more-button,
+.filter-button,
+.scroll-to-top,
+.cta-button,
+.nav-button {
+  cursor: pointer !important;
+}
+
+/* Interactive elements that should have pointer cursor */
+.hover\:scale-105:hover,
+.hover\:scale-110:hover,
+.hover\:scale-\[1\.02\]:hover,
+.hover\:scale-\[1\.05\]:hover,
+.group:hover .group-hover\:scale-110,
+.group:hover .group-hover\:translate-x-1 {
+  cursor: pointer !important;
+}
+
+/* Form elements cursor styles */
+input[type="text"]:focus,
+input[type="search"]:focus,
+textarea:focus,
+select:focus {
+  cursor: text;
+}
+
+/* Disabled elements */
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed !important;
+}
+
+/* Loading state */
+.loading {
+  cursor: wait !important;
+}

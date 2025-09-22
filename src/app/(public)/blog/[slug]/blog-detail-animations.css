@@ -1,0 +1,354 @@
+/* Blog Detail Page Animations */
+
+/* Base animations and utilities */
+.fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.animation-delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animation-delay-400 {
+  animation-delay: 0.4s;
+}
+
+.animation-delay-600 {
+  animation-delay: 0.6s;
+}
+
+.animation-delay-800 {
+  animation-delay: 0.8s;
+}
+
+/* Hero section effects */
+.hero-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  animation: particleFloat 6s ease-in-out infinite;
+}
+
+.hero-waves {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+  clip-path: polygon(0 50%, 100% 80%, 100% 100%, 0% 100%);
+  animation: waveMove 4s ease-in-out infinite;
+}
+
+/* Floating elements */
+.floating-card {
+  animation: float 6s ease-in-out infinite;
+}
+
+.floating-content {
+  animation: float 8s ease-in-out infinite;
+}
+
+.floating-scroll {
+  animation: floatPulse 2s ease-in-out infinite;
+}
+
+/* Content animations */
+.content-animation {
+  animation: contentReveal 1s ease-out;
+}
+
+.content-animation > * {
+  animation: slideInLeft 0.6s ease-out forwards;
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.content-animation > *:nth-child(1) { animation-delay: 0.1s; }
+.content-animation > *:nth-child(2) { animation-delay: 0.2s; }
+.content-animation > *:nth-child(3) { animation-delay: 0.3s; }
+.content-animation > *:nth-child(4) { animation-delay: 0.4s; }
+.content-animation > *:nth-child(5) { animation-delay: 0.5s; }
+.content-animation > *:nth-child(6) { animation-delay: 0.6s; }
+.content-animation > *:nth-child(7) { animation-delay: 0.7s; }
+.content-animation > *:nth-child(8) { animation-delay: 0.8s; }
+
+/* Enhanced prose styling for orange theme */
+.prose-orange {
+  color: #374151;
+}
+
+.prose-orange h1, 
+.prose-orange h2, 
+.prose-orange h3, 
+.prose-orange h4 {
+  color: #ea580c;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.prose-orange h1 {
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, #ea580c, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.prose-orange h2 {
+  font-size: 2rem;
+  color: #dc2626;
+  position: relative;
+  padding-left: 1rem;
+}
+
+.prose-orange h2::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.5rem;
+  height: 1.5rem;
+  width: 4px;
+  background: linear-gradient(to bottom, #ea580c, #f59e0b);
+  border-radius: 2px;
+}
+
+.prose-orange h3 {
+  font-size: 1.5rem;
+  color: #c2410c;
+}
+
+.prose-orange p {
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+  color: #4b5563;
+}
+
+.prose-orange strong {
+  color: #ea580c;
+  font-weight: 600;
+}
+
+.prose-orange em {
+  color: #dc2626;
+  font-style: italic;
+}
+
+.prose-orange blockquote {
+  border-left: 4px solid #ea580c;
+  padding-left: 1rem;
+  margin: 2rem 0;
+  font-style: italic;
+  color: #6b7280;
+  background: linear-gradient(to right, rgba(234, 88, 12, 0.05), transparent);
+  border-radius: 0 0.5rem 0.5rem 0;
+  padding: 1rem 1rem 1rem 1.5rem;
+}
+
+/* Keyframe animations */
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes floatPulse {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-5px) scale(1.05);
+  }
+}
+
+@keyframes particleFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(5px) rotate(-1deg);
+  }
+}
+
+@keyframes waveMove {
+  0%, 100% {
+    transform: translateX(0px);
+  }
+  50% {
+    transform: translateX(10px);
+  }
+}
+
+@keyframes contentReveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Hover effects for interactive elements */
+.prose-orange a {
+  color: #ea580c;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.prose-orange a:hover {
+  color: #dc2626;
+}
+
+.prose-orange a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background: linear-gradient(to right, #ea580c, #f59e0b);
+  transition: width 0.3s ease;
+}
+
+.prose-orange a:hover::after {
+  width: 100%;
+}
+
+/* Reading progress enhancements */
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(to right, #ea580c, #f59e0b);
+  z-index: 1000;
+  transition: width 0.2s ease;
+  box-shadow: 0 2px 10px rgba(234, 88, 12, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .prose-orange h1 {
+    font-size: 2rem;
+  }
+  
+  .prose-orange h2 {
+    font-size: 1.5rem;
+  }
+  
+  .prose-orange h3 {
+    font-size: 1.25rem;
+  }
+  
+  .floating-card,
+  .floating-content {
+    animation: none;
+  }
+  
+  .hero-particles,
+  .hero-waves {
+    animation-duration: 8s;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .prose-orange {
+    color: #d1d5db;
+  }
+  
+  .prose-orange p {
+    color: #9ca3af;
+  }
+  
+  .prose-orange blockquote {
+    background: linear-gradient(to right, rgba(234, 88, 12, 0.1), transparent);
+    color: #9ca3af;
+  }
+}
+
+/* Print styles */
+@media print {
+  .floating-scroll,
+  .hero-particles,
+  .hero-waves {
+    display: none;
+  }
+  
+  .floating-card,
+  .floating-content {
+    animation: none;
+    box-shadow: none;
+  }
+}
+
+/* Cursor pointer styles for all interactive elements */
+button,
+.btn,
+.button,
+.clickable,
+a,
+[role="button"],
+[role="link"],
+input[type="submit"],
+input[type="button"],
+input[type="checkbox"],
+input[type="radio"],
+select {
+  cursor: pointer;
+}
+
+button:disabled,
+.btn:disabled,
+.button:disabled,
+input:disabled,
+select:disabled,
+[disabled] {
+  cursor: not-allowed;
+}
+
+.loading,
+.spinner,
+[data-loading="true"] {
+  cursor: wait;
+}
+
+/* Enhanced focus states for accessibility */
+button:focus,
+.btn:focus,
+.button:focus,
+a:focus,
+[role="button"]:focus {
+  outline: 2px solid #ea580c;
+  outline-offset: 2px;
+}

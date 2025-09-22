@@ -11,7 +11,8 @@ import {
   CalendarDaysIcon,
   ChartBarIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  PencilSquareIcon
 } from '@heroicons/react/24/outline';
 
 const navigation = [
@@ -20,6 +21,7 @@ const navigation = [
   { name: 'Gói tập', href: '/admin/packages', icon: CubeIcon },
   { name: 'Lớp học', href: '/admin/classes', icon: AcademicCapIcon },
   { name: 'Ca tập', href: '/admin/sessions', icon: CalendarDaysIcon },
+  { name: 'Blog', href: '/admin/blog', icon: PencilSquareIcon },
 ];
 
 interface AdminLayoutProps {

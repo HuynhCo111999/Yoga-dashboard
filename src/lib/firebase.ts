@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAnalytics, Analytics } from 'firebase/analytics';
 import { getAuth, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, User, deleteUser } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 // Firebase configuration
 // Environment variables are loaded from .env.local
@@ -23,6 +24,9 @@ export const auth = getAuth(app);
 
 // Initialize Cloud Firestore and get a reference to the service
 export const db = getFirestore(app);
+
+// Initialize Firebase Storage and get a reference to the service
+export const storage = getStorage(app);
 
 // Initialize Analytics (only in browser)
 export let analytics: Analytics | null = null;
@@ -213,5 +217,53 @@ export interface FirebaseUser extends User {
   name?: string;
   userData?: UserData;
 }
+
+// Storage service for uploading files
+export const storageService = {
+  // Upload image to Firebase Storage
+  uploadImage: async (file: File, path: string): Promise<{ url: string | null; error: string | null }> => {
+    try {
+      // Create a reference to the file location
+      const imageRef = ref(storage, `images/${path}/${Date.now()}-${file.name}`);
+      
+      // Upload the file
+      const snapshot = await uploadBytes(imageRef, file);
+      
+      // Get the download URL
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      
+      return { url: downloadURL, error: null };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Upload failed';
+      return { url: null, error: message };
+    }
+  },
+
+  // Delete image from Firebase Storage
+  deleteImage: async (imageUrl: string): Promise<{ error: string | null }> => {
+    try {
+      // Create a reference to the file to delete
+      const imageRef = ref(storage, imageUrl);
+      
+      // Delete the file
+      await deleteObject(imageRef);
+      
+      return { error: null };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Delete failed';
+      return { error: message };
+    }
+  },
+
+  // Upload blog featured image
+  uploadBlogImage: async (file: File): Promise<{ url: string | null; error: string | null }> => {
+    return storageService.uploadImage(file, 'blog');
+  },
+
+  // Generate preview URL for uploaded file
+  generatePreviewUrl: (file: File): string => {
+    return URL.createObjectURL(file);
+  }
+};
 
 export default app;
