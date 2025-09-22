@@ -1,4 +1,8 @@
+import { Metadata } from 'next';
 import Header from '@/components/Header';
+import { generateMetadata, pageConfigs } from '@/utils/seo';
+
+export const metadata: Metadata = generateMetadata(pageConfigs.about);
 
 export default function About() {
   return (

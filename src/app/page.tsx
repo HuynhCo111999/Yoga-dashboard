@@ -1,5 +1,10 @@
 import Link from 'next/link';
+import { Metadata } from 'next';
 import Header from '@/components/Header';
+import StructuredData from '@/components/StructuredData';
+import { generateMetadata as generateSEOMetadata, pageConfigs } from '@/utils/seo';
+
+export const metadata: Metadata = generateSEOMetadata(pageConfigs.home);
 
 export default function Home() {
   return (
@@ -265,6 +270,9 @@ export default function Home() {
         </div>
     </div>
         </section>
+        
+        {/* Structured Data for HomePage */}
+        <StructuredData type="blog" />
     </>
   );
 }

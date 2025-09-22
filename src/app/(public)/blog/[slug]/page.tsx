@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { blogApi } from '@/lib/api/blog';
+import { generateMetadata as generateSEOMetadata, generateBlogPostStructuredData } from '@/utils/seo';
 import BlogDetailClient from './BlogDetailClient';
 
 // Enable SSG
@@ -43,32 +44,13 @@ export async function generateMetadata({
 
     const post = result.data;
     
-    return {
-      title: `${post.title} | Blog Yên Yoga`,
+    return generateSEOMetadata({
+      title: post.title,
       description: post.excerpt || post.content.substring(0, 160),
-      keywords: post.tags.join(', '),
-      authors: [{ name: post.author }],
-      openGraph: {
-        title: post.title,
-        description: post.excerpt || post.content.substring(0, 160),
-        type: 'article',
-        publishedTime: post.publishedAt,
-        authors: [post.author],
-        tags: post.tags,
-        images: post.featuredImage ? [
-          {
-            url: post.featuredImage,
-            alt: post.title,
-          }
-        ] : [],
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title: post.title,
-        description: post.excerpt || post.content.substring(0, 160),
-        images: post.featuredImage ? [post.featuredImage] : [],
-      },
-    };
+      keywords: post.tags,
+      canonical: `/blog/${post.slug}`,
+      ogImage: post.featuredImage || '/logo.jpeg',
+    });
   } catch (error) {
     console.error('Error generating metadata:', error);
     return {
@@ -104,7 +86,24 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
           .slice(0, 3) // Limit to 3 posts
       : [];
 
-    return <BlogDetailClient post={post} relatedPosts={relatedPosts} />;
+    return (
+      <>
+        <BlogDetailClient post={post} relatedPosts={relatedPosts} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(generateBlogPostStructuredData({
+              title: post.title,
+              description: post.excerpt || post.content.substring(0, 160),
+              author: post.author,
+              publishedAt: post.publishedAt,
+              featuredImage: post.featuredImage,
+              slug: post.slug,
+            }))
+          }}
+        />
+      </>
+    );
   } catch (error) {
     console.error('Error loading blog post:', error);
     notFound();
