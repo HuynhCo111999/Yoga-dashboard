@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { PlusIcon, MagnifyingGlassIcon, PencilIcon, ArrowPathIcon, ClockIcon, ExclamationTriangleIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { membersApi, packagesApi, Member, Package } from '@/lib/api';
+import { logger } from '@/lib/logger';
 
 const statusColors = {
   active: 'bg-green-100 text-green-800 border border-green-200',
@@ -56,22 +57,26 @@ export default function MembersPage() {
       setLoading(true);
       setError(null);
 
+      logger.info('Loading members and packages data');
+
       const [membersResult, packagesResult] = await Promise.all([membersApi.getAllMembers(), packagesApi.getActivePackages()]);
 
       if (membersResult.success && membersResult.data) {
         setMembers(membersResult.data);
+        logger.info('Members loaded successfully', { count: membersResult.data.length });
       } else {
-        console.error('Error loading members:', membersResult.error);
+        logger.error('Failed to load members', undefined, { error: membersResult.error });
         setError('Không thể tải danh sách thành viên');
       }
 
       if (packagesResult.success && packagesResult.data) {
         setPackages(packagesResult.data);
+        logger.info('Packages loaded successfully', { count: packagesResult.data.length });
       } else {
-        console.error('Error loading packages:', packagesResult.error);
+        logger.warning('Failed to load packages', { error: packagesResult.error });
       }
     } catch (err) {
-      console.error('Error loading data:', err);
+      logger.error('Error loading members/packages data', err as Error);
       setError('Có lỗi xảy ra khi tải dữ liệu');
     } finally {
       setLoading(false);
@@ -96,6 +101,8 @@ export default function MembersPage() {
 
       if (editingMember) {
         // Update existing member
+        logger.info('Updating member', { memberId: editingMember.id, name: formData.name });
+        
         const updateData: Partial<Member> = {
           name: formData.name,
           phone: formData.phone,
@@ -111,6 +118,10 @@ export default function MembersPage() {
           if (selectedPackage) {
             updateData.remainingClasses = selectedPackage.classLimit;
             updateData.packageStartDate = new Date().toISOString().split('T')[0];
+            logger.info('Package updated for member', { 
+              memberId: editingMember.id, 
+              newPackage: selectedPackage.name 
+            });
           }
         }
 
@@ -118,15 +129,24 @@ export default function MembersPage() {
 
         if (result.success && result.data) {
           setMembers((prev) => prev.map((m) => (m.id === editingMember.id ? result.data! : m)));
+          logger.event('Member Updated', { 
+            memberId: editingMember.id, 
+            updatedFields: Object.keys(updateData) 
+          });
           setEditingMember(null);
           setShowAddForm(false);
           resetForm();
         } else {
-          console.error('Member update failed:', result.error);
+          logger.warning('Member update failed', { 
+            memberId: editingMember.id, 
+            error: result.error 
+          });
           setError(result.error || 'Có lỗi xảy ra khi cập nhật thành viên');
         }
       } else {
         // Create new member
+        logger.info('Creating new member', { email: formData.email, name: formData.name });
+        
         const memberCreateData = {
           email: formData.email,
           name: formData.name,
@@ -141,7 +161,12 @@ export default function MembersPage() {
 
         if (result.success && result.data) {
           setMembers((prev) => [result.data!, ...prev]);
-          setShowAddForm(false);
+          logger.event('Member Created', {
+            memberId: result.data.id,
+            email: formData.email,
+            hasPackage: !!formData.packageId,
+          });
+    setShowAddForm(false);
           resetForm();
 
           // Show setup link for new member
@@ -152,12 +177,18 @@ export default function MembersPage() {
           });
           setShowSetupLink(true);
         } else {
-          console.error('Member creation failed:', result.error);
+          logger.warning('Member creation failed', { 
+            email: formData.email, 
+            error: result.error 
+          });
           setError(result.error || 'Có lỗi xảy ra khi tạo thành viên');
         }
       }
     } catch (err) {
-      console.error('Submit error:', err);
+      logger.error('Member submit error', err as Error, { 
+        action: editingMember ? 'update' : 'create',
+        email: formData.email 
+      });
       setError('Có lỗi xảy ra khi xử lý yêu cầu');
     } finally {
       setSubmitting(false);
@@ -389,12 +420,23 @@ export default function MembersPage() {
       setDeleteSubmitting(true);
       setError(null);
 
+      logger.warning('Deleting member', { 
+        memberId: deletingMember.id, 
+        memberName: deletingMember.name,
+        memberEmail: deletingMember.email 
+      });
+
       // Call API to delete member (this will handle deleting auth, members, and users data)
       const result = await membersApi.deleteMember(deletingMember.id);
 
       if (result.success) {
         // Remove member from the list
         setMembers((prev) => prev.filter((m) => m.id !== deletingMember.id));
+
+        logger.event('Member Deleted', { 
+          memberId: deletingMember.id,
+          memberName: deletingMember.name 
+        });
 
         // Close modal and reset
         setShowDeleteModal(false);
@@ -403,10 +445,16 @@ export default function MembersPage() {
         // Show success message
         alert(`Đã xóa thành viên ${deletingMember.name} thành công!`);
       } else {
+        logger.error('Failed to delete member', undefined, { 
+          memberId: deletingMember.id,
+          error: result.error 
+        });
         setError(result.error || 'Có lỗi xảy ra khi xóa thành viên');
       }
     } catch (err) {
-      console.error('Delete member error:', err);
+      logger.error('Delete member error', err as Error, { 
+        memberId: deletingMember?.id 
+      });
       setError('Có lỗi xảy ra khi xóa thành viên');
     } finally {
       setDeleteSubmitting(false);
@@ -701,7 +749,7 @@ export default function MembersPage() {
                     </option>
                   ))}
                 </select>
-              </div>
+        </div>
 
               <div className='mb-6'>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>Cách tính số buổi:</label>
@@ -716,7 +764,7 @@ export default function MembersPage() {
                     <input type='radio' name='renewMode' value='replace' checked={renewMode === 'replace'} onChange={(e) => setRenewMode(e.target.value as 'replace')} className='mr-2 text-blue-600' />
                     <span className='text-sm text-gray-700'>
                       <strong>Thay thế</strong> - Thay thế số buổi cũ bằng số buổi mới
-                    </span>
+                          </span>
                   </label>
                 </div>
               </div>
@@ -888,8 +936,8 @@ export default function MembersPage() {
                 <div className='text-gray-500'>{searchTerm || statusFilter !== 'all' ? 'Không tìm thấy thành viên nào' : 'Chưa có thành viên nào'}</div>
               </div>
             )}
-          </div>
-        </div>
+                    </div>
+                  </div>
 
         {/* Delete Confirmation Modal */}
         {showDeleteModal && deletingMember && (
@@ -903,7 +951,7 @@ export default function MembersPage() {
                 <p className='text-sm text-gray-600 mb-4'>
                   Bạn có chắc chắn muốn xóa thành viên <strong>{deletingMember.name}</strong>?
                 </p>
-              </div>
+        </div>
 
               <div className='mb-6 p-4 bg-red-50 border border-red-200 rounded-lg'>
                 <div className='text-sm text-red-700 space-y-2'>
@@ -915,8 +963,8 @@ export default function MembersPage() {
                     <li>Dữ liệu người dùng liên quan</li>
                     <li>Lịch sử đăng ký lớp học (nếu có)</li>
                   </ul>
-                </div>
-              </div>
+                  </div>
+                  </div>
 
               <div className='mb-4'>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>Thông tin thành viên:</label>
@@ -945,22 +993,22 @@ export default function MembersPage() {
                       })()}
                     </p>
                   )}
-                </div>
-              </div>
+                  </div>
+                  </div>
 
               <div className='flex justify-end space-x-3'>
-                <button
+                    <button
                   onClick={() => {
                     setShowDeleteModal(false);
                     setDeletingMember(null);
                   }}
                   className='px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 cursor-pointer'
-                >
-                  Hủy
-                </button>
+                    >
+                      Hủy
+                    </button>
                 <button onClick={handleDeleteSubmit} disabled={deleteSubmitting} className='px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'>
                   {deleteSubmitting ? 'Đang xóa...' : 'Xóa thành viên'}
-                </button>
+                    </button>
               </div>
             </div>
           </div>

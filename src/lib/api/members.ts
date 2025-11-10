@@ -1,25 +1,51 @@
-import { WhereFilterOp, query, where, getDocs } from 'firebase/firestore';
-import { BaseApiService } from './base';
-import { authService } from '@/lib/firebase';
-import { Member, MemberCreateRequest, MemberUpdateRequest, MemberFilters, ApiResponse, PaginatedResponse } from './types';
+import { WhereFilterOp, query, where, getDocs } from "firebase/firestore";
+import { BaseApiService } from "./base";
+import { authService } from "@/lib/firebase";
+import {
+  Member,
+  MemberCreateRequest,
+  MemberUpdateRequest,
+  MemberFilters,
+  ApiResponse,
+  PaginatedResponse,
+} from "./types";
+import { logger } from "@/lib/logger";
 
 class MembersApiService extends BaseApiService {
   constructor() {
-    super('members');
+    super("members");
   }
 
-  async createMember(memberData: MemberCreateRequest): Promise<ApiResponse<Member>> {
+  async createMember(
+    memberData: MemberCreateRequest
+  ): Promise<ApiResponse<Member>> {
     try {
+      logger.info("Creating new member", {
+        email: memberData.email,
+        name: memberData.name,
+      });
+
       const { packageId, ...memberDataWithoutPackageId } = memberData;
 
       // Create user document first (without Firebase Auth to avoid admin logout)
-      const userResult = await authService.createUserDocument(memberData.email, {
-        name: memberData.name,
-        role: 'member',
-        phone: memberData.phone,
-      });
+      const userResult = await authService.createUserDocument(
+        memberData.email,
+        {
+          name: memberData.name,
+          role: "member",
+          phone: memberData.phone,
+        }
+      );
 
       if (userResult.error) {
+        logger.error(
+          "Failed to create user document",
+          new Error(userResult.error),
+          {
+            email: memberData.email,
+            error: userResult.error,
+          }
+        );
         return {
           data: null,
           error: userResult.error,
@@ -28,18 +54,29 @@ class MembersApiService extends BaseApiService {
       }
 
       const memberId = userResult.uid;
+      logger.debug("User document created", {
+        memberId,
+        email: memberData.email,
+      });
 
       // Get package info to set remainingClasses
       let remainingClasses = 0;
       if (packageId) {
         try {
-          const { packagesApi } = await import('./packages');
+          const { packagesApi } = await import("./packages");
           const packageResult = await packagesApi.getPackage(packageId);
           if (packageResult.success && packageResult.data) {
             remainingClasses = packageResult.data.classLimit;
+            logger.debug("Package info retrieved", {
+              packageId,
+              classLimit: remainingClasses,
+            });
           }
         } catch (err) {
-          console.error('Error getting package info:', err);
+          logger.warning("Error getting package info", {
+            packageId,
+            error: err,
+          });
         }
       }
 
@@ -47,35 +84,58 @@ class MembersApiService extends BaseApiService {
       const memberDoc = {
         ...memberDataWithoutPackageId,
         id: memberId,
-        role: 'member' as const,
-        membershipStatus: 'active' as const,
+        role: "member" as const,
+        membershipStatus: "active" as const,
         remainingClasses,
-        joinDate: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
+        joinDate: new Date().toISOString().split("T")[0], // YYYY-MM-DD format
         ...(packageId && {
           currentPackage: packageId,
-          packageStartDate: new Date().toISOString().split('T')[0], // Set package start date
+          packageStartDate: new Date().toISOString().split("T")[0], // Set package start date
         }),
       };
 
       // Remove undefined fields to prevent Firestore errors
-      const cleanMemberDoc = Object.fromEntries(Object.entries(memberDoc).filter(([, value]) => value !== undefined)) as Omit<Member, 'createdAt' | 'updatedAt' | 'id'>;
+      const cleanMemberDoc = Object.fromEntries(
+        Object.entries(memberDoc).filter(([, value]) => value !== undefined)
+      ) as Omit<Member, "createdAt" | "updatedAt" | "id">;
 
       // Create member document with user document ID
-      const memberResult = await this.createWithId<Member>(memberId, cleanMemberDoc);
+      const memberResult = await this.createWithId<Member>(
+        memberId,
+        cleanMemberDoc
+      );
 
       if (memberResult.success && memberResult.data) {
+        logger.info("Member created successfully", {
+          memberId,
+          email: memberData.email,
+          hasPackage: !!packageId,
+        });
         return {
           ...memberResult,
           data: { ...memberResult.data, id: memberId },
         };
       } else {
+        logger.error(
+          "Failed to create member document",
+          new Error(memberResult.error || "Unknown error"),
+          {
+            memberId,
+            error: memberResult.error,
+          }
+        );
         return {
           data: null,
-          error: memberResult.error || 'Không thể tạo thông tin thành viên trong cơ sở dữ liệu',
+          error:
+            memberResult.error ||
+            "Không thể tạo thông tin thành viên trong cơ sở dữ liệu",
           success: false,
         };
       }
     } catch (error: unknown) {
+      logger.error("Error in createMember", error as Error, {
+        email: memberData.email,
+      });
       return {
         data: null,
         error: this.handleError(error),
@@ -84,13 +144,16 @@ class MembersApiService extends BaseApiService {
     }
   }
 
-  async updateMember(id: string, memberData: MemberUpdateRequest): Promise<ApiResponse<Member>> {
+  async updateMember(
+    id: string,
+    memberData: MemberUpdateRequest
+  ): Promise<ApiResponse<Member>> {
     // First, find the member document by field 'id' instead of document ID
     const memberResult = await this.findMemberByFieldId(id);
     if (!memberResult.success || !memberResult.data) {
       return {
         data: null,
-        error: 'Không tìm thấy thành viên để cập nhật',
+        error: "Không tìm thấy thành viên để cập nhật",
         success: false,
       };
     }
@@ -104,16 +167,18 @@ class MembersApiService extends BaseApiService {
   }
 
   // Helper method to find member by field 'id' instead of document ID
-  private async findMemberByFieldId(fieldId: string): Promise<ApiResponse<{ documentId: string; member: Member }>> {
+  private async findMemberByFieldId(
+    fieldId: string
+  ): Promise<ApiResponse<{ documentId: string; member: Member }>> {
     try {
-      const q = query(this.getCollection(), where('id', '==', fieldId));
+      const q = query(this.getCollection(), where("id", "==", fieldId));
 
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
         return {
           data: null,
-          error: 'Không tìm thấy thành viên',
+          error: "Không tìm thấy thành viên",
           success: false,
         };
       }
@@ -140,92 +205,129 @@ class MembersApiService extends BaseApiService {
 
   async deleteMember(id: string): Promise<ApiResponse<boolean>> {
     try {
-      console.log('Starting delete process for member ID:', id);
+      logger.warning("Starting member deletion process", { memberId: id });
 
       // First, find the member document by field 'id' instead of document ID
       const memberResult = await this.findMemberByFieldId(id);
       if (!memberResult.success || !memberResult.data) {
+        logger.error(
+          "Member not found for deletion",
+          new Error("Member not found"),
+          { memberId: id }
+        );
         return {
           data: false,
-          error: 'Không tìm thấy thành viên để xóa',
+          error: "Không tìm thấy thành viên để xóa",
           success: false,
         };
       }
 
       const member = memberResult.data.member;
       const documentId = memberResult.data.documentId;
-      console.log('Found member:', member.name, 'Document ID:', documentId);
+      logger.info("Found member for deletion", {
+        memberId: id,
+        memberName: member.name,
+        documentId,
+      });
 
       // Step 1: Delete user document from 'users' collection using member ID
       try {
-        console.log('Attempting to delete from users collection with ID:', id);
-        // Import base service to directly access 'users' collection
-        const usersService = new (await import('./base')).BaseApiService('users');
+        logger.debug("Deleting user document", { userId: id });
+        const usersService = new (await import("./base")).BaseApiService(
+          "users"
+        );
         const usersDeleteResult = await usersService.delete(id);
-        console.log('Users collection deletion result:', usersDeleteResult);
+        logger.debug("User document deletion result", {
+          success: usersDeleteResult.success,
+        });
       } catch (userError) {
-        console.warn('Could not delete user document:', userError);
+        logger.warning("Could not delete user document", {
+          userId: id,
+          error: userError,
+        });
       }
 
       // Step 2: Delete member document from 'members' collection using document ID
-      console.log('Attempting to delete member document with document ID:', documentId);
+      logger.debug("Deleting member document", { documentId });
       const memberDeleteResult = await this.delete(documentId);
-      console.log('Member document deletion result:', memberDeleteResult);
 
       if (!memberDeleteResult.success) {
+        logger.error(
+          "Failed to delete member document",
+          new Error(memberDeleteResult.error || "Unknown error"),
+          {
+            documentId,
+            error: memberDeleteResult.error,
+          }
+        );
         return {
           data: false,
-          error: memberDeleteResult.error || 'Không thể xóa thông tin thành viên',
+          error:
+            memberDeleteResult.error || "Không thể xóa thông tin thành viên",
           success: false,
         };
       }
 
       // Step 3: Delete Firebase Auth user
       try {
-        console.log('Attempting to delete Firebase Auth user for UID:', id);
-        // Call API endpoint to delete Firebase Auth user
-        const response = await fetch('/api/auth/delete-user', {
-          method: 'POST',
+        logger.debug("Deleting Firebase Auth user", { uid: id });
+        const response = await fetch("/api/auth/delete-user", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ uid: id }),
         });
 
         if (response.ok) {
-          console.log('Firebase Auth user deleted successfully');
+          logger.info("Firebase Auth user deleted successfully", { uid: id });
         } else {
-          console.warn('Failed to delete Firebase Auth user:', await response.text());
+          const errorText = await response.text();
+          logger.warning("Failed to delete Firebase Auth user", {
+            uid: id,
+            error: errorText,
+          });
         }
       } catch (authError) {
-        console.warn('Could not delete Firebase Auth user:', authError);
+        logger.warning("Could not delete Firebase Auth user", {
+          uid: id,
+          error: authError,
+        });
       }
 
       // Step 4: Cancel all active session registrations for this member
       try {
-        console.log('Attempting to cancel active sessions for member:', id);
-        const { sessionsApi } = await import('./sessions');
+        logger.debug("Canceling active sessions", { memberId: id });
+        const { sessionsApi } = await import("./sessions");
         const sessionsResult = await sessionsApi.getMemberActiveSessions(id);
 
         if (sessionsResult.success && sessionsResult.data) {
-          console.log('Found active sessions:', sessionsResult.data.length);
-          // Cancel all active registrations
+          logger.info("Found active sessions to cancel", {
+            memberId: id,
+            sessionCount: sessionsResult.data.length,
+          });
           for (const session of sessionsResult.data) {
             await sessionsApi.cancelRegistration(session.id, id);
           }
         }
       } catch (sessionError) {
-        console.warn('Could not cancel session registrations:', sessionError);
+        logger.warning("Could not cancel session registrations", {
+          memberId: id,
+          error: sessionError,
+        });
       }
 
-      console.log('Member deletion completed successfully');
+      logger.event("Member Deleted", {
+        memberId: id,
+        memberName: member.name,
+      });
       return {
         data: true,
         error: null,
         success: true,
       };
     } catch (error) {
-      console.error('Error in deleteMember:', error);
+      logger.error("Error in deleteMember", error as Error, { memberId: id });
       return {
         data: false,
         error: this.handleError(error),
@@ -243,52 +345,61 @@ class MembersApiService extends BaseApiService {
 
     if (filters?.status) {
       queryFilters.push({
-        field: 'membershipStatus',
-        operator: '==',
+        field: "membershipStatus",
+        operator: "==",
         value: filters.status,
       });
     }
 
     if (filters?.package) {
       queryFilters.push({
-        field: 'currentPackage',
-        operator: '==',
+        field: "currentPackage",
+        operator: "==",
         value: filters.package,
       });
     }
 
     if (filters?.joinDateFrom) {
       queryFilters.push({
-        field: 'joinDate',
-        operator: '>=',
+        field: "joinDate",
+        operator: ">=",
         value: filters.joinDateFrom,
       });
     }
 
     if (filters?.joinDateTo) {
       queryFilters.push({
-        field: 'joinDate',
-        operator: '<=',
+        field: "joinDate",
+        operator: "<=",
         value: filters.joinDateTo,
       });
     }
 
     const result = await this.getAll<Member>({
-      orderByField: 'createdAt',
-      orderDirection: 'desc',
+      orderByField: "createdAt",
+      orderDirection: "desc",
       filters: queryFilters,
     });
 
     // Apply search filter (client-side since Firestore doesn't support full-text search)
     if (result.success && result.data && filters?.search) {
       const searchTerm = filters.search.toLowerCase();
-      result.data = result.data.filter((member) => member.name.toLowerCase().includes(searchTerm) || member.email.toLowerCase().includes(searchTerm) || (member.phone && member.phone.includes(searchTerm)));
+      result.data = result.data.filter(
+        (member) =>
+          member.name.toLowerCase().includes(searchTerm) ||
+          member.email.toLowerCase().includes(searchTerm) ||
+          (member.phone && member.phone.includes(searchTerm))
+      );
     }
 
     return result;
   }
 
-  async getMembersPaginated(_page: number = 1, limit: number = 10, filters?: MemberFilters): Promise<PaginatedResponse<Member>> {
+  async getMembersPaginated(
+    _page: number = 1,
+    limit: number = 10,
+    filters?: MemberFilters
+  ): Promise<PaginatedResponse<Member>> {
     const queryFilters: Array<{
       field: string;
       operator: WhereFilterOp;
@@ -297,30 +408,35 @@ class MembersApiService extends BaseApiService {
 
     if (filters?.status) {
       queryFilters.push({
-        field: 'membershipStatus',
-        operator: '==',
+        field: "membershipStatus",
+        operator: "==",
         value: filters.status,
       });
     }
 
     if (filters?.package) {
       queryFilters.push({
-        field: 'currentPackage',
-        operator: '==',
+        field: "currentPackage",
+        operator: "==",
         value: filters.package,
       });
     }
 
     const result = await this.getPaginated<Member>(limit, undefined, {
-      orderByField: 'createdAt',
-      orderDirection: 'desc',
+      orderByField: "createdAt",
+      orderDirection: "desc",
       filters: queryFilters,
     });
 
     // Apply search filter (client-side)
     if (result.success && result.data && filters?.search) {
       const searchTerm = filters.search.toLowerCase();
-      result.data = result.data.filter((member) => member.name.toLowerCase().includes(searchTerm) || member.email.toLowerCase().includes(searchTerm) || (member.phone && member.phone.includes(searchTerm)));
+      result.data = result.data.filter(
+        (member) =>
+          member.name.toLowerCase().includes(searchTerm) ||
+          member.email.toLowerCase().includes(searchTerm) ||
+          (member.phone && member.phone.includes(searchTerm))
+      );
     }
 
     return result;
@@ -328,12 +444,12 @@ class MembersApiService extends BaseApiService {
 
   async getMembersByPackage(packageId: string): Promise<ApiResponse<Member[]>> {
     return this.getAll<Member>({
-      orderByField: 'joinDate',
-      orderDirection: 'desc',
+      orderByField: "joinDate",
+      orderDirection: "desc",
       filters: [
         {
-          field: 'currentPackage',
-          operator: '==',
+          field: "currentPackage",
+          operator: "==",
           value: packageId,
         },
       ],
@@ -342,13 +458,13 @@ class MembersApiService extends BaseApiService {
 
   async getActiveMembers(): Promise<ApiResponse<Member[]>> {
     return this.getAll<Member>({
-      orderByField: 'joinDate',
-      orderDirection: 'desc',
+      orderByField: "joinDate",
+      orderDirection: "desc",
       filters: [
         {
-          field: 'membershipStatus',
-          operator: '==',
-          value: 'active',
+          field: "membershipStatus",
+          operator: "==",
+          value: "active",
         },
       ],
     });
@@ -358,8 +474,8 @@ class MembersApiService extends BaseApiService {
     const result = await this.getAll<Member>({
       filters: [
         {
-          field: 'email',
-          operator: '==',
+          field: "email",
+          operator: "==",
           value: email,
         },
       ],
@@ -376,19 +492,21 @@ class MembersApiService extends BaseApiService {
 
     return {
       data: null,
-      error: 'Không tìm thấy thành viên với email này',
+      error: "Không tìm thấy thành viên với email này",
       success: false,
     };
   }
 
   // GIAI ĐOẠN 1: Kiểm tra và xử lý package hết hạn
-  async checkAndExpirePackage(memberId: string): Promise<ApiResponse<{ wasExpired: boolean; member: Member | null }>> {
+  async checkAndExpirePackage(
+    memberId: string
+  ): Promise<ApiResponse<{ wasExpired: boolean; member: Member | null }>> {
     try {
       const memberResult = await this.getById<Member>(memberId);
       if (!memberResult.success || !memberResult.data) {
         return {
           data: { wasExpired: false, member: null },
-          error: 'Không tìm thấy thành viên',
+          error: "Không tìm thấy thành viên",
           success: false,
         };
       }
@@ -405,7 +523,7 @@ class MembersApiService extends BaseApiService {
       }
 
       // Lấy thông tin package để kiểm tra duration
-      const { packagesApi } = await import('./packages');
+      const { packagesApi } = await import("./packages");
       const packageResult = await packagesApi.getPackage(member.currentPackage);
 
       if (!packageResult.success || !packageResult.data) {
@@ -419,14 +537,17 @@ class MembersApiService extends BaseApiService {
       const packageData = packageResult.data;
       const packageStartDate = new Date(member.packageStartDate);
       const currentDate = new Date();
-      const daysDiff = Math.floor((currentDate.getTime() - packageStartDate.getTime()) / (1000 * 60 * 60 * 24));
+      const daysDiff = Math.floor(
+        (currentDate.getTime() - packageStartDate.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
 
       // Kiểm tra nếu package đã hết hạn
       if (daysDiff >= packageData.duration) {
         // Package hết hạn - set remainingClasses về 0
         const updateResult = await this.update<Member>(memberId, {
           remainingClasses: 0,
-          membershipStatus: 'expired' as const,
+          membershipStatus: "expired" as const,
         });
 
         if (updateResult.success && updateResult.data) {
@@ -453,7 +574,12 @@ class MembersApiService extends BaseApiService {
   }
 
   // GIAI ĐOẠN 2: Gia hạn package với logic add/replace
-  async updateMemberPackage(memberId: string, packageId: string, classLimit: number, mode: 'add' | 'replace' = 'replace'): Promise<ApiResponse<Member>> {
+  async updateMemberPackage(
+    memberId: string,
+    packageId: string,
+    classLimit: number,
+    mode: "add" | "replace" = "replace"
+  ): Promise<ApiResponse<Member>> {
     try {
       // Bước 1: Kiểm tra và xử lý package hết hạn trước
       const expireCheckResult = await this.checkAndExpirePackage(memberId);
@@ -469,7 +595,7 @@ class MembersApiService extends BaseApiService {
       if (!currentMember) {
         return {
           data: null,
-          error: 'Không tìm thấy thông tin thành viên',
+          error: "Không tìm thấy thông tin thành viên",
           success: false,
         };
       }
@@ -477,7 +603,7 @@ class MembersApiService extends BaseApiService {
       // Bước 2: Tính toán remainingClasses dựa trên mode
       let newRemainingClasses = classLimit;
 
-      if (mode === 'add' && !expireCheckResult.data?.wasExpired) {
+      if (mode === "add" && !expireCheckResult.data?.wasExpired) {
         // Nếu mode là 'add' và package chưa hết hạn, cộng thêm vào số buổi hiện có
         const currentRemaining = currentMember.remainingClasses || 0;
 
@@ -492,9 +618,9 @@ class MembersApiService extends BaseApiService {
       // Bước 3: Cập nhật package với ngày bắt đầu mới
       const updateData = {
         currentPackage: packageId,
-        packageStartDate: new Date().toISOString().split('T')[0], // Ngày gia hạn
+        packageStartDate: new Date().toISOString().split("T")[0], // Ngày gia hạn
         remainingClasses: newRemainingClasses,
-        membershipStatus: 'active' as const,
+        membershipStatus: "active" as const,
       };
 
       return this.update<Member>(memberId, updateData);
@@ -507,7 +633,10 @@ class MembersApiService extends BaseApiService {
     }
   }
 
-  async updateMemberClasses(memberId: string, remainingClasses: number): Promise<ApiResponse<Member>> {
+  async updateMemberClasses(
+    memberId: string,
+    remainingClasses: number
+  ): Promise<ApiResponse<Member>> {
     return this.update<Member>(memberId, {
       remainingClasses,
     });
@@ -515,13 +644,13 @@ class MembersApiService extends BaseApiService {
 
   async suspendMember(memberId: string): Promise<ApiResponse<Member>> {
     return this.update<Member>(memberId, {
-      membershipStatus: 'suspended',
+      membershipStatus: "suspended",
     });
   }
 
   async reactivateMember(memberId: string): Promise<ApiResponse<Member>> {
     return this.update<Member>(memberId, {
-      membershipStatus: 'active',
+      membershipStatus: "active",
     });
   }
 
@@ -535,7 +664,19 @@ class MembersApiService extends BaseApiService {
     }>
   > {
     try {
-      const [totalResult, activeResult, inactiveResult, suspendedResult] = await Promise.all([this.count(), this.count([{ field: 'membershipStatus', operator: '==', value: 'active' }]), this.count([{ field: 'membershipStatus', operator: '==', value: 'inactive' }]), this.count([{ field: 'membershipStatus', operator: '==', value: 'suspended' }])]);
+      const [totalResult, activeResult, inactiveResult, suspendedResult] =
+        await Promise.all([
+          this.count(),
+          this.count([
+            { field: "membershipStatus", operator: "==", value: "active" },
+          ]),
+          this.count([
+            { field: "membershipStatus", operator: "==", value: "inactive" },
+          ]),
+          this.count([
+            { field: "membershipStatus", operator: "==", value: "suspended" },
+          ]),
+        ]);
 
       // Get new members this month
       const startOfMonth = new Date();
@@ -544,16 +685,22 @@ class MembersApiService extends BaseApiService {
 
       const newThisMonthResult = await this.count([
         {
-          field: 'createdAt',
-          operator: '>=',
+          field: "createdAt",
+          operator: ">=",
           value: this.stringToTimestamp(startOfMonth.toISOString()),
         },
       ]);
 
-      if (!totalResult.success || !activeResult.success || !inactiveResult.success || !suspendedResult.success || !newThisMonthResult.success) {
+      if (
+        !totalResult.success ||
+        !activeResult.success ||
+        !inactiveResult.success ||
+        !suspendedResult.success ||
+        !newThisMonthResult.success
+      ) {
         return {
           data: null,
-          error: 'Không thể lấy thống kê thành viên',
+          error: "Không thể lấy thống kê thành viên",
           success: false,
         };
       }

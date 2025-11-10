@@ -87,27 +87,131 @@ Truy cập `/sentry-example-page` và click các button để test. Lỗi sẽ x
 - ✅ Edge function errors
 - ✅ Middleware errors
 
-## 5. Sử dụng Sentry trong code
+## 5. Sử dụng Logger trong code
 
-### Capture manual errors:
+Dự án đã được tích hợp logger utility để dễ dàng log events và errors vào console + Sentry.
+
+### Import logger:
+```typescript
+import { logger, apiLogger, authLogger, dbLogger } from '@/lib/logger';
+```
+
+### Basic logging:
+```typescript
+// Debug logs (development only)
+logger.debug('Processing data', { userId: '123', action: 'update' });
+
+// Info logs
+logger.info('User registered successfully', { userId: '123', email: 'user@example.com' });
+
+// Warning logs
+logger.warning('API rate limit approaching', { remaining: 10, limit: 100 });
+
+// Error logs
+try {
+  // risky operation
+} catch (error) {
+  logger.error('Failed to process payment', error, { userId: '123', amount: 1000 });
+}
+
+// Fatal errors (critical system failures)
+logger.fatal('Database connection lost', error, { service: 'postgres' });
+
+// Custom events (user actions, business events)
+logger.event('Package Purchased', { packageId: 'pkg123', userId: 'user456', amount: 500000 });
+```
+
+### API Logging:
+```typescript
+// Log API requests
+apiLogger.request('POST', '/api/members', { name: 'John', email: 'john@example.com' });
+
+// Log API responses
+apiLogger.response('POST', '/api/members', 200, { id: 'member123' });
+
+// Log API errors
+apiLogger.error('POST', '/api/members', error);
+```
+
+### Auth Logging:
+```typescript
+// User login
+authLogger.login(user.id, user.email);
+
+// User logout
+authLogger.logout(user.id);
+
+// Login failed
+authLogger.loginFailed(email, 'Invalid password');
+
+// User sign up
+authLogger.signUp(user.id, user.email);
+```
+
+### Database Logging:
+```typescript
+// Log database queries
+dbLogger.query('members', 'create', { name: 'John', email: 'john@example.com' });
+
+// Log database errors
+dbLogger.error('members', 'create', error);
+
+// Log database success
+dbLogger.success('members', 'create', { id: 'member123' });
+```
+
+### Set User Context:
+```typescript
+// Set user context (automatically tracked in all events)
+logger.setUser({
+  id: user.id,
+  email: user.email,
+  name: user.name,
+  role: user.role,
+});
+
+// Clear user context (on logout)
+logger.clearUser();
+```
+
+### Add Custom Context:
+```typescript
+// Add custom context to all future events
+logger.setContext('payment', {
+  provider: 'stripe',
+  currency: 'VND',
+  environment: 'production',
+});
+
+// Add tags
+logger.setTag('feature', 'checkout');
+logger.setTag('version', '1.2.3');
+```
+
+### Performance Monitoring:
+```typescript
+// Start a span (new Sentry API)
+await logger.startSpan(
+  { name: 'checkout-process', op: 'payment' },
+  async () => {
+    // Do work inside the span
+    await processPayment();
+    return result;
+  }
+);
+```
+
+### Direct Sentry API (advanced):
 ```typescript
 import * as Sentry from '@sentry/nextjs';
 
-try {
-  // your code
-} catch (error) {
-  Sentry.captureException(error);
-}
-```
+// Capture exception directly
+Sentry.captureException(error);
 
-### Add context:
-```typescript
-Sentry.setUser({ id: user.id, email: user.email });
-Sentry.setContext('custom', { key: 'value' });
-```
+// Capture message
+Sentry.captureMessage('Something went wrong', 'error');
 
-### Add breadcrumbs:
-```typescript
+// Add breadcrumb
 Sentry.addBreadcrumb({
   category: 'auth',
   message: 'User logged in',
@@ -155,6 +259,41 @@ Trong Sentry dashboard bạn có thể:
 - **Production**: Full monitoring + source maps upload
 - **Privacy**: Session replay đã được config để mask sensitive data (`maskAllText: true`)
 - **Performance**: `tracesSampleRate: 1.0` = track 100% requests (có thể giảm trong production)
+
+## Debug Logs
+
+Dự án đã được cấu hình để enable debug logs trong development mode:
+
+### Console Logs
+Khi chạy `npm run dev`, bạn sẽ thấy:
+- ✅ **[DEBUG]** - Debug messages (chỉ trong dev)
+- ✅ **[INFO]** - Information messages
+- ✅ **[WARNING]** - Warning messages
+- ✅ **[ERROR]** - Error messages
+- ✅ **[FATAL]** - Critical errors
+- ✅ **[EVENT]** - Custom events
+- ✅ **[SENTRY]** - Sentry context changes
+
+### Sentry Debug Mode
+Khi `debug: true` trong Sentry config, bạn sẽ thấy thêm:
+- Sentry SDK initialization logs
+- Event sending logs
+- Source map upload logs
+- Performance transaction logs
+
+### Tắt Debug Logs
+Để tắt debug logs trong development:
+
+```typescript
+// sentry.client.config.ts / sentry.server.config.ts / sentry.edge.config.ts
+debug: false, // thay vì process.env.NODE_ENV === 'development'
+```
+
+### Production Logs
+Trong production:
+- Debug logs sẽ tự động tắt
+- Chỉ warnings, errors, và fatal errors được gửi lên Sentry
+- Console logs vẫn hoạt động nhưng không gây ảnh hưởng performance
 
 ---
 

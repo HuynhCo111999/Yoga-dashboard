@@ -4,6 +4,7 @@ import { membersApi } from "./members";
 import { classesApi } from "./classes";
 import { sessionsApi } from "./sessions";
 import { packagesApi } from "./packages";
+import { logger } from "@/lib/logger";
 
 class DashboardApiService extends BaseApiService {
   constructor() {
@@ -12,6 +13,8 @@ class DashboardApiService extends BaseApiService {
 
   async getDashboardStats(): Promise<ApiResponse<DashboardStats>> {
     try {
+      logger.info("Fetching dashboard stats");
+
       // const today = new Date().toISOString().split('T')[0];
       const currentMonth = new Date();
       currentMonth.setDate(1);
@@ -31,6 +34,15 @@ class DashboardApiService extends BaseApiService {
         !classStats.success ||
         !sessionStats.success
       ) {
+        logger.error(
+          "Failed to fetch dashboard stats",
+          new Error("Stats fetch failed"),
+          {
+            memberStatsSuccess: memberStats.success,
+            classStatsSuccess: classStats.success,
+            sessionStatsSuccess: sessionStats.success,
+          }
+        );
         return {
           data: null,
           error: "Không thể lấy thống kê dashboard",
@@ -70,11 +82,10 @@ class DashboardApiService extends BaseApiService {
             return sum + (pkg?.price || 0);
           }, 0);
 
-          console.log(
-            `💰 Monthly revenue calculation: ${
-              membersThisMonth.length
-            } members joined this month, total revenue: ${monthlyRevenue.toLocaleString()}đ`
-          );
+          logger.debug("Monthly revenue calculated", {
+            membersThisMonth: membersThisMonth.length,
+            monthlyRevenue,
+          });
         }
       }
 
@@ -107,12 +118,19 @@ class DashboardApiService extends BaseApiService {
         lastUpdated: new Date().toISOString(),
       };
 
+      logger.info("Dashboard stats fetched successfully", {
+        totalMembers: dashboardStats.totalMembers,
+        activeClasses: dashboardStats.activeClasses,
+        monthlyRevenue: dashboardStats.monthlyRevenue,
+      });
+
       return {
         data: dashboardStats,
         error: null,
         success: true,
       };
     } catch (error) {
+      logger.error("Error fetching dashboard stats", error as Error);
       return {
         data: null,
         error: this.handleError(error),
@@ -125,6 +143,8 @@ class DashboardApiService extends BaseApiService {
     limit: number = 10
   ): Promise<ApiResponse<RecentActivity[]>> {
     try {
+      logger.debug("Fetching recent activities", { limit });
+
       // Get real activities from sessions and members
       const [recentSessionsResult, recentMembersResult] = await Promise.all([
         sessionsApi.getUpcomingSessions(10),
