@@ -1,4 +1,4 @@
-import { Metadata } from 'next';
+import { Metadata } from "next";
 
 export interface SEOConfig {
   title: string;
@@ -9,9 +9,10 @@ export interface SEOConfig {
   noIndex?: boolean;
 }
 
-const baseUrl = 'https://yoga-dashboard-two.vercel.app';
-const siteName = 'Yên Yoga Studio';
-const defaultDescription = 'Khám phá hành trình yoga tại Yên Yoga Studio với đội ngũ giảng viên chuyên nghiệp, lớp học đa dạng và không gian thanh tịnh.';
+export const baseUrl = "https://yoga-dashboard-two.vercel.app";
+const siteName = "Yên Yoga Studio";
+const defaultDescription =
+  "Khám phá hành trình yoga tại Yên Yoga Studio với đội ngũ giảng viên chuyên nghiệp, lớp học đa dạng và không gian thanh tịnh.";
 
 export function generateMetadata(config: SEOConfig): Metadata {
   const {
@@ -19,7 +20,7 @@ export function generateMetadata(config: SEOConfig): Metadata {
     description = defaultDescription,
     keywords = [],
     canonical,
-    ogImage = '/logo.jpeg',
+    ogImage = "/logo.jpeg",
     noIndex = false,
   } = config;
 
@@ -30,9 +31,17 @@ export function generateMetadata(config: SEOConfig): Metadata {
     title: fullTitle,
     description,
     keywords: [
-      'yoga', 'yoga studio', 'hatha yoga', 'vinyasa yoga', 'meditation', 
-      'thiền', 'tập yoga', 'yoga việt nam', 'yoga hcm', 'yoga sài gòn',
-      ...keywords
+      "yoga",
+      "yoga studio",
+      "hatha yoga",
+      "vinyasa yoga",
+      "meditation",
+      "thiền",
+      "tập yoga",
+      "yoga việt nam",
+      "yoga hcm",
+      "yoga sài gòn",
+      ...keywords,
     ],
     robots: {
       index: !noIndex,
@@ -40,14 +49,14 @@ export function generateMetadata(config: SEOConfig): Metadata {
       googleBot: {
         index: !noIndex,
         follow: !noIndex,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
       },
     },
     openGraph: {
-      type: 'website',
-      locale: 'vi_VN',
+      type: "website",
+      locale: "vi_VN",
       url,
       siteName,
       title: fullTitle,
@@ -62,17 +71,17 @@ export function generateMetadata(config: SEOConfig): Metadata {
       ],
     },
     twitter: {
-      card: 'summary_large_image',
+      card: "summary_large_image",
       title: fullTitle,
       description,
       images: [`${baseUrl}${ogImage}`],
-      creator: '@yenyogastudio',
-      site: '@yenyogastudio',
+      creator: "@yenyogastudio",
+      site: "@yenyogastudio",
     },
     alternates: {
       canonical: url,
       languages: {
-        'vi-VN': url,
+        "vi-VN": url,
       },
     },
   };
@@ -81,46 +90,63 @@ export function generateMetadata(config: SEOConfig): Metadata {
 // Page-specific SEO configurations
 export const pageConfigs = {
   home: {
-    title: 'Yên Yoga Studio - Không gian yoga thanh tịnh',
-    description: 'Khám phá hành trình yoga tại Yên Yoga Studio với đội ngũ giảng viên chuyên nghiệp, lớp học đa dạng và không gian thanh tịnh. Đăng ký lớp học ngay hôm nay!',
-    keywords: ['yoga studio', 'lớp yoga', 'đăng ký yoga', 'giảng viên yoga chuyên nghiệp'],
-    canonical: '/',
-    ogImage: '/class-studio.jpeg',
+    title: "Yên Yoga Studio - Không gian yoga thanh tịnh",
+    description:
+      "Khám phá hành trình yoga tại Yên Yoga Studio với đội ngũ giảng viên chuyên nghiệp, lớp học đa dạng và không gian thanh tịnh. Đăng ký lớp học ngay hôm nay!",
+    keywords: [
+      "yoga studio",
+      "lớp yoga",
+      "đăng ký yoga",
+      "giảng viên yoga chuyên nghiệp",
+    ],
+    canonical: "/",
+    ogImage: "/class-studio.jpeg",
   },
-  
+
   about: {
-    title: 'Về chúng tôi - Câu chuyện Yên Yoga Studio',
-    description: 'Tìm hiểu về sứ mệnh, tầm nhìn và đội ngũ giảng viên chuyên nghiệp tại Yên Yoga Studio. Hành trình mang yoga đến với mọi người.',
-    keywords: ['về yên yoga', 'đội ngũ giảng viên', 'triết lý yoga', 'sứ mệnh'],
-    canonical: '/about',
+    title: "Về chúng tôi - Câu chuyện Yên Yoga Studio",
+    description:
+      "Tìm hiểu về sứ mệnh, tầm nhìn và đội ngũ giảng viên chuyên nghiệp tại Yên Yoga Studio. Hành trình mang yoga đến với mọi người.",
+    keywords: ["về yên yoga", "đội ngũ giảng viên", "triết lý yoga", "sứ mệnh"],
+    canonical: "/about",
   },
-  
+
   blog: {
-    title: 'Blog Yoga - Kiến thức & Chia sẻ',
-    description: 'Khám phá những bài viết hữu ích về yoga, thiền, sức khỏe và lối sống cân bằng từ các chuyên gia tại Yên Yoga Studio.',
-    keywords: ['blog yoga', 'kiến thức yoga', 'thiền định', 'sức khỏe', 'lối sống cân bằng'],
-    canonical: '/blog',
+    title: "Blog Yoga - Kiến thức & Chia sẻ",
+    description:
+      "Khám phá những bài viết hữu ích về yoga, thiền, sức khỏe và lối sống cân bằng từ các chuyên gia tại Yên Yoga Studio.",
+    keywords: [
+      "blog yoga",
+      "kiến thức yoga",
+      "thiền định",
+      "sức khỏe",
+      "lối sống cân bằng",
+    ],
+    canonical: "/blog",
   },
-  
+
   calendar: {
-    title: 'Lịch học Yoga - Đặt lớp trực tuyến',
-    description: 'Xem lịch học yoga chi tiết và đặt lớp học trực tuyến tại Yên Yoga Studio. Các lớp Hatha, Vinyasa, Yin Yoga và nhiều hơn nữa.',
-    keywords: ['lịch học yoga', 'đặt lớp yoga', 'lịch yoga', 'đăng ký lớp học'],
-    canonical: '/calendar',
+    title: "Lịch học Yoga - Đặt lớp trực tuyến",
+    description:
+      "Xem lịch học yoga chi tiết và đặt lớp học trực tuyến tại Yên Yoga Studio. Các lớp Hatha, Vinyasa, Yin Yoga và nhiều hơn nữa.",
+    keywords: ["lịch học yoga", "đặt lớp yoga", "lịch yoga", "đăng ký lớp học"],
+    canonical: "/calendar",
   },
-  
+
   packages: {
-    title: 'Gói tập Yoga - Ưu đãi hấp dẫn',
-    description: 'Khám phá các gói tập yoga với mức giá ưu đãi tại Yên Yoga Studio. Từ gói cơ bản đến gói không giới hạn, phù hợp với mọi nhu cầu.',
-    keywords: ['gói yoga', 'giá yoga', 'ưu đãi yoga', 'membership yoga'],
-    canonical: '/packages',
+    title: "Gói tập Yoga - Ưu đãi hấp dẫn",
+    description:
+      "Khám phá các gói tập yoga với mức giá ưu đãi tại Yên Yoga Studio. Từ gói cơ bản đến gói không giới hạn, phù hợp với mọi nhu cầu.",
+    keywords: ["gói yoga", "giá yoga", "ưu đãi yoga", "membership yoga"],
+    canonical: "/packages",
   },
-  
+
   contact: {
-    title: 'Liên hệ - Yên Yoga Studio',
-    description: 'Liên hệ với Yên Yoga Studio để được tư vấn về lớp học, gói tập và dịch vụ. Địa chỉ, số điện thoại và form liên hệ trực tuyến.',
-    keywords: ['liên hệ yoga', 'địa chỉ yoga studio', 'tư vấn yoga'],
-    canonical: '/contact',
+    title: "Liên hệ - Yên Yoga Studio",
+    description:
+      "Liên hệ với Yên Yoga Studio để được tư vấn về lớp học, gói tập và dịch vụ. Địa chỉ, số điện thoại và form liên hệ trực tuyến.",
+    keywords: ["liên hệ yoga", "địa chỉ yoga studio", "tư vấn yoga"],
+    canonical: "/contact",
   },
 };
 
@@ -134,29 +160,31 @@ export function generateBlogPostStructuredData(post: {
   slug: string;
 }) {
   return {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
     headline: post.title,
     description: post.description,
-    image: post.featuredImage ? `${baseUrl}${post.featuredImage}` : `${baseUrl}/logo.jpeg`,
+    image: post.featuredImage
+      ? `${baseUrl}${post.featuredImage}`
+      : `${baseUrl}/logo.jpeg`,
     author: {
-      '@type': 'Person',
+      "@type": "Person",
       name: post.author,
       url: baseUrl,
     },
     publisher: {
-      '@type': 'Organization',
+      "@type": "Organization",
       name: siteName,
       logo: {
-        '@type': 'ImageObject',
+        "@type": "ImageObject",
         url: `${baseUrl}/logo.jpeg`,
       },
     },
     datePublished: post.publishedAt,
     dateModified: post.publishedAt,
     mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': `${baseUrl}/blog/${post.slug}`,
+      "@type": "WebPage",
+      "@id": `${baseUrl}/blog/${post.slug}`,
     },
   };
 }
@@ -169,46 +197,48 @@ export function generateServiceStructuredData(service: {
   duration?: string;
 }) {
   return {
-    '@context': 'https://schema.org',
-    '@type': 'Service',
+    "@context": "https://schema.org",
+    "@type": "Service",
     name: service.name,
     description: service.description,
     provider: {
-      '@type': 'Organization',
+      "@type": "Organization",
       name: siteName,
       url: baseUrl,
     },
     areaServed: {
-      '@type': 'City',
-      name: 'Ho Chi Minh City',
+      "@type": "City",
+      name: "Ho Chi Minh City",
     },
     hasOfferCatalog: {
-      '@type': 'OfferCatalog',
-      name: 'Yoga Classes',
+      "@type": "OfferCatalog",
+      name: "Yoga Classes",
       itemListElement: {
-        '@type': 'Offer',
+        "@type": "Offer",
         itemOffered: {
-          '@type': 'Service',
+          "@type": "Service",
           name: service.name,
           description: service.description,
         },
         price: service.price,
-        priceCurrency: 'VND',
+        priceCurrency: "VND",
       },
     },
   };
 }
 
 // Generate FAQ structured data
-export function generateFAQStructuredData(faqs: Array<{ question: string; answer: string }>) {
+export function generateFAQStructuredData(
+  faqs: Array<{ question: string; answer: string }>
+) {
   return {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqs.map(faq => ({
-      '@type': 'Question',
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
       name: faq.question,
       acceptedAnswer: {
-        '@type': 'Answer',
+        "@type": "Answer",
         text: faq.answer,
       },
     })),
