@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import Image from 'next/image';
 import Header from '@/components/Header';
 import { generateMetadata, pageConfigs } from '@/utils/seo';
 
@@ -10,19 +11,18 @@ export default function About() {
       <Header />
       <div className="py-16 sm:py-20 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* Hero Section with Wireframe */}
+          {/* Hero Section */}
           <div className="mx-auto max-w-2xl lg:mx-0 relative">
-            {/* Hero Image Wireframe */}
-            <div className="aspect-[16/6] sm:aspect-[16/5] lg:aspect-[16/6] bg-gradient-to-r from-secondary-100 to-secondary-200 rounded-2xl shadow-lg overflow-hidden mb-6 sm:mb-8">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center text-secondary-400 p-4">
-                  <svg className="mx-auto h-16 w-16 sm:h-20 sm:w-20 mb-3 sm:mb-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                  </svg>
-                  <p className="text-xs sm:text-sm font-medium">About Hero Image</p>
-                  <p className="text-xs">Studio background hoặc team photo</p>
-                </div>
-              </div>
+            <div className="relative aspect-[16/6] sm:aspect-[16/5] lg:aspect-[16/6] rounded-2xl shadow-lg overflow-hidden mb-6 sm:mb-8">
+              <Image
+                src="/images/about-us.png"
+                alt="Không gian studio của Yên Yoga"
+                fill
+                priority={false}
+                loading="lazy"
+                sizes="(max-width: 768px) 100vw, 960px"
+                className="object-cover"
+              />
             </div>
             
             <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl lg:text-4xl text-center lg:text-left">Về Yên Yoga</h2>
@@ -113,22 +113,21 @@ export default function About() {
             </div>
           </div>
           
-          {/* Classes Gallery Wireframes */}
+          {/* Classes Gallery */}
           <div className="mx-auto mt-24 max-w-7xl">
             <h3 className="text-2xl font-bold text-center text-gray-900 mb-12">Không gian luyện tập của chúng tôi</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {/* Main Studio Wireframe */}
               <div className="relative">
-                <div className="aspect-[4/3] bg-gradient-to-br from-primary-100 to-primary-200 rounded-xl overflow-hidden shadow-lg">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-primary-500">
-                      <svg className="mx-auto h-16 w-16 mb-2" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                        <polyline points="9,22 9,12 15,12 15,22"/>
-                      </svg>
-                      <p className="text-sm font-medium">Main Studio</p>
-                    </div>
-                  </div>
+                <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg">
+                  <Image
+                    src="/images/aboutUs/about-us-1.png"
+                    alt="Studio chính tại Yên Yoga"
+                    fill
+                    loading="lazy"
+                    sizes="(max-width: 1024px) 100vw, 360px"
+                    className="object-cover"
+                  />
                 </div>
                 <div className="mt-4">
                   <h4 className="text-lg font-semibold text-gray-900">Studio chính</h4>
@@ -138,15 +137,15 @@ export default function About() {
 
               {/* Private Room Wireframe */}
               <div className="relative">
-                <div className="aspect-[4/3] bg-gradient-to-br from-secondary-100 to-secondary-200 rounded-xl overflow-hidden shadow-lg">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-secondary-500">
-                      <svg className="mx-auto h-16 w-16 mb-2" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                      </svg>
-                      <p className="text-sm font-medium">Private Room</p>
-                    </div>
-                  </div>
+                <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg">
+                  <Image
+                    src="/images/aboutUs/about-us-2.png"
+                    alt="Phòng tập riêng yên tĩnh"
+                    fill
+                    loading="lazy"
+                    sizes="(max-width: 1024px) 100vw, 360px"
+                    className="object-cover"
+                  />
                 </div>
                 <div className="mt-4">
                   <h4 className="text-lg font-semibold text-gray-900">Phòng riêng</h4>
@@ -156,16 +155,15 @@ export default function About() {
 
               {/* Meditation Room Wireframe */}
               <div className="relative">
-                <div className="aspect-[4/3] bg-gradient-to-br from-accent-100 to-accent-200 rounded-xl overflow-hidden shadow-lg">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-accent-600">
-                      <svg className="mx-auto h-16 w-16 mb-2" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 16c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                      </svg>
-                      <p className="text-sm font-medium">Meditation Space</p>
-                    </div>
-                  </div>
+                <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg">
+                  <Image
+                    src="/images/aboutUs/about-us-3.png"
+                    alt="Khu vực thiền tại Yên Yoga"
+                    fill
+                    loading="lazy"
+                    sizes="(max-width: 1024px) 100vw, 360px"
+                    className="object-cover"
+                  />
                 </div>
                 <div className="mt-4">
                   <h4 className="text-lg font-semibold text-gray-900">Khu vực thiền</h4>

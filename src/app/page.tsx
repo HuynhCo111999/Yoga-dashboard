@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Metadata } from 'next';
 import Header from '@/components/Header';
 import StructuredData from '@/components/StructuredData';
@@ -36,18 +37,18 @@ export default function Home() {
                 </div>
               </div>
               <div className="lg:col-span-5 mt-8 sm:mt-12 lg:mt-0">
-                {/* Hero Image Wireframe */}
+                {/* Hero Image */}
                 <div className="relative max-w-md mx-auto lg:max-w-none">
-                  <div className="aspect-[4/3] bg-gradient-to-br from-secondary-100 to-secondary-200 rounded-2xl shadow-xl overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center text-secondary-400 p-4">
-                        <svg className="mx-auto h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 mb-4" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                        </svg>
-                        <p className="text-xs sm:text-sm font-medium">Hero Image Placeholder</p>
-                        <p className="text-xs">Yoga studio hoặc người tập yoga</p>
-                      </div>
-                    </div>
+                  <div className="relative aspect-[4/3] rounded-2xl shadow-xl overflow-hidden">
+        < Image
+                      src="/images/banner.png"
+                      alt="Không gian tập yoga tại Yên Yoga"
+                      fill
+                priority={false}
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 560px"
+                      className="object-cover"
+                      loading="lazy"
+                    />
                   </div>
                   {/* Decorative elements */}
                   <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-accent-200 rounded-full opacity-50"></div>
@@ -153,7 +154,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Gallery/Testimonials Section with Wireframes */}
+        {/* Gallery/Testimonials Section */}
         <section className="py-24 sm:py-32 bg-secondary-50">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-2xl lg:text-center">
@@ -163,83 +164,97 @@ export default function Home() {
               </p>
             </div>
             
-            {/* Image Gallery Wireframes */}
+            {/* Image Gallery */}
             <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
               {/* Studio Image */}
               <div className="relative">
-                <div className="aspect-[3/2] bg-gradient-to-br from-secondary-100 to-secondary-200 rounded-xl overflow-hidden shadow-lg">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-secondary-400">
-                      <svg className="mx-auto h-16 w-16 mb-2" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M3 9V7a1 1 0 011-1h16a1 1 0 011 1v2M3 9v10a1 1 0 001 1h16a1 1 0 001-1V9M3 9l9 5 9-5"/>
-                      </svg>
-                      <p className="text-xs font-medium">Studio Space</p>
-                    </div>
-                  </div>
+                <div className="relative aspect-[3/2] rounded-xl overflow-hidden shadow-lg">
+                  <Image
+                    src="/images/class/class-1.png"
+                    alt="Không gian studio Yên Yoga"
+                    fill
+                    priority={false}
+                    loading="lazy"
+                    sizes="(max-width: 1024px) 100vw, 400px"
+                    className="object-cover"
+                  />
                 </div>
                 <div className="mt-4">
                   <h3 className="text-lg font-semibold text-gray-900">Không gian luyện tập</h3>
-                  <p className="text-sm text-gray-600">Studio hiện đại với ánh sáng tự nhiên</p>
+                  <p className="text-sm text-gray-600">
+                    Studio rộng rãi, tràn ngập ánh sáng tự nhiên với thảm tập và dụng cụ luôn được
+                    vệ sinh sạch sẽ sau mỗi buổi học.
+                  </p>
                 </div>
-              </div>
+        </div>
 
               {/* Class Image */}
               <div className="relative">
-                <div className="aspect-[3/2] bg-gradient-to-br from-accent-100 to-accent-200 rounded-xl overflow-hidden shadow-lg">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-accent-500">
-                      <svg className="mx-auto h-16 w-16 mb-2" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 6.5a9.77 9.77 0 00-8.82 5.5c1.64 2.84 5.19 5.5 8.82 5.5s7.18-2.66 8.82-5.5A9.77 9.77 0 0012 6.5zM12 16a4 4 0 110-8 4 4 0 010 8zm0-6a2 2 0 100 4 2 2 0 000-4z"/>
-                      </svg>
-                      <p className="text-xs font-medium">Yoga Class</p>
-                    </div>
-                  </div>
+                <div className="relative aspect-[3/2] rounded-xl overflow-hidden shadow-lg">
+          <Image
+                    src="/images/class/class-2.png"
+                    alt="Lớp học yoga tại Yên Yoga"
+                    fill
+                    priority={false}
+                    loading="lazy"
+                    sizes="(max-width: 1024px) 100vw, 400px"
+                    className="object-cover"
+                  />
                 </div>
                 <div className="mt-4">
                   <h3 className="text-lg font-semibold text-gray-900">Lớp học đa dạng</h3>
-                  <p className="text-sm text-gray-600">Từ cơ bản đến nâng cao cho mọi trình độ</p>
+                  <p className="text-sm text-gray-600">
+                    Lịch học linh hoạt với nhiều khung giờ sáng – trưa – tối, phù hợp cho người đi làm
+                    và cả học sinh, sinh viên.
+                  </p>
                 </div>
               </div>
 
               {/* Community Image */}
               <div className="relative">
-                <div className="aspect-[3/2] bg-gradient-to-br from-primary-100 to-primary-200 rounded-xl overflow-hidden shadow-lg">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-primary-500">
-                      <svg className="mx-auto h-16 w-16 mb-2" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zM4 18v-4h3v4h2v-7.5c0-.83.67-1.5 1.5-1.5S12 9.67 12 10.5V18h2v-4h3v4h2V9.5C19 8.12 17.88 7 16.5 7S14 8.12 14 9.5V11h-4V9.5C10 8.12 8.88 7 7.5 7S5 8.12 5 9.5V18h-1z"/>
-                      </svg>
-                      <p className="text-xs font-medium">Community</p>
-                    </div>
-                  </div>
+                <div className="relative aspect-[3/2] rounded-xl overflow-hidden shadow-lg">
+          <Image
+                    src="/images/class/class-3.png"
+                    alt="Cộng đồng Yên Yoga"
+                    fill
+                    priority={false}
+                    loading="lazy"
+                    sizes="(max-width: 1024px) 100vw, 400px"
+                    className="object-cover"
+                  />
                 </div>
                 <div className="mt-4">
                   <h3 className="text-lg font-semibold text-gray-900">Cộng đồng thân thiện</h3>
-                  <p className="text-sm text-gray-600">Kết nối và hỗ trợ lẫn nhau</p>
+                  <p className="text-sm text-gray-600">
+                    Mỗi buổi tập không chỉ là luyện tập mà còn là dịp để kết nối, chia sẻ và truyền cảm
+                    hứng cho nhau trong hành trình chăm sóc sức khỏe.
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Testimonial Wireframe */}
+            {/* Testimonial */}
             <div className="mx-auto mt-16 max-w-3xl">
               <div className="bg-white rounded-2xl shadow-xl p-8 border border-secondary-100">
-                <div className="flex items-center space-x-4 mb-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center sm:space-x-4 mb-6">
                   <div className="w-16 h-16 bg-gradient-to-br from-secondary-200 to-secondary-300 rounded-full flex items-center justify-center">
-                    <svg className="w-8 h-8 text-secondary-500" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                    </svg>
+                    <span className="text-secondary-700 font-bold text-2xl">L</span>
                   </div>
-                  <div>
-                    <div className="h-4 bg-secondary-200 rounded w-32 mb-2"></div>
-                    <div className="h-3 bg-secondary-100 rounded w-24"></div>
+                  <div className="mt-4 sm:mt-0">
+                    <p className="text-base font-semibold text-gray-900">Lan Anh • 32 tuổi</p>
+                    <p className="text-sm text-gray-500">Thành viên gắn bó hơn 1 năm tại Yên Yoga</p>
                   </div>
                 </div>
-                <div className="space-y-3">
-                  <div className="h-4 bg-gray-100 rounded w-full"></div>
-                  <div className="h-4 bg-gray-100 rounded w-4/5"></div>
-                  <div className="h-4 bg-gray-100 rounded w-3/4"></div>
+                <div className="space-y-3 text-gray-700">
+                  <p>
+                    “Sau giờ làm việc căng thẳng, mỗi buổi tối đến Yên Yoga giống như được reset lại hoàn toàn.
+                    Không gian yên tĩnh, giảng viên hướng dẫn rất kỹ và luôn để ý tới từng chuyển động của học viên.”
+                  </p>
+                  <p>
+                    “Khoảng 3 tháng tập đều đặn, mình ngủ ngon hơn, ít đau mỏi vai gáy và tinh thần cũng nhẹ nhàng hơn rất nhiều.
+                    Điều mình thích nhất là lớp không quá đông nên cảm giác rất an toàn và gần gũi.”
+                  </p>
                 </div>
-                <p className="text-center text-sm text-gray-400 mt-4">Customer Testimonial Placeholder</p>
               </div>
             </div>
           </div>
