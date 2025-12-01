@@ -9,7 +9,8 @@ export interface SEOConfig {
   noIndex?: boolean;
 }
 
-export const baseUrl = "https://yoga-dashboard-two.vercel.app";
+export const baseUrl =
+  process.env.NEXT_PUBLIC_BASE_URL || "https://yoga-dashboard-two.vercel.app";
 const siteName = "Yên Yoga Studio";
 const defaultDescription =
   "Khám phá hành trình yoga tại Yên Yoga Studio với đội ngũ giảng viên chuyên nghiệp, lớp học đa dạng và không gian thanh tịnh.";
