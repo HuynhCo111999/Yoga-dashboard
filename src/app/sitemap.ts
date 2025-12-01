@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { baseUrl } from "@/utils/seo";
+import { blogApi } from "@/lib/api/blog";
 
 const staticRoutes: Array<{
   path: string;
@@ -16,13 +17,34 @@ const staticRoutes: Array<{
   { path: "/login", changeFrequency: "yearly", priority: 0.4 },
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
 
-  return staticRoutes.map(({ path, changeFrequency, priority }) => ({
-    url: `${baseUrl}${path}`,
-    lastModified,
-    changeFrequency,
-    priority,
-  }));
+  const staticEntries: MetadataRoute.Sitemap = staticRoutes.map(
+    ({ path, changeFrequency, priority }) => ({
+      url: `${baseUrl}${path}`,
+      lastModified,
+      changeFrequency,
+      priority,
+    })
+  );
+
+  // Blog post detail pages
+  let blogEntries: MetadataRoute.Sitemap = [];
+  try {
+    const postsResult = await blogApi.getPublishedPosts();
+    const posts =
+      postsResult.success && postsResult.data ? postsResult.data : [];
+
+    blogEntries = posts.map((post) => ({
+      url: `${baseUrl}/blog/${post.slug}`,
+      lastModified: post.updatedAt || post.publishedAt || lastModified,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    }));
+  } catch {
+    blogEntries = [];
+  }
+
+  return [...staticEntries, ...blogEntries];
 }
