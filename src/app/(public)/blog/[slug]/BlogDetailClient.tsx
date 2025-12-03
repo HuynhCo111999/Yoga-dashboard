@@ -185,7 +185,7 @@ export default function BlogDetailClient({ post, relatedPosts }: BlogDetailClien
       )}
 
       {/* Enhanced Article Content */}
-      <article className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <article className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="relative">
           <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20"></div>
           <div className="relative bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border border-orange-100/50 p-8 lg:p-16 floating-content">

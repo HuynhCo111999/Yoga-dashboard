@@ -70,8 +70,12 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
           author: formData.author,
           tags: formData.tags,
           isPublished: formData.isPublished,
-          featuredImage: formData.featuredImage || undefined,
         };
+
+        // Chỉ thêm field featuredImage nếu có giá trị (string) để tránh undefined
+        if (formData.featuredImage) {
+          (updateData as BlogPostUpdateRequest).featuredImage = formData.featuredImage;
+        }
         
         const result = await blogApi.updatePost(post.id, updateData);
         if (result.success) {

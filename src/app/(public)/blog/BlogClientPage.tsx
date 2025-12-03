@@ -78,12 +78,8 @@ export default function BlogClientPage() {
       {/* Animated Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-primary-600 via-primary-500 to-accent-500">
         {/* Animated Background Elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full animate-pulse"></div>
-          <div className="absolute top-32 right-20 w-16 h-16 bg-white/5 rounded-full animate-bounce delay-300"></div>
-          <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-white/10 rounded-full animate-pulse delay-700"></div>
-          <div className="absolute bottom-40 right-1/3 w-8 h-8 bg-white/5 rounded-full animate-bounce delay-1000"></div>
-        </div>
+        {/* Subtle background overlay */}
+        <div className="absolute inset-0 bg-black/10" />
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
@@ -97,10 +93,10 @@ export default function BlogClientPage() {
               </span>
             </h1>
             <p className="mt-6 text-xl md:text-2xl text-orange-100 max-w-3xl mx-auto leading-relaxed animate-fade-in-up delay-300">
-              🧘‍♀️ Khám phá hành trình yoga đầy cảm hứng cùng chúng tôi
+              Khám phá hành trình yoga đầy cảm hứng cùng Yên Yoga Studio.
             </p>
             <p className="mt-4 text-lg text-orange-200 max-w-2xl mx-auto animate-fade-in-up delay-500">
-              Chia sẻ kiến thức, kinh nghiệm và những câu chuyện đầy ý nghĩa về yoga
+              Chia sẻ kiến thức, kinh nghiệm và những câu chuyện ý nghĩa về luyện tập, sức khỏe và lối sống cân bằng.
             </p>
           </div>
         </div>
@@ -130,7 +126,7 @@ export default function BlogClientPage() {
                 <div className="relative group">
                   <input
                     type="text"
-                    placeholder="🔍 Tìm kiếm bài viết thú vị..."
+                    placeholder="Tìm kiếm bài viết..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-12 pr-6 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-300 text-lg bg-white/70 backdrop-blur-sm group-hover:shadow-lg"
@@ -153,7 +149,7 @@ export default function BlogClientPage() {
                   onChange={(e) => setSelectedTag(e.target.value)}
                   className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-300 text-lg bg-white/70 backdrop-blur-sm hover:shadow-lg cursor-pointer"
                 >
-                  <option value="">🏷️ Tất cả chủ đề</option>
+                  <option value="">Tất cả chủ đề</option>
                   {allTags.map(tag => (
                     <option key={tag} value={tag}>📌 {tag}</option>
                   ))}
@@ -166,7 +162,7 @@ export default function BlogClientPage() {
               <div className="mt-6 flex flex-wrap gap-3">
                 {searchTerm && (
                   <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-primary-100 text-primary-800">
-                    🔍 &quot;{searchTerm}&quot;
+                    Từ khóa: &quot;{searchTerm}&quot;
                     <button
                       onClick={() => setSearchTerm('')}
                       className="ml-2 text-primary-600 hover:text-primary-800"
@@ -177,7 +173,7 @@ export default function BlogClientPage() {
                 )}
                 {selectedTag && (
                   <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-accent-100 text-accent-800">
-                    🏷️ {selectedTag}
+                    Chủ đề: {selectedTag}
                     <button
                       onClick={() => setSelectedTag('')}
                       className="ml-2 text-accent-600 hover:text-accent-800"
@@ -205,7 +201,7 @@ export default function BlogClientPage() {
               <div className="w-16 h-16 border-4 border-primary-200 rounded-full animate-spin"></div>
               <div className="w-16 h-16 border-4 border-primary-600 rounded-full animate-spin absolute top-0 left-0" style={{clipPath: 'polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%)'}}></div>
             </div>
-            <p className="mt-6 text-lg text-gray-600 animate-pulse">✨ Đang tải những bài viết tuyệt vời...</p>
+            <p className="mt-6 text-lg text-gray-600 animate-pulse">Đang tải bài viết, vui lòng chờ trong giây lát...</p>
           </div>
         ) : filteredPosts.length === 0 ? (
           <div className="text-center py-20">
@@ -218,12 +214,12 @@ export default function BlogClientPage() {
               </div>
             </div>
             <h3 className="mt-8 text-2xl font-bold text-gray-900">
-              {searchTerm || selectedTag ? '🔍 Không tìm thấy bài viết phù hợp' : '📚 Chưa có bài viết nào'}
+              {searchTerm || selectedTag ? 'Không tìm thấy bài viết phù hợp' : 'Chưa có bài viết nào'}
             </h3>
             <p className="mt-4 text-lg text-gray-600 max-w-md mx-auto">
               {searchTerm || selectedTag ? 
-                '🎯 Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc để khám phá thêm' : 
-                '🌟 Hãy quay lại sau để đọc những bài viết mới đầy cảm hứng'
+                'Hãy thử thay đổi từ khóa tìm kiếm hoặc bộ lọc để khám phá thêm.' : 
+                'Hãy quay lại sau để đọc những bài viết mới từ Yên Yoga Studio.'
               }
             </p>
           </div>
@@ -235,7 +231,7 @@ export default function BlogClientPage() {
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-accent-600 rounded-3xl blur-xl opacity-25 group-hover:opacity-40 transition-opacity duration-500"></div>
                   <article className="relative bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:scale-[1.02] transition-all duration-500 group-hover:shadow-3xl">
-                    <div className="grid lg:grid-cols-2 gap-0">
+                    <div className="grid lg:grid-cols gap-0">
                       {/* Featured Image */}
                       {filteredPosts[0].featuredImage && (
                         <div className="relative h-64 lg:h-full min-h-[400px] overflow-hidden">
@@ -261,7 +257,7 @@ export default function BlogClientPage() {
                             <button
                               key={index}
                               onClick={() => setSelectedTag(tag)}
-                              className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800 hover:bg-primary-200 transition-colors transform hover:scale-105"
+                              className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800 hover:bg-primary-200 transition-colors"
                             >
                               #{tag}
                             </button>
@@ -313,7 +309,7 @@ export default function BlogClientPage() {
                 {filteredPosts.slice(1).map((post, index) => (
                   <article 
                     key={post.id} 
-                    className="group bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 hover:scale-[1.02]"
+                    className="group bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-300"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     {/* Featured Image */}
@@ -336,7 +332,7 @@ export default function BlogClientPage() {
                           <button
                             key={tagIndex}
                             onClick={() => setSelectedTag(tag)}
-                            className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-primary-100 to-accent-100 text-primary-800 hover:from-primary-200 hover:to-accent-200 transition-all transform hover:scale-105"
+                            className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-primary-100 to-accent-100 text-primary-800 hover:from-primary-200 hover:to-accent-200 transition-colors"
                           >
                             #{tag}
                           </button>
@@ -372,7 +368,7 @@ export default function BlogClientPage() {
                       {/* Read More Button */}
                       <button 
                         onClick={() => router.push(`/blog/${post.slug}`)}
-                        className="w-full bg-gradient-to-r from-primary-600 to-accent-600 text-white py-3 px-4 rounded-xl hover:from-primary-700 hover:to-accent-700 transition-all duration-300 text-sm font-semibold transform hover:scale-[1.02] hover:shadow-lg group flex items-center justify-center"
+                        className="w-full bg-gradient-to-r from-primary-600 to-accent-600 text-white py-3 px-4 rounded-xl hover:from-primary-700 hover:to-accent-700 transition-all duration-300 text-sm font-semibold hover:shadow-lg group flex items-center justify-center"
                       >
                         <span>📖 Đọc thêm</span>
                         <svg className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -396,7 +392,7 @@ export default function BlogClientPage() {
               </div>
             </div>
             <p className="text-lg text-gray-700 font-medium">
-              ✨ Hiển thị <span className="text-primary-600 font-bold">{filteredPosts.length}</span> trên tổng số <span className="text-accent-600 font-bold">{posts.length}</span> bài viết tuyệt vời
+              Đang hiển thị <span className="text-primary-600 font-bold">{filteredPosts.length}</span> trên tổng số <span className="text-accent-600 font-bold">{posts.length}</span> bài viết
             </p>
             {(searchTerm || selectedTag) && (
               <button
@@ -404,7 +400,7 @@ export default function BlogClientPage() {
                   setSearchTerm('');
                   setSelectedTag('');
                 }}
-                className="mt-4 inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary-600 to-accent-600 text-white rounded-2xl hover:from-primary-700 hover:to-accent-700 font-medium transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                className="mt-4 inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary-600 to-accent-600 text-white rounded-2xl hover:from-primary-700 hover:to-accent-700 font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
               >
                 <span>🔄 Xóa bộ lọc</span>
               </button>
@@ -418,21 +414,21 @@ export default function BlogClientPage() {
             <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-accent-600 rounded-3xl blur-xl opacity-25"></div>
             <div className="relative bg-gradient-to-r from-primary-600 to-accent-600 rounded-3xl p-12 text-center text-white shadow-2xl">
               <h3 className="text-3xl font-bold mb-4">
-                🌟 Khám phá thêm nhiều bài viết thú vị
+                Khám phá thêm nhiều bài viết từ Yên Yoga
               </h3>
               <p className="text-xl text-orange-100 mb-8 max-w-2xl mx-auto">
-                Tham gia cộng đồng yoga của chúng tôi để không bỏ lỡ những chia sẻ bổ ích và cảm hứng mới mỗi ngày
+                Tham gia cộng đồng yoga của Yên Yoga Studio để không bỏ lỡ những chia sẻ hữu ích và nguồn cảm hứng mới mỗi ngày.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button 
                   onClick={() => router.push('/calendar')}
-                  className="inline-flex items-center px-8 py-4 bg-white text-primary-600 rounded-2xl hover:bg-orange-50 transition-all duration-300 font-semibold transform hover:scale-105 shadow-lg hover:shadow-xl"
+                  className="inline-flex items-center px-8 py-4 bg-white text-primary-600 rounded-2xl hover:bg-orange-50 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl"
                 >
                   <span>📅 Xem lịch lớp học</span>
                 </button>
                 <button 
                   onClick={() => router.push('/about')}
-                  className="inline-flex items-center px-8 py-4 bg-primary-700/50 text-white rounded-2xl hover:bg-primary-700 transition-all duration-300 font-semibold transform hover:scale-105 border border-white/20"
+                  className="inline-flex items-center px-8 py-4 bg-primary-700/50 text-white rounded-2xl hover:bg-primary-700 transition-all duration-300 font-semibold border border-white/20"
                 >
                   <span>🧘‍♀️ Tìm hiểu về chúng tôi</span>
                 </button>
@@ -446,7 +442,7 @@ export default function BlogClientPage() {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 w-14 h-14 bg-gradient-to-r from-primary-600 to-accent-600 text-white rounded-full shadow-2xl hover:shadow-3xl transform hover:scale-110 transition-all duration-300 flex items-center justify-center animate-bounce"
+          className="fixed bottom-8 right-8 z-50 w-14 h-14 bg-gradient-to-r from-primary-600 to-accent-600 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center justify-center"
           aria-label="Scroll to top"
         >
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -454,11 +450,6 @@ export default function BlogClientPage() {
           </svg>
         </button>
       )}
-
-      {/* Floating Elements for Visual Appeal */}
-      <div className="fixed top-20 right-10 w-3 h-3 bg-accent-400 rounded-full animate-pulse opacity-70 pointer-events-none"></div>
-      <div className="fixed top-40 right-16 w-2 h-2 bg-primary-400 rounded-full animate-bounce delay-300 opacity-60 pointer-events-none"></div>
-      <div className="fixed bottom-32 left-10 w-4 h-4 bg-accent-300 rounded-full animate-pulse delay-700 opacity-50 pointer-events-none"></div>
     </div>
   );
 }
