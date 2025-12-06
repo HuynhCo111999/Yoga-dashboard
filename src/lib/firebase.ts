@@ -1,19 +1,40 @@
-import { initializeApp } from 'firebase/app';
-import { getAnalytics, Analytics } from 'firebase/analytics';
-import { getAuth, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, User, deleteUser } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { initializeApp } from "firebase/app";
+import { getAnalytics, Analytics } from "firebase/analytics";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  User,
+  deleteUser,
+} from "firebase/auth";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+} from "firebase/firestore";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
 
 // Firebase configuration
 // Environment variables are loaded from .env.local
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyC0ZTh6rcSCn5vTANp0CWKJ-aIZxx4vt90',
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'yen-yoga-dashboard.firebaseapp.com',
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'yen-yoga-dashboard',
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'yen-yoga-dashboard.firebasestorage.app',
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '17255003511',
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '1:17255003511:web:737c001d0e5e5debf25d72',
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-XX91RY8C7H',
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
@@ -30,7 +51,7 @@ export const storage = getStorage(app);
 
 // Initialize Analytics (only in browser)
 export let analytics: Analytics | null = null;
-if (typeof window !== 'undefined' && firebaseConfig.measurementId) {
+if (typeof window !== "undefined" && firebaseConfig.measurementId) {
   analytics = getAnalytics(app);
 }
 
@@ -42,33 +63,45 @@ export const authService = {
   // Sign in with email and password
   signIn: async (email: string, password: string): Promise<AuthResult> => {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       return { user: userCredential.user, error: null };
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Sign in failed';
+      const message = error instanceof Error ? error.message : "Sign in failed";
       return { user: null, error: message };
     }
   },
 
   // Sign up with email and password
-  signUp: async (email: string, password: string, userData: Partial<UserData>): Promise<AuthResult> => {
+  signUp: async (
+    email: string,
+    password: string,
+    userData: Partial<UserData>
+  ): Promise<AuthResult> => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
 
       // Create user document in Firestore
       const newUserData: UserData = {
         email: userCredential.user.email || email,
-        role: userData.role || 'member',
-        name: userData.name || '',
+        role: userData.role || "member",
+        name: userData.name || "",
         createdAt: new Date().toISOString(),
         ...userData,
       };
 
-      await setDoc(doc(db, 'users', userCredential.user.uid), newUserData);
+      await setDoc(doc(db, "users", userCredential.user.uid), newUserData);
 
       return { user: userCredential.user, error: null };
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Sign up failed';
+      const message = error instanceof Error ? error.message : "Sign up failed";
       return { user: null, error: message };
     }
   },
@@ -80,25 +113,30 @@ export const authService = {
   ): Promise<{ uid: string; error: string | null }> => {
     try {
       // Generate a unique ID for the user document
-      const uid = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const uid = `user_${Date.now()}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
 
       // Create user document in Firestore
       const newUserData: UserData = {
         email,
-        role: userData.role || 'member',
-        name: userData.name || '',
+        role: userData.role || "member",
+        name: userData.name || "",
         createdAt: new Date().toISOString(),
         ...userData,
         // Add a flag to indicate this user needs to complete auth setup
         authSetupRequired: true,
       };
 
-      await setDoc(doc(db, 'users', uid), newUserData);
+      await setDoc(doc(db, "users", uid), newUserData);
 
       return { uid, error: null };
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Failed to create user document';
-      return { uid: '', error: message };
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to create user document";
+      return { uid: "", error: message };
     }
   },
 
@@ -108,7 +146,8 @@ export const authService = {
       await signOut(auth);
       return { error: null };
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Sign out failed';
+      const message =
+        error instanceof Error ? error.message : "Sign out failed";
       return { error: message };
     }
   },
@@ -116,28 +155,33 @@ export const authService = {
   // Get current user data from Firestore
   getUserData: async (uid: string): Promise<DataResult<UserData>> => {
     try {
-      const userDoc = await getDoc(doc(db, 'users', uid));
+      const userDoc = await getDoc(doc(db, "users", uid));
       if (userDoc.exists()) {
         return { data: userDoc.data() as UserData, error: null };
       } else {
-        return { data: null, error: 'User not found' };
+        return { data: null, error: "User not found" };
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Failed to get user data';
+      const message =
+        error instanceof Error ? error.message : "Failed to get user data";
       return { data: null, error: message };
     }
   },
 
   // Update user data
-  updateUserData: async (uid: string, userData: Partial<UserData>): Promise<ErrorResult> => {
+  updateUserData: async (
+    uid: string,
+    userData: Partial<UserData>
+  ): Promise<ErrorResult> => {
     try {
-      await updateDoc(doc(db, 'users', uid), {
+      await updateDoc(doc(db, "users", uid), {
         ...userData,
         updatedAt: new Date().toISOString(),
       });
       return { error: null };
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Failed to update user data';
+      const message =
+        error instanceof Error ? error.message : "Failed to update user data";
       return { error: message };
     }
   },
@@ -148,13 +192,16 @@ export const authService = {
       // Note: This function would typically require admin privileges
       // For client-side deletion, the user needs to be currently authenticated
       // In production, this should be done through Firebase Admin SDK on the server
-      
+
       // For now, we'll just return success since the actual deletion
       // should be handled by Firebase Admin SDK on the backend
-      console.warn('User deletion should be handled by Firebase Admin SDK on the server');
+      console.warn(
+        "User deletion should be handled by Firebase Admin SDK on the server"
+      );
       return { error: null };
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Failed to delete user';
+      const message =
+        error instanceof Error ? error.message : "Failed to delete user";
       return { error: message };
     }
   },
@@ -167,8 +214,8 @@ export const authService = {
 
 // User roles
 export const USER_ROLES = {
-  ADMIN: 'admin',
-  MEMBER: 'member',
+  ADMIN: "admin",
+  MEMBER: "member",
 } as const;
 
 export type UserRole = (typeof USER_ROLES)[keyof typeof USER_ROLES];
@@ -221,20 +268,26 @@ export interface FirebaseUser extends User {
 // Storage service for uploading files
 export const storageService = {
   // Upload image to Firebase Storage
-  uploadImage: async (file: File, path: string): Promise<{ url: string | null; error: string | null }> => {
+  uploadImage: async (
+    file: File,
+    path: string
+  ): Promise<{ url: string | null; error: string | null }> => {
     try {
       // Create a reference to the file location
-      const imageRef = ref(storage, `images/${path}/${Date.now()}-${file.name}`);
-      
+      const imageRef = ref(
+        storage,
+        `images/${path}/${Date.now()}-${file.name}`
+      );
+
       // Upload the file
       const snapshot = await uploadBytes(imageRef, file);
-      
+
       // Get the download URL
       const downloadURL = await getDownloadURL(snapshot.ref);
-      
+
       return { url: downloadURL, error: null };
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Upload failed';
+      const message = error instanceof Error ? error.message : "Upload failed";
       return { url: null, error: message };
     }
   },
@@ -244,26 +297,28 @@ export const storageService = {
     try {
       // Create a reference to the file to delete
       const imageRef = ref(storage, imageUrl);
-      
+
       // Delete the file
       await deleteObject(imageRef);
-      
+
       return { error: null };
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Delete failed';
+      const message = error instanceof Error ? error.message : "Delete failed";
       return { error: message };
     }
   },
 
   // Upload blog featured image
-  uploadBlogImage: async (file: File): Promise<{ url: string | null; error: string | null }> => {
-    return storageService.uploadImage(file, 'blog');
+  uploadBlogImage: async (
+    file: File
+  ): Promise<{ url: string | null; error: string | null }> => {
+    return storageService.uploadImage(file, "blog");
   },
 
   // Generate preview URL for uploaded file
   generatePreviewUrl: (file: File): string => {
     return URL.createObjectURL(file);
-  }
+  },
 };
 
 export default app;
