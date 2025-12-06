@@ -115,8 +115,8 @@
   content: '';
   position: absolute;
   left: 0;
-  top: 0.5rem;
-  height: 1.5rem;
+  top: 0.7rem;
+  height: 2rem;
   width: 4px;
   background: linear-gradient(to bottom, #ea580c, #f59e0b);
   border-radius: 2px;
