@@ -2,18 +2,27 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { blogApi, BlogPost } from '@/lib/api/blog';
+import { logger } from '@/lib/logger';
 import './blog-animations.css';
 
 export default function BlogClientPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
   const [showScrollTop, setShowScrollTop] = useState(false);
+
+  // Log page view
+  useEffect(() => {
+    logger.info('Page viewed: Blog', { page: 'blog', path: pathname });
+    logger.event('Page View', { page: 'Blog', path: pathname });
+    console.log('[PAGE] User navigated to Blog page');
+  }, [pathname]);
 
   useEffect(() => {
     loadPosts();
@@ -40,14 +49,27 @@ export default function BlogClientPage() {
       setLoading(true);
       setError(null);
 
+      logger.debug('Loading blog posts', { page: 'blog' });
+
       const result = await blogApi.getPublishedPosts();
       if (result.success && result.data) {
         setPosts(result.data);
+        logger.info('Blog posts loaded successfully', {
+          count: result.data.length,
+          page: 'blog',
+        });
+        console.log(`[BLOG] Loaded ${result.data.length} blog posts`);
       } else {
         setError(result.error || 'Có lỗi xảy ra khi tải bài viết');
+        logger.warning('Failed to load blog posts', {
+          error: result.error,
+          page: 'blog',
+        });
       }
-    } catch {
-      setError('Có lỗi xảy ra khi tải bài viết');
+    } catch (err) {
+      const errorMessage = 'Có lỗi xảy ra khi tải bài viết';
+      setError(errorMessage);
+      logger.error('Blog posts loading error', err, { page: 'blog' });
     } finally {
       setLoading(false);
     }
@@ -71,6 +93,45 @@ export default function BlogClientPage() {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  // Logging handlers
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    if (value.length >= 3) {
+      logger.debug('Blog search performed', {
+        searchTerm: value,
+        page: 'blog',
+      });
+      console.log(`[BLOG] User searching for: "${value}"`);
+    }
+  };
+
+  const handleTagChange = (tag: string) => {
+    setSelectedTag(tag);
+    logger.info('Blog tag filter applied', {
+      tag: tag || 'all',
+      page: 'blog',
+    });
+    logger.event('Blog Filter Changed', {
+      filterType: 'tag',
+      value: tag || 'all',
+    });
+    console.log(`[BLOG] Tag filter applied: ${tag || 'all'}`);
+  };
+
+  const handlePostClick = (post: BlogPost) => {
+    logger.info('Blog post clicked', {
+      slug: post.slug,
+      title: post.title,
+      page: 'blog',
+    });
+    logger.event('Blog Post Clicked', {
+      slug: post.slug,
+      title: post.title,
+    });
+    console.log(`[BLOG] User clicked post: ${post.title}`);
+    router.push(`/blog/${post.slug}`);
   };
 
   return (
@@ -128,7 +189,7 @@ export default function BlogClientPage() {
                     type="text"
                     placeholder="Tìm kiếm bài viết..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => handleSearchChange(e.target.value)}
                     className="w-full pl-12 pr-6 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-300 text-lg bg-white/70 backdrop-blur-sm group-hover:shadow-lg"
                   />
                   <svg 
@@ -146,7 +207,7 @@ export default function BlogClientPage() {
               <div className="lg:w-80 w-full">
                 <select
                   value={selectedTag}
-                  onChange={(e) => setSelectedTag(e.target.value)}
+                  onChange={(e) => handleTagChange(e.target.value)}
                   className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-300 text-lg bg-white/70 backdrop-blur-sm hover:shadow-lg cursor-pointer"
                 >
                   <option value="">Tất cả chủ đề</option>
@@ -288,7 +349,7 @@ export default function BlogClientPage() {
 
                         {/* Read More Button */}
                         <button 
-                          onClick={() => router.push(`/blog/${filteredPosts[0].slug}`)}
+                          onClick={() => handlePostClick(filteredPosts[0])}
                           className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-primary-600 to-accent-600 text-white rounded-2xl hover:from-primary-700 hover:to-accent-700 transition-all duration-300 text-lg font-semibold transform hover:scale-105 hover:shadow-xl group"
                         >
                           <span>📖 Đọc bài viết</span>
@@ -367,7 +428,7 @@ export default function BlogClientPage() {
 
                       {/* Read More Button */}
                       <button 
-                        onClick={() => router.push(`/blog/${post.slug}`)}
+                        onClick={() => handlePostClick(post)}
                         className="w-full bg-gradient-to-r from-primary-600 to-accent-600 text-white py-3 px-4 rounded-xl hover:from-primary-700 hover:to-accent-700 transition-all duration-300 text-sm font-semibold hover:shadow-lg group flex items-center justify-center"
                       >
                         <span>📖 Đọc thêm</span>

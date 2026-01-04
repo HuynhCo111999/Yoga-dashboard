@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Image from 'next/image';
 import Header from '@/components/Header';
+import PageLogger from '@/components/PageLogger';
 import { generateMetadata, pageConfigs } from '@/utils/seo';
 
 export const metadata: Metadata = generateMetadata(pageConfigs.about);
@@ -8,6 +9,7 @@ export const metadata: Metadata = generateMetadata(pageConfigs.about);
 export default function About() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-accent-50 to-secondary-50">
+      <PageLogger pageName="About Page" pageData={{ section: 'about' }} />
       <Header />
       <div className="py-16 sm:py-20 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

@@ -1,9 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Header from '@/components/Header';
+import { logger } from '@/lib/logger';
 
 export default function ContactClientPage() {
+  const pathname = usePathname();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -11,12 +14,50 @@ export default function ContactClientPage() {
     message: ''
   });
 
+  // Log page view
+  useEffect(() => {
+    logger.info('Page viewed: Contact', { page: 'contact', path: pathname });
+    logger.event('Page View', { page: 'Contact', path: pathname });
+    console.log('[PAGE] User navigated to Contact page');
+  }, [pathname]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
-    alert('Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất có thể.');
-    setFormData({ name: '', email: '', phone: '', message: '' });
+    
+    try {
+      // Log form submission attempt
+      logger.info('Contact form submitted', {
+        name: formData.name,
+        email: formData.email,
+        hasPhone: !!formData.phone,
+        messageLength: formData.message.length,
+      });
+
+      // Track as Sentry event
+      logger.event('Contact Form Submitted', {
+        email: formData.email,
+        hasPhone: !!formData.phone,
+        messageLength: formData.message.length,
+      });
+
+      // Handle form submission here
+      console.log('[FORM] Contact form submitted:', {
+        name: formData.name,
+        email: formData.email,
+      });
+
+      alert('Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất có thể.');
+      
+      // Log successful submission
+      logger.info('Contact form submission successful', { email: formData.email });
+      
+      setFormData({ name: '', email: '', phone: '', message: '' });
+    } catch (error) {
+      // Log error
+      logger.error('Contact form submission failed', error, {
+        email: formData.email,
+      });
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

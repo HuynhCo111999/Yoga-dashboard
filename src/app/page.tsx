@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Metadata } from 'next';
 import Header from '@/components/Header';
 import StructuredData from '@/components/StructuredData';
+import PageLogger from '@/components/PageLogger';
 import { generateMetadata as generateSEOMetadata, pageConfigs } from '@/utils/seo';
 
 export const metadata: Metadata = generateSEOMetadata(pageConfigs.home);
@@ -10,6 +11,7 @@ export const metadata: Metadata = generateSEOMetadata(pageConfigs.home);
 export default function Home() {
   return (
     <>
+      <PageLogger pageName="Landing Page" pageData={{ section: 'home' }} />
       <Header />
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-accent-50 to-primary-50 py-12 sm:py-16 lg:py-20">

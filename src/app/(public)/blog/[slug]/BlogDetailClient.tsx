@@ -1,9 +1,10 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { BlogPost } from '@/lib/api/blog';
+import { logger } from '@/lib/logger';
 import './blog-detail-animations.css';
 
 interface BlogDetailClientProps {
@@ -13,8 +14,26 @@ interface BlogDetailClientProps {
 
 export default function BlogDetailClient({ post, relatedPosts }: BlogDetailClientProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
+
+  // Log page view for blog post
+  useEffect(() => {
+    logger.info('Blog post viewed', {
+      slug: post.slug,
+      title: post.title,
+      author: post.author,
+      tags: post.tags,
+      path: pathname,
+    });
+    logger.event('Blog Post Viewed', {
+      slug: post.slug,
+      title: post.title,
+      author: post.author,
+    });
+    console.log(`[BLOG] User viewing post: ${post.title}`);
+  }, [post.slug, post.title, post.author, post.tags, pathname]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,11 +43,26 @@ export default function BlogDetailClient({ post, relatedPosts }: BlogDetailClien
       
       setScrollProgress(scrollPercent);
       setShowScrollTop(scrollTop > 500);
+
+      // Log when user reaches certain milestones
+      if (scrollPercent >= 25 && scrollPercent < 26) {
+        console.log('[BLOG] User scrolled 25% of the post');
+      } else if (scrollPercent >= 50 && scrollPercent < 51) {
+        console.log('[BLOG] User scrolled 50% of the post');
+      } else if (scrollPercent >= 75 && scrollPercent < 76) {
+        console.log('[BLOG] User scrolled 75% of the post');
+      } else if (scrollPercent >= 95) {
+        logger.event('Blog Post Read Complete', {
+          slug: post.slug,
+          title: post.title,
+        });
+        console.log('[BLOG] User completed reading the post');
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [post.slug, post.title]);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -74,6 +108,20 @@ export default function BlogDetailClient({ post, relatedPosts }: BlogDetailClien
         );
       })
       .filter(Boolean);
+  };
+
+  const handleRelatedPostClick = (relatedPost: BlogPost) => {
+    logger.info('Related blog post clicked', {
+      fromSlug: post.slug,
+      toSlug: relatedPost.slug,
+      toTitle: relatedPost.title,
+    });
+    logger.event('Related Post Clicked', {
+      fromPost: post.title,
+      toPost: relatedPost.title,
+    });
+    console.log(`[BLOG] User clicked related post: ${relatedPost.title}`);
+    router.push(`/blog/${relatedPost.slug}`);
   };
 
   return (
@@ -258,7 +306,7 @@ export default function BlogDetailClient({ post, relatedPosts }: BlogDetailClien
                 <article
                   key={relatedPost.id}
                   className="group relative bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-orange-100/50 hover:border-primary-200 floating-card hover:-translate-y-2 cursor-pointer"
-                  onClick={() => router.push(`/blog/${relatedPost.slug}`)}
+                  onClick={() => handleRelatedPostClick(relatedPost)}
                   style={{ animationDelay: `${index * 0.2}s` }}
                 >
                   {/* Card glow effect */}
