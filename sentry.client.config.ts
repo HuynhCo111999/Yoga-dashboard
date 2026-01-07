@@ -19,6 +19,7 @@ Sentry.init({
       xhr: true,
     }),
   ],
+  enableLogs: true,
 
   maxBreadcrumbs: 100,
   beforeBreadcrumb(breadcrumb, hint) {
