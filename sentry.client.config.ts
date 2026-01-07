@@ -1,5 +1,7 @@
 import * as Sentry from "@sentry/nextjs";
 
+Sentry.logger.info("User triggered test log", { log_source: "sentry_test" });
+
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   tracesSampleRate: 1.0,
