@@ -20,6 +20,7 @@ Sentry.init({
       history: true,
       xhr: true,
     }),
+    Sentry.consoleLoggingIntegration({ levels: ["log", "warn", "error"] }),
   ],
   enableLogs: true,
 
