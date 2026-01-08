@@ -1,18 +1,19 @@
 import * as Sentry from "@sentry/nextjs";
 
-Sentry.logger.info("User triggered test log", { log_source: "sentry_test" });
-
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-  tracesSampleRate: 1.0,
-  debug: process.env.NODE_ENV === "development",
-  replaysOnErrorSampleRate: 1.0,
-  replaysSessionSampleRate: 0.1,
+  environment: process.env.VERCEL_ENV || process.env.NODE_ENV,
+  tracesSampleRate: 0.1,
+  enableLogs: true,
+  replaysOnErrorSampleRate: 1,
+  replaysSessionSampleRate: 0.01,
+
   integrations: [
     Sentry.replayIntegration({
       maskAllText: true,
       blockAllMedia: true,
     }),
+
     Sentry.breadcrumbsIntegration({
       console: true,
       dom: true,
@@ -20,12 +21,13 @@ Sentry.init({
       history: true,
       xhr: true,
     }),
-    Sentry.consoleLoggingIntegration({ levels: ["log", "warn", "error"] }),
   ],
-  enableLogs: true,
 
-  maxBreadcrumbs: 100,
-  beforeBreadcrumb(breadcrumb, hint) {
+  debug: process.env.NODE_ENV === "development",
+
+  maxBreadcrumbs: 50,
+
+  beforeBreadcrumb(breadcrumb) {
     return breadcrumb;
   },
 
