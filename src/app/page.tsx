@@ -75,7 +75,7 @@ export default function Home() {
             </div>
 
             {/* Right: Image */}
-            <div className="lg:col-span-6 mt-12 lg:mt-0 animate-slide-in-right animate-delay-200">
+            <div className="lg:col-span-6 mt-12 lg:mt-0 animate-slide-in-right">
               <div className="relative max-w-lg mx-auto lg:max-w-none">
                 {/* Main image */}
                 <div className="relative aspect-[4/3] rounded-3xl shadow-2xl overflow-hidden border-4 border-white">
