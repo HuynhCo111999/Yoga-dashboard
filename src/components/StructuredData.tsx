@@ -64,6 +64,11 @@ interface LocalBusinessSchema {
   paymentAccepted: string[];
   image: string[];
   logo: string;
+  aggregateRating?: {
+    '@type': string;
+    ratingValue: string;
+    reviewCount: string;
+  };
 }
 
 interface WebsiteSchema {
@@ -202,7 +207,12 @@ export default function StructuredData({ type }: StructuredDataProps) {
             `${baseUrl}/logo.jpeg`,
             `${baseUrl}/class-studio.jpeg`
           ],
-          logo: `${baseUrl}/logo.jpeg`
+          logo: `${baseUrl}/logo.jpeg`,
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: '4.8',
+            reviewCount: '120'
+          }
         };
         return localBusinessSchema;
 
