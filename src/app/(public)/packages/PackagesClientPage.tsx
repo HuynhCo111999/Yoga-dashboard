@@ -102,22 +102,26 @@ export default function PackagesClientPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-accent-50 to-secondary-50">
+    <div className='min-h-[100dvh] bg-gradient-to-br from-primary-50 via-white to-accent-50 relative overflow-hidden'>
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-100/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 animate-float-slow pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-secondary-100/50 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4 animate-float pointer-events-none"></div>
+
       <Header />
 
-      <div className="py-12 sm:py-16">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          {/* Page Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Gói Tập Yoga
-            </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Khám phá các gói tập yoga phù hợp với nhu cầu và mục tiêu của bạn. 
-              Từ cơ bản đến nâng cao, chúng tôi có gói tập phù hợp cho mọi trình độ.
-            </p>
-            <div className="mt-6 h-1 w-24 bg-gradient-to-r from-primary-400 to-primary-600 rounded-full mx-auto"></div>
-          </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20 relative z-10">
+        {/* Page Header */}
+        <div className='text-center mb-16'>
+          <span className="inline-block py-1.5 px-4 rounded-full bg-white border border-secondary-200 text-secondary-600 text-sm font-semibold tracking-wide mb-4 shadow-sm animate-fadeInUp">
+            Chi Phí Đầu Tư
+          </span>
+          <h1 className='text-4xl sm:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight animate-fadeInUp animate-delay-100'>
+            Gói tập <span className="gradient-text">Yoga</span>
+          </h1>
+          <p className='text-lg text-gray-600 max-w-2xl mx-auto animate-fadeInUp animate-delay-200'>
+            Khám phá các gói tập yoga phù hợp với nhu cầu và mục tiêu của bạn. Từ cơ bản đến nâng cao, chúng tôi có gói tập phù hợp cho mọi trình độ.
+          </p>
+        </div>
 
           {/* Error Display */}
           {error && (
@@ -134,92 +138,98 @@ export default function PackagesClientPage() {
 
           {/* Packages Grid */}
           {packages.length > 0 ? (
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {packages.map((pkg) => (
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
+              {packages.map((pkg, idx) => (
                 <div
                   key={pkg.id}
-                  className="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-primary-100 hover:shadow-2xl transition-all duration-300 hover:border-primary-200 transform hover:scale-105"
+                  className="group relative bg-white/70 backdrop-blur-xl shadow-xl rounded-[2rem] border border-white hover:shadow-[0_20px_40px_rgba(219,110,76,0.15)] transition-all duration-500 hover:-translate-y-2 overflow-hidden flex flex-col"
+                  style={{ animationDelay: `${idx * 150}ms` }}
                 >
-                  <div className="p-8">
+                  {/* Subtle top gradient line */}
+                  <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary-400 to-accent-400 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 delay-100"></div>
+                  
+                  <div className="p-8 lg:p-10 flex-1 flex flex-col">
                     {/* Package Icon */}
-                    <div className="flex justify-center mb-6">
+                    <div className="flex justify-center mb-8 transform group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500">
                       {getPackageIcon(pkg.name)}
                     </div>
 
                     {/* Package Name */}
-                    <h3 className="text-2xl font-bold text-gray-900 text-center mb-4">
+                    <h3 className="text-2xl font-extrabold text-gray-900 text-center mb-4 group-hover:text-primary-600 transition-colors">
                       {pkg.name}
                     </h3>
 
                     {/* Package Description */}
-                    <p className="text-gray-600 text-center mb-6 min-h-[3rem]">
+                    <p className="text-gray-600 text-center mb-8 min-h-[3rem] leading-relaxed">
                       {pkg.description || 'Gói tập yoga chất lượng cao với nhiều lợi ích cho sức khỏe và tinh thần.'}
                     </p>
 
                     {/* Package Features */}
-                    <div className="space-y-3 mb-8">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
-                          <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <div className="space-y-4 mb-10 flex-1">
+                      <div className="flex items-start space-x-3 group/feature">
+                        <div className="w-6 h-6 rounded-full bg-primary-50 flex items-center justify-center shrink-0 mt-0.5 group-hover/feature:bg-primary-100 transition-colors shadow-sm text-primary-600">
+                          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                           </svg>
                         </div>
-                        <span className="text-sm text-gray-700">
+                        <span className="text-[15px] font-medium text-gray-700">
                           {getClassLimitText(pkg.classLimit)} mỗi tháng
                         </span>
                       </div>
                       
-                      <div className="flex items-center space-x-3">
-                        <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
-                          <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                      <div className="flex items-start space-x-3 group/feature">
+                        <div className="w-6 h-6 rounded-full bg-primary-50 flex items-center justify-center shrink-0 mt-0.5 group-hover/feature:bg-primary-100 transition-colors shadow-sm text-primary-600">
+                          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                           </svg>
                         </div>
-                        <span className="text-sm text-gray-700">
+                        <span className="text-[15px] font-medium text-gray-700">
                           Giảng viên chuyên nghiệp
                         </span>
                       </div>
 
-                      <div className="flex items-center space-x-3">
-                        <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
-                          <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                      <div className="flex items-start space-x-3 group/feature">
+                        <div className="w-6 h-6 rounded-full bg-primary-50 flex items-center justify-center shrink-0 mt-0.5 group-hover/feature:bg-primary-100 transition-colors shadow-sm text-primary-600">
+                          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                           </svg>
                         </div>
-                        <span className="text-sm text-gray-700">
+                        <span className="text-[15px] font-medium text-gray-700">
                           Thiết bị tập luyện hiện đại
                         </span>
                       </div>
 
-                      <div className="flex items-center space-x-3">
-                        <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
-                          <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                      <div className="flex items-start space-x-3 group/feature">
+                        <div className="w-6 h-6 rounded-full bg-primary-50 flex items-center justify-center shrink-0 mt-0.5 group-hover/feature:bg-primary-100 transition-colors shadow-sm text-primary-600">
+                          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                           </svg>
                         </div>
-                        <span className="text-sm text-gray-700">
-                          Không gian tập luyện thoải mái
+                        <span className="text-[15px] font-medium text-gray-700">
+                          Không gian tập yên tĩnh
                         </span>
                       </div>
                     </div>
 
+                    <div className="h-px w-full bg-gradient-to-r from-transparent via-gray-200 to-transparent mb-8"></div>
+
                     {/* Price */}
                     <div className="text-center mb-8">
-                      <div className="text-4xl font-bold text-primary-600 mb-2">
-                        {formatPrice(pkg.price)} VND
+                      <div className="text-4xl font-extrabold text-gray-900 mb-2 drop-shadow-sm">
+                        {formatPrice(pkg.price)}<span className="text-xl font-bold text-gray-500 ml-1">đ</span>
                       </div>
-                      <div className="text-sm text-gray-500">
-                        Thời hạn: {pkg.duration.toString() + ' ngày' || '1 tháng'} 
+                      <div className="inline-flex items-center px-3 py-1 rounded-full bg-gray-50 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Thời hạn {pkg.duration.toString() + ' ngày' || '1 tháng'}
                       </div>
                     </div>
 
                     {/* CTA Button */}
-                    <div className="text-center">
+                    <div className="text-center mt-auto">
                       <Link
                         href="/contact"
-                        className="inline-flex items-center justify-center w-full px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200 shadow-lg hover:shadow-xl"
+                        className="btn-shine inline-flex items-center justify-center w-full px-6 py-4 border border-transparent text-base font-bold rounded-xl text-white bg-gradient-to-r from-primary-600 to-accent-500 hover:from-primary-700 hover:to-accent-600 transition-all duration-300 shadow-[0_4px_14px_0_rgba(234,88,12,0.39)] hover:shadow-[0_6px_20px_rgba(234,88,12,0.23)]"
                       >
-                        Liên hệ đăng ký
+                        Liên hệ đăng ký ngay
                       </Link>
                     </div>
                   </div>
@@ -243,29 +253,31 @@ export default function PackagesClientPage() {
           )}
 
           {/* Call to Action */}
-          <div className="mt-16 bg-gradient-to-r from-primary-50 to-accent-50 rounded-2xl p-8 border border-primary-100">
-            <div className="text-center">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Bạn cần tư vấn thêm?
+          <div className="mt-20 relative lg:mt-28">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-accent-600 rounded-3xl blur-xl opacity-25"></div>
+            <div className="relative bg-gradient-to-r from-primary-600 to-accent-600 rounded-3xl p-10 sm:p-14 text-center text-white shadow-2xl overflow-hidden">
+              <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-white opacity-5 rounded-full blur-3xl"></div>
+              
+              <h3 className="relative text-3xl sm:text-4xl font-bold mb-6">
+                Bạn cần tư vấn lộ trình riêng?
               </h3>
-              <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                Đội ngũ tư vấn chuyên nghiệp của chúng tôi sẽ giúp bạn chọn gói tập phù hợp nhất với nhu cầu và mục tiêu của bạn.
+              <p className="relative text-lg sm:text-xl text-orange-100 mb-10 max-w-2xl mx-auto leading-relaxed">
+                Đội ngũ chuyên gia của Yên Yoga sẽ cùng bạn xây dựng thời khóa biểu và cá nhân hóa lộ trình tùy theo thể trạng của riêng bạn.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="relative flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/contact"
-                  className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-primary-700 bg-white hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1"
                 >
-                  Liên hệ tư vấn
+                  Liên hệ nhận tư vấn
                 </Link>
                 <Link
                   href="/calendar"
-                  className="inline-flex items-center justify-center px-6 py-3 border border-primary-200 text-base font-medium rounded-xl text-primary-700 bg-white hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200 shadow-md hover:shadow-lg"
+                  className="inline-flex items-center justify-center px-8 py-4 border-2 border-white/30 text-lg font-bold rounded-xl text-white bg-transparent hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white transition-all duration-300 hover:-translate-y-1"
                 >
-                  Xem lịch học
+                  Xem lịch khai giảng
                 </Link>
               </div>
-            </div>
           </div>
         </div>
       </div>

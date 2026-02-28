@@ -404,66 +404,100 @@ export default function CalendarClientPage() {
   };
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-primary-50 via-accent-50 to-secondary-50'>
+    <div className='min-h-[100dvh] bg-gradient-to-br from-primary-50 via-white to-accent-50 relative overflow-hidden'>
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-100/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 animate-float-slow pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-secondary-100/50 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4 animate-float pointer-events-none"></div>
+
       <Header />
-      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12'>
-        {/* Header */}
-        <div className='text-center mb-12'>
-          <h1 className='text-4xl font-bold text-gray-900 mb-4'>Lịch tập Yên Yoga</h1>
-          <p className='text-xl text-gray-600 max-w-2xl mx-auto'>Khám phá và đăng ký các lớp yoga phù hợp với lịch trình của bạn</p>
-          <div className='mt-6 h-1 w-24 bg-gradient-to-r from-primary-400 to-primary-600 rounded-full mx-auto'></div>
+      
+      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20 relative z-10'>
+        {/* Page Header */}
+        <div className='text-center mb-16'>
+          <span className="inline-block py-1.5 px-4 rounded-full bg-white border border-secondary-200 text-secondary-600 text-sm font-semibold tracking-wide mb-4 shadow-sm animate-fadeInUp">
+            Lịch Tập Yoga
+          </span>
+          <h1 className='text-4xl sm:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight animate-fadeInUp animate-delay-100'>
+            Lên lịch cho <span className="gradient-text">sự bình yên</span>
+          </h1>
+          <p className='text-lg text-gray-600 max-w-2xl mx-auto animate-fadeInUp animate-delay-200'>
+            Khám phá và đăng ký các lớp yoga phù hợp với lịch trình của bạn. Mọi hành trình đều bắt đầu từ một bước nhỏ.
+          </p>
 
           {/* Login status */}
           {!user && (
-            <div className='mt-4 bg-amber-50 border border-amber-200 rounded-lg p-3 max-w-md mx-auto'>
-              <p className='text-sm text-amber-700'>
-                💡 Bạn cần{' '}
-                <a href='/login' className='font-medium text-amber-800 hover:text-amber-900 underline'>
-                  đăng nhập
-                </a>{' '}
-                để đăng ký lớp học
-              </p>
+            <div className='mt-8 bg-white/60 backdrop-blur-md border border-amber-200 shadow-lg rounded-2xl p-4 max-w-md mx-auto animate-fadeInUp animate-delay-300'>
+              <div className="flex items-center justify-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <p className='text-sm text-gray-700 font-medium text-left'>
+                  Bạn cần{' '}
+                  <a href='/login' className='text-primary-600 hover:text-primary-700 font-bold underline decoration-2 underline-offset-2 transition-colors'>
+                    đăng nhập
+                  </a>{' '}
+                  để đăng ký lớp học
+                </p>
+              </div>
             </div>
           )}
 
           {/* Package validity status */}
           {user && packageValidity && (
-            <div className={`mt-4 rounded-lg p-3 max-w-md mx-auto ${packageValidity.includes('hết hạn') || packageValidity.includes('Chưa có gói') ? 'bg-red-50 border border-red-200' : packageValidity.includes('còn') && parseInt(packageValidity.match(/\d+/)?.[0] || '0') <= 7 ? 'bg-yellow-50 border border-yellow-200' : 'bg-green-50 border border-green-200'}`}>
-              <p className={`text-sm ${packageValidity.includes('hết hạn') || packageValidity.includes('Chưa có gói') ? 'text-red-700' : packageValidity.includes('còn') && parseInt(packageValidity.match(/\d+/)?.[0] || '0') <= 7 ? 'text-yellow-700' : 'text-green-700'}`}>📦 {packageValidity}</p>
+            <div className={`mt-8 backdrop-blur-md rounded-2xl p-4 max-w-md mx-auto shadow-lg animate-fadeInUp animate-delay-300 ${packageValidity?.includes('hết hạn') || packageValidity?.includes('Chưa có gói') ? 'bg-red-50/80 border border-red-200' : packageValidity?.includes('còn') && parseInt(packageValidity.match(/\d+/)?.[0] || '0') <= 7 ? 'bg-amber-50/80 border border-amber-200' : 'bg-green-50/80 border border-green-200'}`}>
+              <div className="flex items-center justify-center gap-3">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${packageValidity?.includes('hết hạn') || packageValidity?.includes('Chưa có gói') ? 'bg-red-100 text-red-600' : packageValidity?.includes('còn') && parseInt(packageValidity.match(/\d+/)?.[0] || '0') <= 7 ? 'bg-amber-100 text-amber-600' : 'bg-green-100 text-green-600'}`}>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                </div>
+                <p className={`text-sm font-medium ${packageValidity?.includes('hết hạn') || packageValidity?.includes('Chưa có gói') ? 'text-red-700' : packageValidity?.includes('còn') && parseInt(packageValidity.match(/\d+/)?.[0] || '0') <= 7 ? 'text-amber-700' : 'text-green-700'}`}>
+                  {packageValidity}
+                </p>
+              </div>
             </div>
           )}
         </div>
 
         {/* Error Display */}
         {error && (
-          <div className='mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg max-w-2xl mx-auto'>
-            {error}
-            <button onClick={() => setError(null)} className='ml-2 text-red-800 hover:text-red-900'>
-              ✕
+          <div className='mb-8 bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl max-w-2xl mx-auto shadow-md flex justify-between items-center animate-fadeInUp'>
+            <div className="flex items-center gap-3">
+              <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="font-medium">{error}</span>
+            </div>
+            <button onClick={() => setError(null)} className='text-red-500 hover:text-red-700 transition-colors p-1 bg-red-100 rounded-full hover:bg-red-200'>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           </div>
         )}
 
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
-          {/* Calendar */}
+          {/* Calendar Area */}
           <div className='lg:col-span-2'>
-            <div className='bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-primary-100 overflow-hidden'>
-              {/* Calendar Header */}
-              <div className='bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-4'>
+            <div className='bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-xl border border-white overflow-hidden'>
+              {/* Calendar Controls */}
+              <div className='bg-gradient-to-r from-secondary-800 to-secondary-900 text-white px-8 py-6'>
                 <div className='flex items-center justify-between'>
-                  <h2 className='text-2xl font-bold'>{formatMonthYear(currentMonth)}</h2>
-                  <div className='flex space-x-2'>
-                    <button onClick={() => navigateMonth('prev')} className='p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors'>
+                  <h2 className='text-2xl lg:text-3xl font-bold tracking-tight'>{formatMonthYear(currentMonth)}</h2>
+                  <div className='flex items-center gap-3'>
+                    <button onClick={() => navigateMonth('prev')} className='cursor-pointer p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-all hover:scale-105 active:scale-95'>
                       <svg className='w-5 h-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M15 19l-7-7 7-7' />
+                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2.5' d='M15 19l-7-7 7-7' />
                       </svg>
                     </button>
-                    <button onClick={() => setCurrentMonth(new Date(today.getFullYear(), today.getMonth()))} className='px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors text-sm font-medium'>
+                      <button onClick={() => setCurrentMonth(new Date(today.getFullYear(), today.getMonth()))} className='cursor-pointer px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition-all hover:scale-105 active:scale-95 text-sm font-semibold tracking-wide'>
                       Hôm nay
                     </button>
-                    <button onClick={() => navigateMonth('next')} className='p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors'>
+                    <button onClick={() => navigateMonth('next')} className='cursor-pointer p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-all hover:scale-105 active:scale-95'>
                       <svg className='w-5 h-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M9 5l7 7-7 7' />
+                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2.5' d='M9 5l7 7-7 7' />
                       </svg>
                     </button>
                   </div>
@@ -498,7 +532,7 @@ export default function CalendarClientPage() {
                             <button
                               onClick={() => setSelectedDate(day.date)}
                               title={day.isDisabledByPackage ? 'Gói tập không còn hiệu lực vào ngày này' : ''}
-                              className={`w-full h-full rounded-xl p-2 transition-all duration-200 ${day.isDisabledByPackage ? 'bg-gray-100 text-gray-300' : 'hover:scale-105'} ${
+                              className={`w-full h-full cursor-pointer rounded-xl p-2 transition-all duration-200 ${day.isDisabledByPackage ? 'bg-gray-100 text-gray-300' : 'hover:scale-105'} ${
                                 day.isSelected ? 'bg-primary-500 text-white shadow-lg' : day.isToday ? 'bg-accent-100 text-accent-800 border-2 border-accent-400' : day.sessions.length > 0 ? 'bg-primary-50 text-primary-700 hover:bg-primary-100' : 'text-gray-400 hover:bg-gray-50'
                               }`}
                             >
@@ -518,9 +552,13 @@ export default function CalendarClientPage() {
             </div>
 
             {/* Quick Week View */}
-            <div className='mt-8 bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-primary-100 p-6'>
-              <h3 className='text-lg font-bold text-gray-900 mb-4'>7 ngày tới</h3>
-              <div className='grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3'>
+            <div className='mt-8 bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-xl border border-white p-6 sm:p-8'>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className='text-xl font-bold text-gray-900'>7 Ngày Tới</h3>
+                <div className="h-px flex-1 bg-gradient-to-r from-gray-200 to-transparent ml-6"></div>
+              </div>
+              
+              <div className='grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4'>
                 {getNextWeekDates().map((date, index) => {
                   const dateStr = formatDate(date);
                   const sessionsCount = getSessionsForDate(dateStr).length;
@@ -528,9 +566,21 @@ export default function CalendarClientPage() {
                   const isTodayDate = isToday(dateStr);
 
                   return (
-                    <button key={index} onClick={() => setSelectedDate(dateStr)} className={`p-4 rounded-xl transition-all duration-200 hover:scale-105 ${isSelected ? 'bg-primary-500 text-white shadow-lg' : isTodayDate ? 'bg-accent-100 text-accent-800 border-2 border-accent-400' : 'bg-gray-50 text-gray-700 hover:bg-primary-50'}`}>
-                      <div className='text-sm font-semibold'>{formatDisplayDate(date)}</div>
-                      <div className={`text-xs mt-1 ${isSelected ? 'text-white' : 'text-primary-600'}`}>{sessionsCount} lớp</div>
+                    <button 
+                      key={index} 
+                      onClick={() => setSelectedDate(dateStr)} 
+                      className={`relative cursor-pointer overflow-hidden p-4 rounded-2xl transition-all duration-300 hover:-translate-y-1 ${isSelected ? 'shadow-[0_10px_20px_rgba(219,110,76,0.2)] border-transparent' : isTodayDate ? 'border-2 border-accent-300 bg-white/50 shadow-sm' : 'border border-gray-100 bg-white/50 hover:shadow-md hover:border-primary-100'}`}
+                    >
+                      {isSelected && <div className="absolute inset-0 bg-gradient-to-br from-primary-500 to-primary-600"></div>}
+                      
+                      <div className="relative z-10 flex flex-col h-full justify-between items-center text-center gap-2">
+                        <div className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-gray-900'}`}>{formatDisplayDate(date).split(',')[0]}</div>
+                        <div className={`text-2xl font-bold ${isSelected ? 'text-white' : 'text-gray-900'}`}>{date.getDate()}</div>
+                        
+                        <div className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${isSelected ? 'bg-white/20 text-white' : sessionsCount > 0 ? 'bg-primary-50 text-primary-700' : 'bg-gray-100 text-gray-500'}`}>
+                          {sessionsCount} lớp
+                        </div>
+                      </div>
                     </button>
                   );
                 })}
@@ -562,83 +612,100 @@ export default function CalendarClientPage() {
                       const canCancel = isRegistered && timeInfo.canCancel;
 
                       return (
-                        <div key={session.id} className='border border-gray-200 rounded-2xl p-4 hover:shadow-lg transition-all duration-200 hover:border-primary-200'>
-                          <div className='flex items-start justify-between mb-3'>
-                            <h4 className='font-bold text-gray-900 text-lg leading-tight'>{session.className}</h4>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${difficultyColors[session.difficulty as DifficultyLevel]}`}>{difficultyLabels[session.difficulty as DifficultyLevel]}</span>
+                        <div key={session.id} className='group bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-[0_15px_30px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden'>
+                          {/* Top decorative gradient line */}
+                          <div className={`absolute top-0 left-0 w-full h-1 ${isFull && !isRegistered ? 'bg-red-400' : 'bg-primary-400'}`}></div>
+                          
+                          <div className='flex items-start justify-between mb-4 mt-2'>
+                            <h4 className='font-bold text-gray-900 text-xl leading-tight group-hover:text-primary-600 transition-colors'>{session.className}</h4>
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold tracking-wide shadow-sm ${difficultyColors[session.difficulty as DifficultyLevel]}`}>{difficultyLabels[session.difficulty as DifficultyLevel]}</span>
                           </div>
 
-                          <div className='space-y-2 mb-4'>
-                            <div className='flex items-center text-sm text-gray-600'>
-                              <svg className='w-4 h-4 mr-2 text-gray-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' />
-                              </svg>
-                              {session.instructor}
+                          <div className='space-y-3 mb-6 bg-gray-50/50 rounded-xl p-4 border border-gray-100/50'>
+                            <div className='flex items-center text-sm text-gray-700'>
+                              <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center mr-3 shadow-sm text-primary-500">
+                                <svg className='w-3.5 h-3.5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' />
+                                </svg>
+                              </div>
+                              <span className="font-medium">{session.instructor}</span>
                             </div>
-                            <div className='flex items-center text-sm text-gray-600'>
-                              <svg className='w-4 h-4 mr-2 text-gray-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' />
-                              </svg>
+                            <div className='flex items-center text-sm text-gray-700'>
+                              <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center mr-3 shadow-sm text-primary-500">
+                                <svg className='w-3.5 h-3.5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' />
+                                </svg>
+                              </div>
                               {session.startTime} - {session.endTime}
                             </div>
-                            <div className='flex items-center text-sm text-gray-600'>
-                              <svg className='w-4 h-4 mr-2 text-gray-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' />
-                              </svg>
-                              {session.registeredCount}/{session.capacity} người
-                              {isFull && !isRegistered && <span className='ml-1 text-red-500'>(Đầy)</span>}
+                            <div className='flex items-center text-sm text-gray-700'>
+                              <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center mr-3 shadow-sm text-primary-500">
+                                <svg className='w-3.5 h-3.5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' />
+                                </svg>
+                              </div>
+                              <span className="flex-1">
+                                {session.registeredCount}/{session.capacity} học viên
+                                {isFull && !isRegistered && <span className='ml-2 text-red-500 font-bold badge bg-red-50 px-2 py-0.5 rounded text-[10px] uppercase'>Đã đầy</span>}
+                                {!isFull && <span className="text-gray-400 ml-1">({session.capacity - session.registeredCount} chỗ trống)</span>}
+                              </span>
                             </div>
                           </div>
 
-                          <div className='mb-4'>
-                            <div className='flex justify-between text-sm text-gray-600 mb-1'>
-                              <span>Đã đăng ký</span>
-                              <span>{Math.round((session.registeredCount / session.capacity) * 100)}%</span>
+                          <div className='mb-5'>
+                            <div className='flex justify-between text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2'>
+                              <span>Sức chứa</span>
+                              <span className={isFull ? 'text-red-500' : 'text-primary-600'}>{Math.round((session.registeredCount / session.capacity) * 100)}%</span>
                             </div>
-                            <div className='w-full bg-gray-200 rounded-full h-2'>
-                              <div className={`h-2 rounded-full transition-all duration-300 ${isFull ? 'bg-gradient-to-r from-red-400 to-red-600' : 'bg-gradient-to-r from-primary-400 to-primary-600'}`} style={{ width: `${Math.min((session.registeredCount / session.capacity) * 100, 100)}%` }}></div>
+                            <div className='w-full bg-gray-100 rounded-full h-1.5 overflow-hidden'>
+                              <div className={`h-1.5 rounded-full transition-all duration-700 ease-out ${isFull ? 'bg-gradient-to-r from-red-400 to-red-500' : 'bg-gradient-to-r from-primary-300 to-primary-500'}`} style={{ width: `${Math.min((session.registeredCount / session.capacity) * 100, 100)}%` }}></div>
                             </div>
                           </div>
 
                           {/* Registration status for logged in users */}
                           {user && isRegistered && (
-                            <div className='mb-3 bg-green-50 border border-green-200 rounded-lg p-2'>
-                              <p className='text-xs text-green-700 flex items-center'>
-                                <svg className='w-3 h-3 mr-1' fill='currentColor' viewBox='0 0 20 20'>
-                                  <path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
+                            <div className='mb-4 bg-green-50/50 border border-green-200/60 rounded-xl p-3 flex items-start'>
+                              <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center text-green-600 shrink-0 mt-0.5 mr-2">
+                                <svg className='w-3.5 h-3.5' fill='currentColor' viewBox='0 0 20 20'>
+                                  <path fillRule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clipRule='evenodd' />
                                 </svg>
-                                Bạn đã đăng ký lớp này
+                              </div>
+                              <p className='text-sm text-green-800 font-medium'>
+                                Tuyệt vời! Bạn đã đăng ký lớp này.
                               </p>
                             </div>
                           )}
 
                           {/* Login prompt for guests */}
                           {!user && (
-                            <div className='mb-3 bg-blue-50 border border-blue-200 rounded-lg p-3'>
-                              <p className='text-xs text-blue-700 flex items-center mb-2'>
-                                <svg className='w-4 h-4 mr-1' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+                            <div className='mb-4 bg-secondary-50 border border-secondary-200 rounded-xl p-3 flex items-start group/login cursor-pointer' onClick={() => window.location.href = '/login'}>
+                              <div className="w-5 h-5 rounded-full bg-secondary-100 flex items-center justify-center text-secondary-600 shrink-0 mt-0.5 mr-2 group-hover/login:scale-110 transition-transform">
+                                <svg className='w-3 h-3' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z' />
                                 </svg>
-                                Đăng nhập để đăng ký lớp học
-                              </p>
-                              <a href='/login' className='inline-flex items-center text-xs font-medium text-blue-800 hover:text-blue-900 underline'>
-                                Đăng nhập ngay
-                                <svg className='w-3 h-3 ml-1' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M9 5l7 7-7 7' />
-                                </svg>
-                              </a>
+                              </div>
+                              <div className="flex-1">
+                                <p className='text-xs text-secondary-800 font-medium'>Đăng nhập để đăng ký lớp</p>
+                                <span className='text-[10px] text-secondary-500 font-bold uppercase tracking-wider group-hover/login:text-secondary-700 transition-colors'>Tới trang đăng nhập →</span>
+                              </div>
                             </div>
                           )}
 
                           <button
                             onClick={() => handleRegisterClick(session)}
                             disabled={!canRegister || actionLoading || (isRegistered && !canCancel)}
-                            className={`w-full py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-200 ${
-                              !user ? 'bg-blue-500 hover:bg-blue-600 text-white hover:scale-105' : isRegistered ? (canCancel ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed') : isFull ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-primary-500 hover:bg-primary-600 text-white hover:scale-105'
+                            className={`w-full cursor-pointer py-3.5 px-4 rounded-xl font-bold text-sm transition-all duration-300 relative overflow-hidden flex items-center justify-center gap-2 ${
+                              !user 
+                                ? 'bg-secondary-800 hover:bg-secondary-900 text-white hover:shadow-lg' 
+                                : isRegistered 
+                                  ? (canCancel ? 'bg-white border-2 border-red-100 hover:border-red-500 text-red-600 hover:bg-red-50' : 'bg-gray-100 text-gray-400 cursor-not-allowed') 
+                                  : isFull 
+                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                    : 'btn-shine bg-primary-600 hover:bg-primary-700 text-white shadow-[0_4px_14px_0_rgba(234,88,12,0.39)] hover:shadow-[0_6px_20px_rgba(234,88,12,0.23)]'
                             }`}
                             title={!user ? 'Nhấn để đăng nhập' : isRegistered && !canCancel ? `Chỉ được hủy trước 1 tiếng. ${timeInfo.timeUntilSessionText}` : canRegisterOnDate === false ? 'Gói tập không còn hiệu lực vào ngày này' : ''}
                           >
-                            {!user ? '🔐 Đăng nhập để đăng ký' : isRegistered ? (canCancel ? 'Hủy đăng ký' : 'Không thể hủy') : isFull ? 'Đã đầy' : canRegisterOnDate === false ? 'Gói hết hạn' : 'Đăng ký'}
+                            {!user ? 'Đăng nhập ngay' : isRegistered ? (canCancel ? 'Hủy đăng ký' : 'Đã quá thời gian hủy') : isFull ? 'Lớp đã đầy' : canRegisterOnDate === false ? 'Gói tập hết hạn' : 'Đăng ký học'}
                           </button>
                         </div>
                       );
