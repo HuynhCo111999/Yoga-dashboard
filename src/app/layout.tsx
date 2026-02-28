@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://yen-yoga.vercel.app'),
+  metadataBase: new URL('https://www.yen-yoga-studio.com'),
   title: {
     default: "Yên Yoga Studio - Không gian yoga thanh tịnh",
     template: "%s | Yên Yoga Studio"
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'vi_VN',
-    url: 'https://yoga-dashboard-two.vercel.app',
+    url: 'https://www.yen-yoga-studio.com',
     siteName: 'Yên Yoga Studio',
     title: 'Yên Yoga Studio - Không gian yoga thanh tịnh',
     description: 'Khám phá hành trình yoga tại Yên Yoga Studio với đội ngũ giảng viên chuyên nghiệp, lớp học đa dạng và không gian thanh tịnh.',
@@ -79,15 +79,13 @@ export const metadata: Metadata = {
     yahoo: 'your-yahoo-verification-code',
   },
   alternates: {
-    canonical: 'https://yoga-dashboard-two.vercel.app',
+    canonical: 'https://www.yen-yoga-studio.com',
     languages: {
-      'vi-VN': 'https://yoga-dashboard-two.vercel.app',
+      'vi-VN': 'https://www.yen-yoga-studio.com',
     },
   },
   category: 'Health & Fitness',
   manifest: "/manifest.json",
-  themeColor: "#f97316",
-  viewport: "width=device-width, initial-scale=1",
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -99,6 +97,12 @@ export const metadata: Metadata = {
     ],
     shortcut: '/favicon.ico',
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#f97316",
 };
 
 export default function RootLayout({
