@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { GoogleTagManager } from "@next/third-parties/google";
+import { GoogleTagManager, GoogleAnalytics } from "@next/third-parties/google";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import LayoutWrapper from "@/components/LayoutWrapper";
@@ -125,7 +125,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <GoogleTagManager gtmId="G-LG5C7RHPJX" />
+        <GoogleTagManager gtmId="GTM-MQ9ZLX8C" />
+        <GoogleAnalytics gaId="G-LG5C7RHPJX" />
         <AuthProvider>
           <LayoutWrapper>{children}</LayoutWrapper>
           <Toaster 
