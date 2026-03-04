@@ -8,6 +8,8 @@ export interface BlogPost {
   title: string;
   content: string;
   excerpt: string;
+  metaTitle?: string;
+  metaDescription?: string;
   author: string;
   publishedAt: string;
   tags: string[];
@@ -21,21 +23,27 @@ export interface BlogPostCreateRequest {
   title: string;
   content: string;
   excerpt: string;
+  metaTitle?: string;
+  metaDescription?: string;
   author: string;
   tags: string[];
   isPublished: boolean;
   featuredImage?: string;
+  slug?: string;
 }
 
 export interface BlogPostUpdateRequest {
   title?: string;
   content?: string;
   excerpt?: string;
+  metaTitle?: string;
+  metaDescription?: string;
   author?: string;
   tags?: string[];
   isPublished?: boolean;
   featuredImage?: string;
   publishedAt?: string;
+  slug?: string;
 }
 
 export interface BlogPostFilters {
@@ -185,7 +193,7 @@ class BlogApiService extends BaseApiService {
   async createPost(data: BlogPostCreateRequest): Promise<ApiResponse<BlogPost>> {
     try {
       // Generate unique slug
-      const baseSlug = this.generateSlug(data.title);
+      const baseSlug = this.generateSlug(data.slug || data.title);
       const slug = await this.ensureUniqueSlug(baseSlug);
       
       const postData = {
@@ -215,7 +223,11 @@ class BlogApiService extends BaseApiService {
       };
 
       // If title is being updated, generate new slug
-      if (data.title) {
+      if (data.slug) {
+        const baseSlug = this.generateSlug(data.slug);
+        const uniqueSlug = await this.ensureUniqueSlug(baseSlug, id);
+        updateData.slug = uniqueSlug;
+      } else if (data.title) {
         const baseSlug = this.generateSlug(data.title);
         const uniqueSlug = await this.ensureUniqueSlug(baseSlug, id);
         updateData.slug = uniqueSlug;

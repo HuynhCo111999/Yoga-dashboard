@@ -5,6 +5,8 @@ import Header from '@/components/Header';
 import StructuredData from '@/components/StructuredData';
 import PageLogger from '@/components/PageLogger';
 import TestimonialCarousel from '@/components/TestimonialCarousel';
+import HomeBlogSection from '@/components/HomeBlogSection';
+
 import { generateMetadata as generateSEOMetadata, pageConfigs } from '@/utils/seo';
 
 export const metadata: Metadata = generateSEOMetadata(pageConfigs.home);
@@ -250,6 +252,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Latest Blog Posts */}
+      <HomeBlogSection />
 
       {/* Gallery & Testimonial Section */}
       <section className="py-20 lg:py-28 bg-white">

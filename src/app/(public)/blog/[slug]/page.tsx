@@ -45,8 +45,8 @@ export async function generateMetadata({
     const post = result.data;
     
     return generateSEOMetadata({
-      title: post.title,
-      description: post.excerpt || post.content.substring(0, 160),
+      title: post.metaTitle || post.title,
+      description: post.metaDescription || post.excerpt || post.content.substring(0, 160),
       keywords: post.tags,
       canonical: `/blog/${post.slug}`,
       ogImage: post.featuredImage || '/logo.jpeg',
@@ -93,8 +93,8 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(generateBlogPostStructuredData({
-              title: post.title,
-              description: post.excerpt || post.content.substring(0, 160),
+              title: post.metaTitle || post.title,
+              description: post.metaDescription || post.excerpt || post.content.substring(0, 160),
               author: post.author,
               publishedAt: post.publishedAt,
               featuredImage: post.featuredImage,

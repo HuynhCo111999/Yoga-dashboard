@@ -1,11 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { blogApi, BlogPost, BlogPostCreateRequest, BlogPostUpdateRequest } from '@/lib/api/blog';
 import { toast } from 'react-hot-toast';
 import ImageUpload from '@/components/admin/ImageUpload';
+import RichTextEditor from '@/components/admin/RichTextEditor';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 interface BlogModalProps {
   isOpen: boolean;
@@ -14,16 +17,31 @@ interface BlogModalProps {
   onSave: () => void;
 }
 
+function generateSlugFromTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .substring(0, 100);
+}
+
 function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
   const { user } = useAuth();
   const [formData, setFormData] = useState<BlogPostCreateRequest>({
     title: '',
     content: '',
     excerpt: '',
+    metaTitle: '',
+    metaDescription: '',
     author: user?.name || '',
     tags: [],
     isPublished: false,
     featuredImage: '',
+    slug: '',
   });
   const [tagInput, setTagInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -34,20 +52,26 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
         title: post.title,
         content: post.content,
         excerpt: post.excerpt,
+        metaTitle: post.metaTitle || '',
+        metaDescription: post.metaDescription || '',
         author: post.author,
         tags: post.tags,
         isPublished: post.isPublished,
         featuredImage: post.featuredImage || '',
+        slug: post.slug,
       });
     } else {
       setFormData({
         title: '',
         content: '',
         excerpt: '',
+        metaTitle: '',
+        metaDescription: '',
         author: user?.name || '',
         tags: [],
         isPublished: false,
         featuredImage: '',
+        slug: '',
       });
     }
   }, [post, user]);
@@ -67,9 +91,12 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
           title: formData.title,
           content: formData.content,
           excerpt: formData.excerpt,
+          metaTitle: formData.metaTitle,
+          metaDescription: formData.metaDescription,
           author: formData.author,
           tags: formData.tags,
           isPublished: formData.isPublished,
+          slug: formData.slug,
         };
 
         // Chỉ thêm field featuredImage nếu có giá trị (string) để tránh undefined
@@ -142,18 +169,56 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Title */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tiêu đề *
-              </label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                placeholder="Nhập tiêu đề bài viết"
-                required
-              />
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tiêu đề *
+                </label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) =>
+                    setFormData(prev => ({
+                      ...prev,
+                      title: e.target.value,
+                      metaTitle: prev.metaTitle || e.target.value,
+                      slug: prev.slug || generateSlugFromTitle(e.target.value),
+                    }))
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="Nhập tiêu đề bài viết"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Đường dẫn (slug)
+                </label>
+                <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
+                  <span className="truncate">
+                    https://yenyoga.vn/blog/
+                    <span className="font-mono text-gray-700">
+                      {formData.slug || 'duong-dan-bai-viet'}
+                    </span>
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  value={formData.slug || ''}
+                  onChange={(e) =>
+                    setFormData(prev => ({
+                      ...prev,
+                      slug: generateSlugFromTitle(e.target.value),
+                    }))
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="tieu-de-bai-viet"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Có thể chỉnh sửa slug. Hệ thống tự chuẩn hóa bỏ dấu và ký tự đặc biệt.
+                </p>
+              </div>
             </div>
 
             {/* Excerpt */}
@@ -166,8 +231,46 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
                 onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
                 rows={3}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                placeholder="Mô tả ngắn về bài viết"
+                placeholder="Mô tả ngắn hiển thị ở danh sách bài viết"
               />
+            </div>
+
+            {/* SEO fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tiêu đề SEO (meta title)
+                </label>
+                <input
+                  type="text"
+                  value={formData.metaTitle || ''}
+                  onChange={(e) =>
+                    setFormData(prev => ({
+                      ...prev,
+                      metaTitle: e.target.value,
+                    }))
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="Nếu bỏ trống sẽ dùng Tiêu đề bài viết"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Mô tả SEO (meta description)
+                </label>
+                <textarea
+                  value={formData.metaDescription || ''}
+                  onChange={(e) =>
+                    setFormData(prev => ({
+                      ...prev,
+                      metaDescription: e.target.value,
+                    }))
+                  }
+                  rows={2}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="Tối đa ~150–160 ký tự để hiển thị đẹp trên Google"
+                />
+              </div>
             </div>
 
             {/* Content */}
@@ -175,13 +278,15 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Nội dung *
               </label>
-              <textarea
+              <RichTextEditor
                 value={formData.content}
-                onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                rows={12}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                placeholder="Nhập nội dung bài viết (hỗ trợ Markdown)"
-                required
+                onChange={(html) =>
+                  setFormData(prev => ({
+                    ...prev,
+                    content: html,
+                  }))
+                }
+                disabled={loading}
               />
             </div>
 
@@ -295,6 +400,7 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
 }
 
 export default function AdminBlog() {
+  const router = useRouter();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -337,8 +443,7 @@ export default function AdminBlog() {
   };
 
   const handleCreatePost = () => {
-    setSelectedPost(null);
-    setShowModal(true);
+    router.push('/admin/blog/new');
   };
 
   const handleEditPost = (post: BlogPost) => {
@@ -401,8 +506,9 @@ export default function AdminBlog() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <AdminLayout>
+      <div className="min-h-screen bg-gray-50">
+      <div className="w-full py-6 space-y-8">
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
           <div className="flex items-center justify-between">
@@ -423,7 +529,7 @@ export default function AdminBlog() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 rounded-lg">
@@ -613,6 +719,7 @@ export default function AdminBlog() {
         post={selectedPost}
         onSave={handleModalSave}
       />
-    </div>
+      </div>
+    </AdminLayout>
   );
 }
