@@ -6,8 +6,9 @@ import StructuredData from '@/components/StructuredData';
 import PageLogger from '@/components/PageLogger';
 import TestimonialCarousel from '@/components/TestimonialCarousel';
 import HomeBlogSection from '@/components/HomeBlogSection';
+import FAQSection from '@/components/FAQSection';
 
-import { generateMetadata as generateSEOMetadata, pageConfigs } from '@/utils/seo';
+import { generateMetadata as generateSEOMetadata, pageConfigs, generateFAQStructuredData } from '@/utils/seo';
 
 export const metadata: Metadata = generateSEOMetadata(pageConfigs.home);
 
@@ -256,6 +257,8 @@ export default function Home() {
       {/* Latest Blog Posts */}
       <HomeBlogSection />
 
+      
+
       {/* Gallery & Testimonial Section */}
       <section className="py-20 lg:py-28 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -317,6 +320,9 @@ export default function Home() {
           <TestimonialCarousel />
         </div>
       </section>
+      
+      {/* FAQ about yoga courses */}
+      <FAQSection />
 
       {/* CTA Section */}
       <section className="relative overflow-hidden">
@@ -365,6 +371,42 @@ export default function Home() {
 
       {/* Structured Data for HomePage */}
       <StructuredData type="blog" />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            generateFAQStructuredData(
+              [
+                {
+                  question: 'Khóa học yoga của Yên Yoga phù hợp với những ai?',
+                  answer:
+                    'Các khóa học yoga của Yên Yoga được thiết kế cho nhiều nhóm: người mới hoàn toàn, người đã tập trước đó, dân văn phòng, người cần phục hồi thể chất. Mỗi khóa sẽ có mô tả rõ ràng về mục tiêu và cấp độ để bạn dễ chọn.',
+                },
+                {
+                  question: 'Thời lượng và lịch học của khóa học yoga tại Yên Yoga như thế nào?',
+                  answer:
+                    'Một khóa học yoga tiêu chuẩn tại Yên Yoga kéo dài 4–8 tuần, mỗi tuần 2–3 buổi, mỗi buổi 60–75 phút. Lịch học được sắp xếp linh hoạt sáng, trưa, tối để phù hợp với lịch làm việc của học viên.',
+                },
+                {
+                  question: 'Học phí khóa học yoga của Yên Yoga là bao nhiêu?',
+                  answer:
+                    'Học phí khóa học yoga tại Yên Yoga phụ thuộc vào gói tập bạn chọn (theo số buổi hoặc không giới hạn). Thông tin chi tiết và ưu đãi mới nhất được cập nhật tại trang Gói tập và qua tư vấn trực tiếp.',
+                },
+                {
+                  question: 'Tôi có được học thử khóa học yoga tại Yên Yoga không?',
+                  answer:
+                    'Yên Yoga thường có chương trình trải nghiệm buổi học yoga đầu tiên miễn phí hoặc giảm giá đặc biệt cho học viên mới. Bạn có thể đăng ký trực tiếp trên website hoặc liên hệ fanpage/Yên Yoga để được hỗ trợ.',
+                },
+                {
+                  question: 'Khóa học yoga tại Yên Yoga có phù hợp cho người chưa từng tập yoga?',
+                  answer:
+                    'Hoàn toàn phù hợp. Yên Yoga có các khóa Hatha cơ bản và lớp “Yoga cho người mới bắt đầu” với giáo trình chậm rãi, nhiều hướng dẫn chi tiết về tư thế và hơi thở, giúp bạn bắt đầu hành trình yoga một cách an toàn.',
+                },
+              ],
+            ),
+          ),
+        }}
+      />
     </>
   );
 }
