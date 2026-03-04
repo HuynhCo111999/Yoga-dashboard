@@ -109,7 +109,7 @@ interface StructuredDataProps {
 
 export default function StructuredData({ type }: StructuredDataProps) {
   const getSchema = () => {
-    const baseUrl = 'https://yen-yoga.vercel.app';
+    const baseUrl = 'https://www.yen-yoga-studio.com';
     
     switch (type) {
       case 'organization':
@@ -126,14 +126,14 @@ export default function StructuredData({ type }: StructuredDataProps) {
           ],
           address: {
             '@type': 'PostalAddress',
-            streetAddress: '123 Đường Yoga',
-            addressLocality: 'Quận 1',
+            streetAddress: 'Bình Thạnh',
+            addressLocality: 'Bình Thạnh',
             addressRegion: 'TP. Hồ Chí Minh',
             addressCountry: 'VN'
           },
           contactPoint: {
             '@type': 'ContactPoint',
-            telephone: '+84-xxx-xxx-xxx',
+            telephone: '+84-393636143',
             contactType: 'customer service',
             availableLanguage: ['Vietnamese', 'English']
           },
@@ -173,14 +173,14 @@ export default function StructuredData({ type }: StructuredDataProps) {
           name: 'Yên Yoga Studio',
           description: 'Studio yoga chuyên nghiệp với không gian thanh tịnh và đội ngũ giảng viên có kinh nghiệm',
           url: baseUrl,
-          telephone: '+84-xxx-xxx-xxx',
+          telephone: '+84-393636143',
           address: {
             '@type': 'PostalAddress',
-            streetAddress: '123 Đường Yoga',
-            addressLocality: 'Quận 1',
+            streetAddress: 'Bình Thạnh',
+            addressLocality: 'Bình Thạnh',
             addressRegion: 'TP. Hồ Chí Minh',
             postalCode: '700000',
-            addressCountry: 'VN'
+            addressCountry: 'VN' 
           },
           geo: {
             '@type': 'GeoCoordinates',
