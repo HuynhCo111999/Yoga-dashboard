@@ -91,13 +91,16 @@ export function generateMetadata(config: SEOConfig): Metadata {
 // Page-specific SEO configurations
 export const pageConfigs = {
   home: {
-    title: "Yên Yoga Studio - Không gian yoga thanh tịnh",
+    title: "Khóa học yoga tại Yên Yoga Studio - Không gian yoga thanh tịnh",
     description:
-      "Khám phá hành trình yoga tại Yên Yoga Studio với đội ngũ giảng viên chuyên nghiệp, lớp học đa dạng và không gian thanh tịnh. Đăng ký lớp học ngay hôm nay!",
+      "Khám phá các khóa học yoga tại Yên Yoga Studio với đội ngũ giảng viên chuyên nghiệp, lớp học yoga đa dạng và không gian thanh tịnh. Đăng ký khóa học yoga phù hợp với bạn ngay hôm nay!",
     keywords: [
       "yoga studio",
+      "khóa học yoga",
       "lớp yoga",
-      "đăng ký yoga",
+      "khóa học yoga Yên Yoga",
+      "Yên Yoga Studio",
+      "đăng ký khóa học yoga",
       "giảng viên yoga chuyên nghiệp",
     ],
     canonical: "/",

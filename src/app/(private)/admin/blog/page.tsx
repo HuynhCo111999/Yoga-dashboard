@@ -9,6 +9,7 @@ import { toast } from 'react-hot-toast';
 import ImageUpload from '@/components/admin/ImageUpload';
 import RichTextEditor from '@/components/admin/RichTextEditor';
 import AdminLayout from '@/components/admin/AdminLayout';
+import { storageService } from '@/lib/firebase';
 
 interface BlogModalProps {
   isOpen: boolean;
@@ -76,6 +77,26 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
     }
   }, [post, user]);
 
+  const dataUrlToFile = (dataUrl: string, filename: string): File | null => {
+    try {
+      const matches = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.*)$/);
+      if (!matches) return null;
+
+      const mime = matches[1];
+      const b64Data = matches[2];
+      const byteString = atob(b64Data);
+      const len = byteString.length;
+      const u8arr = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        u8arr[i] = byteString.charCodeAt(i);
+      }
+
+      return new File([u8arr], filename, { type: mime });
+    } catch {
+      return null;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title.trim() || !formData.content.trim()) {
@@ -85,11 +106,38 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
 
     setLoading(true);
     try {
+      // 1. Upload các ảnh base64 trong nội dung (Quill) nếu có và replace sang URL thật
+      let finalContent = formData.content;
+      if (finalContent.includes('data:image')) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(finalContent, 'text/html');
+        const images = Array.from(doc.querySelectorAll('img'));
+
+        for (const img of images) {
+          const src = img.getAttribute('src') || '';
+          if (!src.startsWith('data:image')) continue;
+
+          const file = dataUrlToFile(src, `blog-content-${Date.now()}.png`);
+          if (!file) continue;
+
+          const uploadResult = await storageService.uploadBlogImage(file);
+          if (uploadResult.error || !uploadResult.url) {
+            toast.error(uploadResult.error || 'Không upload được ảnh trong nội dung');
+            setLoading(false);
+            return;
+          }
+
+          img.setAttribute('src', uploadResult.url);
+        }
+
+        finalContent = doc.body.innerHTML;
+      }
+
       if (post) {
         // Update existing post
         const updateData: BlogPostUpdateRequest = {
           title: formData.title,
-          content: formData.content,
+          content: finalContent,
           excerpt: formData.excerpt,
           metaTitle: formData.metaTitle,
           metaDescription: formData.metaDescription,
@@ -114,7 +162,10 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
         }
       } else {
         // Create new post
-        const result = await blogApi.createPost(formData);
+        const result = await blogApi.createPost({
+          ...formData,
+          content: finalContent,
+        });
         if (result.success) {
           toast.success('Tạo bài viết thành công!');
           onSave();

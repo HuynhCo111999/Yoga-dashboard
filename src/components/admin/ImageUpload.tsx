@@ -13,6 +13,8 @@ interface ImageUploadProps {
   acceptedTypes?: string;
   maxSize?: number; // in MB
   placeholder?: string;
+  uploadOnSelect?: boolean;
+  onFileSelect?: (file: File | null) => void;
 }
 
 export default function ImageUpload({
@@ -22,7 +24,9 @@ export default function ImageUpload({
   disabled = false,
   acceptedTypes = "image/*",
   maxSize = 5,
-  placeholder = "Chọn hoặc kéo thả ảnh vào đây"
+  placeholder = "Chọn hoặc kéo thả ảnh vào đây",
+  uploadOnSelect = true,
+  onFileSelect,
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -46,7 +50,15 @@ export default function ImageUpload({
     const preview = storageService.generatePreviewUrl(file);
     setPreviewUrl(preview);
 
-    // Upload to Firebase Storage
+    // Nếu parent muốn tự xử lý upload (ví dụ: upload khi submit form)
+    if (!uploadOnSelect) {
+      onFileSelect?.(file);
+      // Đẩy URL preview (blob:) ra ngoài để parent hiển thị (ví dụ: card preview)
+      onChange(preview);
+      return;
+    }
+
+    // Upload lên Firebase Storage ngay khi chọn
     setUploading(true);
     try {
       const result = await storageService.uploadBlogImage(file);
@@ -109,6 +121,9 @@ export default function ImageUpload({
     if (onRemove) {
       onRemove();
     }
+    if (onFileSelect) {
+      onFileSelect(null);
+    }
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -120,8 +135,8 @@ export default function ImageUpload({
     }
   };
 
-  // Show current uploaded image or preview
-  const imageToShow = value || previewUrl;
+  // Show preview (ưu tiên preview mới) hoặc ảnh đã upload
+  const imageToShow = previewUrl ?? value;
 
   return (
     <div className="space-y-4">
@@ -139,7 +154,7 @@ export default function ImageUpload({
           />
           
           {uploading && (
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
               <div className="text-white text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
                 <span className="text-sm">Đang upload...</span>
@@ -165,15 +180,6 @@ export default function ImageUpload({
           onDragLeave={handleDragLeave}
           onClick={openFileDialog}
         >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={acceptedTypes}
-            onChange={handleFileInputChange}
-            disabled={disabled || uploading}
-            className="hidden"
-          />
-
           <div className="space-y-2">
             <div className="mx-auto w-12 h-12 text-gray-400">
               <svg className="w-full h-full" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -205,7 +211,7 @@ export default function ImageUpload({
           type="button"
           onClick={openFileDialog}
           disabled={disabled}
-          className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+          className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 cursor-pointer"
         >
           Thay đổi ảnh
         </button>

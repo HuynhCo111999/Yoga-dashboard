@@ -50,8 +50,8 @@ export default function ImagePreview({
         {/* Loading State */}
         {isLoading && (
           <div 
-            className="flex items-center justify-center bg-gray-100"
-            style={{ width, height }}
+            className="flex items-center justify-center bg-gray-100 w-full"
+            style={{  height }}
           >
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
           </div>
@@ -60,8 +60,8 @@ export default function ImagePreview({
         {/* Error State */}
         {hasError && (
           <div 
-            className="flex items-center justify-center bg-gray-100"
-            style={{ width, height }}
+            className="flex items-center justify-center bg-gray-100 w-full"
+            style={{  height }}
           >
             <div className="text-center text-gray-500">
               <svg className="w-12 h-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -74,12 +74,12 @@ export default function ImagePreview({
 
         {/* Image */}
         {!hasError && (
-          <div className="relative" style={{ width, height }}>
+          <div className="relative w-full" style={{  height }}>
             <Image
               src={src}
               alt={alt}
               fill
-              className="object-cover"
+              className="object-contain mx-auto"
               onLoad={handleImageLoad}
               onError={handleImageError}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -87,13 +87,13 @@ export default function ImagePreview({
 
             {/* Controls Overlay */}
             {showControls && !isLoading && !hasError && (
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center">
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-200 flex items-center justify-center">
                 <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   {/* View Full Size */}
                   <button
                     type="button"
                     onClick={openFullSize}
-                    className="p-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
+                    className="cursor-pointer p-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
                     title="Xem ảnh đầy đủ"
                   >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -107,7 +107,7 @@ export default function ImagePreview({
                     <button
                       type="button"
                       onClick={onRemove}
-                      className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                      className="cursor-pointer p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
                       title="Xóa ảnh"
                     >
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -124,7 +124,7 @@ export default function ImagePreview({
 
       {/* Full Size Modal */}
       {showFullSize && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className="relative max-w-7xl max-h-full">
             <button
               onClick={closeFullSize}

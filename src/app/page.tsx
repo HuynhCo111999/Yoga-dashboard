@@ -38,13 +38,13 @@ export default function Home() {
               </div>
 
               <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl xl:text-7xl leading-tight text-center lg:text-left">
-                Chào mừng đến với{' '}
+                Khóa học yoga tại{' '}
                 <span className="gradient-text block sm:inline">Yên Yoga</span>
               </h1>
 
               <p className="mt-6 text-lg leading-relaxed text-gray-600 text-center lg:text-left max-w-xl mx-auto lg:mx-0">
-                Khám phá hành trình yoga cùng những giảng viên chuyên nghiệp và cộng đồng yêu thương.
-                Tìm sự cân bằng giữa <strong className="text-gray-800">cơ thể và tâm hồn</strong> trong không gian thanh tịnh.
+                Khám phá các khóa học yoga tại Yên Yoga cùng đội ngũ giảng viên chuyên nghiệp và cộng đồng yêu thương.
+                Tìm sự cân bằng giữa <strong className="text-gray-800">cơ thể và tâm hồn</strong> qua những lớp học yoga được thiết kế phù hợp cho mọi cấp độ.
               </p>
 
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
@@ -52,7 +52,7 @@ export default function Home() {
                   href="/calendar"
                   className="btn-shine w-full sm:w-auto rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg hover:shadow-xl hover:from-primary-600 hover:to-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 transition-all duration-300 text-center"
                 >
-                  Xem lịch học ngay →
+                  Xem lịch khóa học yoga →
                 </Link>
                 <Link
                   href="/about"
@@ -128,11 +128,11 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-16">
             <span className="inline-block px-4 py-1.5 rounded-full bg-primary-50 text-primary-600 text-sm font-semibold mb-4 border border-primary-100">
-              Dịch vụ của chúng tôi
+              Khóa học yoga & dịch vụ
             </span>
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
               Tất cả những gì bạn cần
-              <span className="gradient-text"> cho hành trình yoga</span>
+              <span className="gradient-text"> cho khóa học yoga hiệu quả</span>
             </h2>
           </div>
 
