@@ -22,7 +22,9 @@ const withPWA = require("next-pwa")({
   skipWaiting: true,
 });
 
-export default withSentryConfig(withPWA(nextConfig), {
+const configWithPWA = withPWA(nextConfig);
+
+const sentryOptions = {
   org: "huynhco",
   project: "yen-yoga",
   silent: !process.env.CI,
@@ -31,4 +33,8 @@ export default withSentryConfig(withPWA(nextConfig), {
   hideSourceMaps: true,
   disableLogger: true,
   automaticVercelMonitors: true,
-});
+};
+
+export default process.env.NODE_ENV === "development"
+  ? configWithPWA
+  : withSentryConfig(configWithPWA, sentryOptions);

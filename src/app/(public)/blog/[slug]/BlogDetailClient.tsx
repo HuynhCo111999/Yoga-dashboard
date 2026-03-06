@@ -152,7 +152,7 @@ export default function BlogDetailClient({ post, relatedPosts }: BlogDetailClien
   };
 
   return (
-    <div className="min-h-[100dvh] bg-gray-50 relative">
+    <div className="min-h-[100dvh] bg-gradient-to-br from-primary-50 via-white to-accent-50 relative">
       {/* Reading Progress Bar - Viblo style thin bar */}
       <div className="fixed top-0 left-0 w-full h-0.5 bg-gray-200 z-50">
         <div
