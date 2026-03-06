@@ -82,7 +82,7 @@ export default function ContactClientPage() {
               <span className="inline-block py-1.5 px-4 rounded-full bg-white/80 backdrop-blur-md border border-secondary-200 text-secondary-600 text-sm font-semibold tracking-wide mb-6 shadow-sm animate-fadeInUp">
                 Hỗ Trợ & Tư Vấn
               </span>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 tracking-tight animate-fadeInUp animate-delay-100">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight animate-fadeInUp animate-delay-100">
                 Liên hệ với <span className="gradient-text">Yên Yoga</span>
               </h1>
               <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-4 sm:px-0 animate-fadeInUp animate-delay-200">

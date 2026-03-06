@@ -63,7 +63,7 @@ export default function About() {
               <span className="inline-block py-1.5 px-4 rounded-full bg-primary-50 border border-primary-200 text-primary-600 text-sm font-semibold tracking-wide mb-6 shadow-sm">
                 Về Chúng Tôi
               </span>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 tracking-tight leading-tight mb-8">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight leading-tight mb-8">
                 Hành trình tìm lại <br className="hidden sm:block" />
                 <span className="gradient-text">sự cân bằng đích thực</span>
               </h1>
@@ -118,7 +118,7 @@ export default function About() {
                 <div className="absolute -left-6 -top-6 w-20 h-20 border-t-4 border-l-4 border-primary-100 rounded-tl-3xl opacity-50"></div>
                 <div className="absolute -right-6 -bottom-6 w-20 h-20 border-b-4 border-r-4 border-accent-100 rounded-br-3xl opacity-50"></div>
                 
-                <h2 className="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-8 leading-tight">
+                <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-8 leading-tight">
                   Khởi nguồn từ <br/> <span className="text-primary-600">tình yêu Yoga</span>
                 </h2>
                 <div className="prose prose-lg text-gray-600 space-y-6">
@@ -170,7 +170,7 @@ export default function About() {
               <span className="inline-block py-1.5 px-4 rounded-full bg-white border border-secondary-200 text-secondary-600 text-sm font-semibold tracking-wide mb-4 shadow-sm">
                 Danh Mục Đào Tạo
               </span>
-              <h2 className="text-3xl lg:text-5xl font-extrabold text-gray-900 mb-6">Các lớp học đa dạng</h2>
+              <h2 className="text-3xl lg:text-5xl font-bold text-gray-900 mb-6">Các lớp học đa dạng</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 Từ người mới bắt đầu đến những yogi lão luyện, Yên Yoga luôn có lớp học phù hợp với cấp độ và mục tiêu của bạn.
               </p>
@@ -197,7 +197,7 @@ export default function About() {
                     <div className="relative h-full bg-white/60 backdrop-blur-xl rounded-[2.3rem] p-8 lg:p-10 flex flex-col justify-between min-h-[320px] border border-white/50">
                       <div>
                         {/* Huge Number */}
-                        <div className="text-[5rem] font-serif font-extrabold text-gray-900/5 leading-none absolute top-4 right-6 group-hover:text-primary-500/10 transition-colors duration-500 pointer-events-none">
+                        <div className="text-[5rem] font-serif font-bold text-gray-900/5 leading-none absolute top-4 right-6 group-hover:text-primary-500/10 transition-colors duration-500 pointer-events-none">
                           0{idx + 1}
                         </div>
                         

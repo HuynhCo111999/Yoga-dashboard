@@ -37,7 +37,7 @@ export default function Home() {
                 <span className="text-sm font-medium text-primary-700">Trải nghiệm buổi học đầu tiên miễn phí</span>
               </div>
 
-              <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl xl:text-7xl leading-tight text-center lg:text-left">
+              <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl xl:text-7xl leading-tight text-center lg:text-left">
                 Khóa học yoga tại{' '}
                 <span className="gradient-text block sm:inline">Yên Yoga</span>
               </h1>
@@ -341,7 +341,7 @@ export default function Home() {
               <span className="text-3xl">🧘‍♀️</span>
             </div>
 
-            <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl leading-tight">
+            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl leading-tight">
               Bắt đầu hành trình yoga
               <span className="block text-accent-300">của bạn ngay hôm nay</span>
             </h2>

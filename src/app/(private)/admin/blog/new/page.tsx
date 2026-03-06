@@ -170,7 +170,7 @@ export default function NewBlogPostPage() {
                 Trình soạn thảo Blog
               </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
               Tạo bài viết mới
             </h1>
             <p className="mt-2 text-sm text-gray-600 max-w-xl">

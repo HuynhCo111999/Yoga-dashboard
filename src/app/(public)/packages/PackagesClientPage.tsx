@@ -115,7 +115,7 @@ export default function PackagesClientPage() {
           <span className="inline-block py-1.5 px-4 rounded-full bg-white border border-secondary-200 text-secondary-600 text-sm font-semibold tracking-wide mb-4 shadow-sm animate-fadeInUp">
             Chi Phí Đầu Tư
           </span>
-          <h1 className='text-4xl sm:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight animate-fadeInUp animate-delay-100'>
+          <h1 className='text-4xl sm:text-5xl font-bold text-gray-900 mb-6 tracking-tight animate-fadeInUp animate-delay-100'>
             Gói tập <span className="gradient-text">Yoga</span>
           </h1>
           <p className='text-lg text-gray-600 max-w-2xl mx-auto animate-fadeInUp animate-delay-200'>
@@ -155,7 +155,7 @@ export default function PackagesClientPage() {
                     </div>
 
                     {/* Package Name */}
-                    <h3 className="text-2xl font-extrabold text-gray-900 text-center mb-4 group-hover:text-primary-600 transition-colors">
+                    <h3 className="text-2xl font-bold text-gray-900 text-center mb-4 group-hover:text-primary-600 transition-colors">
                       {pkg.name}
                     </h3>
 
@@ -215,7 +215,7 @@ export default function PackagesClientPage() {
 
                     {/* Price */}
                     <div className="text-center mb-8">
-                      <div className="text-4xl font-extrabold text-gray-900 mb-2 drop-shadow-sm">
+                      <div className="text-4xl font-bold text-gray-900 mb-2 drop-shadow-sm">
                         {formatPrice(pkg.price)}<span className="text-xl font-bold text-gray-500 ml-1">đ</span>
                       </div>
                       <div className="inline-flex items-center px-3 py-1 rounded-full bg-gray-50 text-xs font-bold text-gray-500 uppercase tracking-wider">

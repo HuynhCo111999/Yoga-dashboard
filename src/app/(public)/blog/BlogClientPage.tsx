@@ -436,7 +436,7 @@ export default function BlogClientPage() {
                {/* inner blob */}
                <div className="absolute top-0 right-0 -mr-10 -mt-10 w-64 h-64 bg-primary-100 rounded-full blur-3xl opacity-50"></div>
 
-              <h3 className="relative text-3xl sm:text-4xl font-extrabold mb-6 text-gray-900 tracking-tight">
+              <h3 className="relative text-3xl sm:text-4xl font-bold mb-6 text-gray-900 tracking-tight">
                 Không muốn bỏ lỡ <span className="gradient-text">bài viết mới</span>?
               </h3>
               <p className="relative text-lg text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">

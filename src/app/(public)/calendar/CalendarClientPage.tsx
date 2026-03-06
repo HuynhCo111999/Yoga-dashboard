@@ -417,7 +417,7 @@ export default function CalendarClientPage() {
           <span className="inline-block py-1.5 px-4 rounded-full bg-white border border-secondary-200 text-secondary-600 text-sm font-semibold tracking-wide mb-4 shadow-sm animate-fadeInUp">
             Lịch Tập Yoga
           </span>
-          <h1 className='text-4xl sm:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight animate-fadeInUp animate-delay-100'>
+          <h1 className='text-4xl sm:text-5xl font-bold text-gray-900 mb-6 tracking-tight animate-fadeInUp animate-delay-100'>
             Lên lịch cho <span className="gradient-text">sự bình yên</span>
           </h1>
           <p className='text-lg text-gray-600 max-w-2xl mx-auto animate-fadeInUp animate-delay-200'>
