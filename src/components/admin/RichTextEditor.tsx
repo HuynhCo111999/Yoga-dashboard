@@ -72,6 +72,14 @@ export default function RichTextEditor({
 
                     const range = this.quill.getSelection(true);
                     this.quill.insertEmbed(range.index, 'image', base64);
+
+                    // Gán alt từ tên file (bỏ phần mở rộng)
+                    const altText = file.name.replace(/\.[^/.]+$/, '') || 'Ảnh minh họa';
+                    const [blot] = this.quill.getLeaf(range.index);
+                    if (blot?.domNode && blot.domNode.tagName === 'IMG') {
+                      blot.domNode.setAttribute('alt', altText);
+                    }
+
                     this.quill.setSelection(range.index + 1);
                   };
                   reader.readAsDataURL(file);
