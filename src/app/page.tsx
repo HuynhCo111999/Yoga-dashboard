@@ -123,7 +123,75 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* AIDA – Interest: Vấn đề & giải pháp */}
+      <section className="py-16 bg-white border-b border-gray-100">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto text-center mb-10">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-primary-50 text-primary-600 text-xs sm:text-sm font-semibold mb-3 border border-primary-100">
+              Vì sao bạn dễ bỏ dở yoga?
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+              Những rào cản thường gặp khi bắt đầu luyện tập
+            </h2>
+            <p className="text-sm sm:text-base text-gray-600">
+              Yên Yoga hiểu rằng không chỉ động lực, mà thời gian, sức khỏe và môi trường tập luyện
+              cũng quyết định bạn có gắn bó lâu dài với yoga hay không.
+            </p>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-3 mb-8">
+            {[
+              {
+                icon: '⏰',
+                title: 'Lịch làm việc bận rộn',
+                desc: 'Khó sắp xếp thời gian cố định cho việc tập luyện, dễ bị gián đoạn sau vài buổi.',
+              },
+              {
+                icon: '💭',
+                title: 'Lo lắng về thể lực',
+                desc: 'Sợ không theo kịp lớp, đau mỏi hoặc chưa hiểu rõ kỹ thuật hít thở và giữ thăng bằng.',
+              },
+              {
+                icon: '🏠',
+                title: 'Thiếu môi trường phù hợp',
+                desc: 'Không gian chật, đông hoặc tự tập ở nhà nên thiếu người chỉnh sửa, động viên.',
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="relative rounded-2xl border border-gray-100 bg-white px-5 py-5 text-left shadow-sm"
+              >
+                <div className="mb-3 flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary-100 to-accent-100 flex items-center justify-center text-lg">
+                    <span>{item.icon}</span>
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    {item.title}
+                  </h3>
+                </div>
+                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                  {item.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="rounded-2xl border border-primary-100 bg-gradient-to-r from-primary-50 to-accent-50 px-4 sm:px-6 py-5 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between shadow-sm">
+            <p className="text-sm text-gray-800">
+              <span className="font-semibold text-primary-700">Yên Yoga</span> thiết kế khóa học,
+              lịch học và không gian luyện tập xoay quanh chính những rào cản đó – để bạn dễ dàng duy trì thói quen yoga bền vững.
+            </p>
+            <Link
+              href="/packages"
+              className="whitespace-nowrap inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-primary-600 text-white text-xs sm:text-sm font-medium hover:bg-primary-700 transition-colors"
+            >
+              Xem lộ trình & gói tập
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* AIDA – Interest: Lợi ích & đặc điểm khóa học */}
       <section className="py-20 lg:py-28 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-16">

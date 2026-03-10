@@ -150,6 +150,14 @@
   font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 }
 
+.blog-content .ql-align-center {
+  text-align: center;
+}
+
+.blog-content img {
+  padding: 12px 0;
+}
+
 /* Enhanced prose styling for orange theme */
 .prose-orange {
   color: #374151;

@@ -46,7 +46,7 @@ export default function Footer() {
               <a
                 href="https://facebook.com"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noopener noreferrer nofollow"
                 aria-label="Facebook Yên Yoga Studio"
                 className="w-9 h-9 rounded-xl bg-secondary-700 hover:bg-primary-600 flex items-center justify-center text-secondary-300 hover:text-white transition-all duration-300 hover:scale-110"
               >
@@ -57,7 +57,7 @@ export default function Footer() {
               <a
                 href="https://youtube.com"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noopener noreferrer nofollow"
                 aria-label="YouTube Yên Yoga Studio"
                 className="w-9 h-9 rounded-xl bg-secondary-700 hover:bg-primary-600 flex items-center justify-center text-secondary-300 hover:text-white transition-all duration-300 hover:scale-110"
               >
@@ -70,9 +70,9 @@ export default function Footer() {
 
           {/* Quick links */}
           <div>
-            <h3 className="text-sm font-semibold text-white tracking-wider uppercase mb-4">
+            <p className="text-sm font-semibold text-white tracking-wider uppercase mb-4">
               Điều hướng
-            </h3>
+            </p>
             <ul className="space-y-3" role="list">
               {quickLinks.map((item) => (
                 <li key={item.name}>
@@ -90,9 +90,9 @@ export default function Footer() {
 
           {/* Services */}
           <div>
-            <h3 className="text-sm font-semibold text-white tracking-wider uppercase mb-4">
+            <p className="text-sm font-semibold text-white tracking-wider uppercase mb-4">
               Dịch vụ
-            </h3>
+            </p>
             <ul className="space-y-3" role="list">
               {services.map((item) => (
                 <li key={item.name}>
@@ -110,9 +110,9 @@ export default function Footer() {
 
           {/* Contact info */}
           <div>
-            <h3 className="text-sm font-semibold text-white tracking-wider uppercase mb-4">
+            <p className="text-sm font-semibold text-white tracking-wider uppercase mb-4">
               Liên hệ
-            </h3>
+            </p>
             <address className="not-italic space-y-3">
               <div className="flex items-start gap-3">
                 <svg className="w-4 h-4 text-primary-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">

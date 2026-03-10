@@ -99,18 +99,23 @@ export default function FAQSection() {
                     })
                   }
                 >
-                  <span className="text-sm sm:text-base font-semibold text-gray-900">
+                  <h3 className="text-sm sm:text-base font-semibold text-gray-900">
                     {item.question}
-                  </span>
+                  </h3>
                   <span className="ml-2 flex h-7 w-7 items-center justify-center rounded-full bg-primary-50 text-primary-600 text-sm flex-shrink-0">
                     {isOpen ? '−' : '+'}
                   </span>
                 </button>
-                {isOpen && (
-                  <div className="px-4 sm:px-5 pb-4 text-sm text-gray-600 leading-relaxed border-t border-gray-100 pt-3">
+                <div
+                  className={`px-4 sm:px-5 text-sm text-gray-600 leading-relaxed border-t border-gray-100 ${
+                    isOpen ? 'pt-3 pb-2 block' : 'pt-0 hidden'
+                  }`}
+                  aria-hidden={!isOpen}
+                >
+                  <p className="text-sm text-gray-600 leading-relaxed">
                     {item.answer}
-                  </div>
-                )}
+                  </p>
+                </div>
               </div>
             );
           })}
