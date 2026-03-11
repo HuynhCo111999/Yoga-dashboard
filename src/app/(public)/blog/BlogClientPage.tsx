@@ -11,11 +11,15 @@ export default function BlogClientPage() {
   const router = useRouter();
   const pathname = usePathname();
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [featuredPost, setFeaturedPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
 
   // Log page view
   useEffect(() => {
@@ -25,7 +29,18 @@ export default function BlogClientPage() {
   }, [pathname]);
 
   useEffect(() => {
-    loadPosts();
+    // Load featured post độc lập với phân trang
+    const loadFeatured = async () => {
+      const result = await blogApi.getFeaturedPost();
+      if (result.success && result.data) {
+        setFeaturedPost(result.data);
+      } else {
+        setFeaturedPost(null);
+      }
+    };
+
+    loadFeatured();
+    loadPosts(1, false);
   }, []);
 
   useEffect(() => {
@@ -44,21 +59,26 @@ export default function BlogClientPage() {
     });
   };
 
-  const loadPosts = async () => {
+  const PAGE_SIZE = 9;
+
+  const loadPosts = async (targetPage: number, append: boolean) => {
     try {
       setLoading(true);
       setError(null);
 
-      logger.debug('Loading blog posts', { page: 'blog' });
+      logger.debug('Loading blog posts', { page: targetPage, limit: PAGE_SIZE });
 
-      const result = await blogApi.getPublishedPosts();
+      const result = await blogApi.getPublishedPostsPaginated(targetPage, PAGE_SIZE);
       if (result.success && result.data) {
-        setPosts(result.data);
+        setPosts(prev => (append ? [...prev, ...result.data] : result.data));
+        setHasMore(result.hasMore);
+        setPage(targetPage);
+        setTotal(result.total ?? result.data.length);
         logger.info('Blog posts loaded successfully', {
           count: result.data.length,
-          page: 'blog',
+          page: targetPage,
         });
-        console.log(`[BLOG] Loaded ${result.data.length} blog posts`);
+        console.log(`[BLOG] Loaded ${result.data.length} blog posts (page=${targetPage}, append=${append})`);
       } else {
         setError(result.error || 'Có lỗi xảy ra khi tải bài viết');
         logger.warning('Failed to load blog posts', {
@@ -78,14 +98,22 @@ export default function BlogClientPage() {
   // Get all unique tags
   const allTags = Array.from(new Set(posts.flatMap(post => post.tags)));
 
-  // Filter posts based on search and tag
-  const filteredPosts = posts.filter(post => {
+  const hasFilter = !!searchTerm || !!selectedTag;
+
+  // Nếu có filter, áp dụng lên cả featured + posts; nếu không, chỉ filter list thường
+  const baseListForFilter = hasFilter
+    ? [...(featuredPost ? [featuredPost] : []), ...posts]
+    : posts;
+
+  const filteredPosts = baseListForFilter.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          post.content.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTag = !selectedTag || post.tags.includes(selectedTag);
     return matchesSearch && matchesTag;
   });
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('vi-VN', {
@@ -193,7 +221,9 @@ export default function BlogClientPage() {
 
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-gray-500">
-              {loading ? 'Đang tải bài viết...' : `Hiển thị ${filteredPosts.length} / ${posts.length} bài viết`}
+              {loading && posts.length === 0
+                ? 'Đang tải bài viết...'
+                : `Hiển thị ${filteredPosts.length} / ${total || posts.length} bài viết`}
             </p>
 
             {(searchTerm || selectedTag) && (
@@ -245,7 +275,7 @@ export default function BlogClientPage() {
         )}
 
         {/* Loading state */}
-        {loading ? (
+        {loading && posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="h-10 w-10 rounded-full border-2 border-gray-200 border-t-primary-600 animate-spin" />
             <p className="mt-4 text-sm text-gray-500">Đang tải bài viết...</p>
@@ -264,26 +294,27 @@ export default function BlogClientPage() {
           </div>
         ) : (
           <>
-            {/* Featured Post (first post) */}
-            {filteredPosts.length > 0 && (
+            {/* Nếu không có filter: hiển thị bài nổi bật cố định (không phụ thuộc paging) */}
+            {!hasFilter && featuredPost && (
               <div className="mb-10">
                 <article
                   className="group bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer"
-                  onClick={() => handlePostClick(filteredPosts[0])}
+                  onClick={() => handlePostClick(featuredPost)}
                 >
                   <div className="grid lg:grid-cols-[1.1fr_1fr] gap-0">
                       {/* Featured Image */}
-                      {filteredPosts[0].featuredImage && (
+                      {featuredPost.featuredImage && (
                         <div className="relative h-72 lg:h-full min-h-[340px] overflow-hidden bg-gray-100">
                           <Image
-                            src={filteredPosts[0].featuredImage}
-                            alt={filteredPosts[0].title}
+                            src={featuredPost.featuredImage}
+                            alt={featuredPost.title}
                             fill
                             className="object-cover"
                           />
                           <div className="absolute top-5 left-5">
-                            <span className="inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold bg-white/90 text-primary-700 border border-white">
-                              Nổi bật
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-primary-600/95 text-white shadow-md">
+                              <span className="inline-block h-1.5 w-1.5 rounded-full bg-white" />
+                              Bài viết nổi bật
                             </span>
                           </div>
                         </div>
@@ -292,7 +323,7 @@ export default function BlogClientPage() {
                       <div className="p-6 sm:p-8 lg:p-10 flex flex-col justify-center">
                         {/* Tags */}
                         <div className="flex flex-wrap gap-2 mb-4">
-                          {filteredPosts[0].tags.slice(0, 3).map((tag, index) => (
+                          {featuredPost.tags.slice(0, 3).map((tag, index) => (
                             <button
                               key={index}
                               onClick={(e) => {
@@ -308,12 +339,12 @@ export default function BlogClientPage() {
 
                         {/* Title */}
                         <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4 leading-tight group-hover:text-primary-600 transition-colors">
-                          {filteredPosts[0].title}
+                          {featuredPost.title}
                         </h2>
 
                         {/* Excerpt */}
                         <p className="text-gray-600 text-base mb-6 leading-relaxed line-clamp-3">
-                          {filteredPosts[0].excerpt}
+                          {featuredPost.excerpt}
                         </p>
 
                         {/* Meta */}
@@ -321,11 +352,11 @@ export default function BlogClientPage() {
                           <div className="flex items-center text-sm text-gray-500 min-w-0">
                             <div className="flex items-center">
                               <div className="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center text-gray-700 text-sm font-bold mr-3">
-                                {filteredPosts[0].author.charAt(0).toUpperCase()}
+                                {featuredPost.author.charAt(0).toUpperCase()}
                               </div>
                               <div className="flex flex-col">
-                                <span className="font-semibold text-gray-900">{filteredPosts[0].author}</span>
-                                <span className="text-xs">{formatDate(filteredPosts[0].publishedAt)}</span>
+                                <span className="font-semibold text-gray-900">{featuredPost.author}</span>
+                                <span className="text-xs">{formatDate(featuredPost.publishedAt)}</span>
                               </div>
                             </div>
                           </div>
@@ -340,10 +371,10 @@ export default function BlogClientPage() {
               </div>
             )}
 
-            {/* Other Posts Grid */}
-            {filteredPosts.length > 1 && (
+            {/* Other Posts Grid (luôn lấy từ danh sách phân trang, không phụ thuộc featured) */}
+            {filteredPosts.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredPosts.slice(1).map((post) => (
+                {filteredPosts.map((post) => (
                   <article 
                     key={post.id} 
                     onClick={() => handlePostClick(post)}
@@ -400,6 +431,51 @@ export default function BlogClientPage() {
                 ))}
               </div>
             )}
+
+            {/* Pagination controls */}
+            {totalPages > 1 && (
+              <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  disabled={loading || page === 1}
+                  onClick={() => loadPosts(page - 1, false)}
+                  className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+                >
+                  ← Trang trước
+                </button>
+
+                <div className="flex flex-wrap gap-1">
+                  {Array.from({ length: totalPages }).map((_, idx) => {
+                    const p = idx + 1;
+                    const isActive = p === page;
+                    return (
+                      <button
+                        key={p}
+                        type="button"
+                        disabled={loading && isActive}
+                        onClick={() => loadPosts(p, false)}
+                        className={`min-w-[32px] px-2 py-1 rounded-full text-xs font-medium border ${
+                          isActive
+                            ? 'bg-primary-600 text-white border-primary-600'
+                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  type="button"
+                  disabled={loading || !hasMore || page === totalPages}
+                  onClick={() => loadPosts(page + 1, false)}
+                  className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+                >
+                  Trang sau →
+                </button>
+              </div>
+            )}
           </>
         )}
 
@@ -412,7 +488,7 @@ export default function BlogClientPage() {
               </div>
             </div>
             <p className="text-lg text-gray-700 font-medium">
-              Đang hiển thị <span className="text-primary-600 font-bold">{filteredPosts.length}</span> trên tổng số <span className="text-accent-600 font-bold">{posts.length}</span> bài viết
+              Đang hiển thị <span className="text-primary-600 font-bold">{filteredPosts.length}</span> trên tổng số <span className="text-accent-600 font-bold">{total}</span> bài viết
             </p>
             {(searchTerm || selectedTag) && (
               <button

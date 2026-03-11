@@ -158,6 +158,18 @@
   padding: 12px 0;
 }
 
+.blog-content a {
+  color: #ea580c;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.blog-content a:hover {
+  color: #dc2626;
+  text-decoration: underline;
+}
+
 /* Enhanced prose styling for orange theme */
 .prose-orange {
   color: #374151;

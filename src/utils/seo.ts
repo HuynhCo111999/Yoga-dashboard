@@ -10,10 +10,20 @@ export interface SEOConfig {
 }
 
 export const baseUrl =
-  process.env.NEXT_PUBLIC_BASE_URL || "https://yoga-dashboard-two.vercel.app";
+  process.env.NEXT_PUBLIC_BASE_URL || "https://yen-yoga-studio.com";
 const siteName = "Yên Yoga Studio";
 const defaultDescription =
   "Khám phá hành trình yoga tại Yên Yoga Studio với đội ngũ giảng viên chuyên nghiệp, lớp học đa dạng và không gian thanh tịnh.";
+
+function buildImageUrl(pathOrUrl: string): string {
+  if (!pathOrUrl) return `${baseUrl}/logo.jpeg`;
+  // If already absolute URL (e.g. Firebase), return as is
+  if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")) {
+    return pathOrUrl;
+  }
+  // Otherwise treat as relative path on this site
+  return `${baseUrl}${pathOrUrl}`;
+}
 
 export function generateMetadata(config: SEOConfig): Metadata {
   const {
@@ -64,7 +74,7 @@ export function generateMetadata(config: SEOConfig): Metadata {
       description,
       images: [
         {
-          url: `${baseUrl}${ogImage}`,
+          url: buildImageUrl(ogImage),
           width: 1200,
           height: 630,
           alt: title,
@@ -75,7 +85,7 @@ export function generateMetadata(config: SEOConfig): Metadata {
       card: "summary_large_image",
       title: fullTitle,
       description,
-      images: [`${baseUrl}${ogImage}`],
+      images: [buildImageUrl(ogImage)],
       creator: "@yenyogastudio",
       site: "@yenyogastudio",
     },
@@ -169,7 +179,7 @@ export function generateBlogPostStructuredData(post: {
     headline: post.title,
     description: post.description,
     image: post.featuredImage
-      ? `${baseUrl}${post.featuredImage}`
+      ? buildImageUrl(post.featuredImage)
       : `${baseUrl}/logo.jpeg`,
     author: {
       "@type": "Person",
@@ -233,7 +243,7 @@ export function generateServiceStructuredData(service: {
 
 // Generate FAQ structured data
 export function generateFAQStructuredData(
-  faqs: Array<{ question: string; answer: string }>
+  faqs: Array<{ question: string; answer: string }>,
 ) {
   return {
     "@context": "https://schema.org",

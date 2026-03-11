@@ -109,7 +109,7 @@ interface StructuredDataProps {
 
 export default function StructuredData({ type }: StructuredDataProps) {
   const getSchema = () => {
-    const baseUrl = 'https://www.yen-yoga-studio.com';
+    const baseUrl = 'https://yen-yoga-studio.com';
     
     switch (type) {
       case 'organization':

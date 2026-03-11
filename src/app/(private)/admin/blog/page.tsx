@@ -43,6 +43,8 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
     isPublished: false,
     featuredImage: '',
     slug: '',
+    showOnHome: false,
+    isFeatured: false,
   });
   const [tagInput, setTagInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -60,6 +62,8 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
         isPublished: post.isPublished,
         featuredImage: post.featuredImage || '',
         slug: post.slug,
+        showOnHome: post.showOnHome ?? false,
+        isFeatured: post.isFeatured ?? false,
       });
     } else {
       setFormData({
@@ -73,6 +77,8 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
         isPublished: false,
         featuredImage: '',
         slug: '',
+        showOnHome: false,
+        isFeatured: false,
       });
     }
   }, [post, user]);
@@ -145,6 +151,8 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
           tags: formData.tags,
           isPublished: formData.isPublished,
           slug: formData.slug,
+          showOnHome: formData.showOnHome,
+          isFeatured: formData.isFeatured,
         };
 
         // Chỉ thêm field featuredImage nếu có giá trị (string) để tránh undefined
@@ -411,18 +419,48 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
               />
             </div>
 
-            {/* Published Status */}
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="isPublished"
-                checked={formData.isPublished}
-                onChange={(e) => setFormData(prev => ({ ...prev, isPublished: e.target.checked }))}
-                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-              />
-              <label htmlFor="isPublished" className="ml-2 block text-sm text-gray-900">
-                Xuất bản ngay
-              </label>
+            {/* Published & flags */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isPublished"
+                  checked={formData.isPublished}
+                  onChange={(e) => setFormData(prev => ({ ...prev, isPublished: e.target.checked }))}
+                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                />
+                <label htmlFor="isPublished" className="ml-2 block text-sm text-gray-900">
+                  Xuất bản ngay
+                </label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="showOnHome"
+                  checked={!!formData.showOnHome}
+                  onChange={(e) =>
+                    setFormData(prev => ({ ...prev, showOnHome: e.target.checked }))
+                  }
+                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                />
+                <label htmlFor="showOnHome" className="ml-2 block text-sm text-gray-900">
+                  Hiển thị trên trang chủ
+                </label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isFeatured"
+                  checked={!!formData.isFeatured}
+                  onChange={(e) =>
+                    setFormData(prev => ({ ...prev, isFeatured: e.target.checked }))
+                  }
+                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                />
+                <label htmlFor="isFeatured" className="ml-2 block text-sm text-gray-900">
+                  Đánh dấu là bài nổi bật
+                </label>
+              </div>
             </div>
 
             {/* Buttons */}
@@ -469,7 +507,7 @@ export default function AdminBlog() {
       setLoading(true);
       setError(null);
 
-      const result = await blogApi.getAllPosts();
+        const result = await blogApi.getAllPosts();
       if (result.success && result.data) {
         setPosts(result.data);
       } else {
@@ -665,6 +703,12 @@ export default function AdminBlog() {
                       Trạng thái
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Trang chủ
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Nổi bật
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Ngày xuất bản
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -723,6 +767,28 @@ export default function AdminBlog() {
                           }`}
                         >
                           {post.isPublished ? 'Đã xuất bản' : 'Bản nháp'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            post.showOnHome
+                              ? 'bg-primary-50 text-primary-700'
+                              : 'bg-gray-50 text-gray-500'
+                          }`}
+                        >
+                          {post.showOnHome ? 'Hiển thị' : 'Ẩn'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            post.isFeatured
+                              ? 'bg-indigo-50 text-indigo-700'
+                              : 'bg-gray-50 text-gray-500'
+                          }`}
+                        >
+                          {post.isFeatured ? 'Nổi bật' : 'Thường'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

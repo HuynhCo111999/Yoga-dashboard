@@ -15,9 +15,9 @@ export default function HomeBlogSection() {
       try {
         setLoading(true);
         setError(null);
-        const result = await blogApi.getPublishedPosts();
+        const result = await blogApi.getHomePosts(3);
         if (result.success && result.data) {
-          setPosts(result.data.slice(0, 3));
+          setPosts(result.data);
         } else {
           setError(result.error || 'Không tải được bài viết');
         }
