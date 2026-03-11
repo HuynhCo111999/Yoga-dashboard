@@ -4,6 +4,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState, useMemo } from 'react';
 import Image from 'next/image';
+import parse, { domToReact, Element, type DOMNode } from 'html-react-parser';
 import { BlogPost } from '@/lib/api/blog';
 import { logger } from '@/lib/logger';
 import './blog-detail-animations.css';
@@ -52,6 +53,72 @@ export default function BlogDetailClient({ post, relatedPosts }: BlogDetailClien
 
     return { tocItems: toc, parsedContent: modifiedHtml };
   }, [post?.content]);
+
+  const contentNodes = useMemo(() => {
+    if (!parsedContent) return null;
+
+    return parse(parsedContent, {
+      replace: (node) => {
+        if (!(node instanceof Element)) return;
+
+        if (node.name === 'img') {
+          const src = node.attribs?.src || '';
+          const alt = node.attribs?.alt || post.title || 'Ảnh minh họa';
+
+          // Next/Image doesn't support data: URLs reliably; keep as native img for previews (shouldn't exist in published content)
+          if (src.startsWith('data:image')) {
+            // eslint-disable-next-line @next/next/no-img-element
+            return (
+              <img
+                src={src}
+                alt={alt}
+                className="my-6 w-full h-auto rounded-lg shadow-md"
+              />
+            );
+          }
+
+          const widthAttr = node.attribs?.width ? Number(node.attribs.width) : undefined;
+          const heightAttr = node.attribs?.height ? Number(node.attribs.height) : undefined;
+          const width = Number.isFinite(widthAttr) && widthAttr! > 0 ? widthAttr! : 1200;
+          const height = Number.isFinite(heightAttr) && heightAttr! > 0 ? heightAttr! : 675;
+
+          return (
+            <span className="block my-6">
+              <Image
+                src={src}
+                alt={alt}
+                width={width}
+                height={height}
+                sizes="(max-width: 768px) 100vw, 768px"
+                className="w-full h-auto rounded-lg object-contain"
+              />
+            </span>
+          );
+        }
+
+        // Ensure links inside content keep rel safety when opening new tab
+        if (node.name === 'a') {
+          const href = node.attribs?.href || '#';
+          const target = node.attribs?.target;
+          const rel = node.attribs?.rel;
+          const safeRel =
+            target === '_blank'
+              ? Array.from(
+                  new Set(
+                    `${rel || ''} noopener noreferrer`.trim().split(/\s+/).filter(Boolean),
+                  ),
+                ).join(' ')
+              : rel;
+
+          return (
+            <a href={href} target={target} rel={safeRel}>
+              {domToReact(node.children as DOMNode[])}
+            </a>
+          );
+        }
+      },
+    });
+  }, [parsedContent, post.title]);
 
   // Track active heading for TOC
   useEffect(() => {
@@ -280,8 +347,9 @@ export default function BlogDetailClient({ post, relatedPosts }: BlogDetailClien
                   prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:bg-gray-50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r prose-blockquote:not-italic prose-blockquote:text-gray-700
                   prose-ul:my-4 prose-ol:my-4 prose-li:my-1
                   prose-strong:font-semibold prose-strong:text-gray-900"
-                dangerouslySetInnerHTML={{ __html: parsedContent }}
-              />
+              >
+                {contentNodes}
+              </div>
 
             {/* Article Footer - Internal links Viblo-style */}
             <div className="mt-12 pt-8 border-t border-gray-200">
