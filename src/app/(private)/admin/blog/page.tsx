@@ -48,9 +48,13 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
   });
   const [tagInput, setTagInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [featuredImageFile, setFeaturedImageFile] = useState<File | null>(null);
+  const [originalFeaturedImage, setOriginalFeaturedImage] = useState<string>('');
 
   useEffect(() => {
     if (post) {
+      setFeaturedImageFile(null);
+      setOriginalFeaturedImage(post.featuredImage || '');
       setFormData({
         title: post.title,
         content: post.content,
@@ -66,6 +70,8 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
         isFeatured: post.isFeatured ?? false,
       });
     } else {
+      setFeaturedImageFile(null);
+      setOriginalFeaturedImage('');
       setFormData({
         title: '',
         content: '',
@@ -139,6 +145,21 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
         finalContent = doc.body.innerHTML;
       }
 
+      // 2. Upload ảnh đại diện nếu có chọn file mới (giống logic add)
+      let featuredImageUrl = formData.featuredImage;
+      if (featuredImageFile) {
+        const uploadResult = await storageService.uploadBlogImage(featuredImageFile);
+        if (uploadResult.error || !uploadResult.url) {
+          toast.error(uploadResult.error || 'Không upload được ảnh đại diện');
+          setLoading(false);
+          return;
+        }
+        featuredImageUrl = uploadResult.url;
+      } else if (featuredImageUrl?.startsWith('blob:')) {
+        // Fallback: nếu đang là URL preview tạm nhưng không còn file
+        featuredImageUrl = originalFeaturedImage;
+      }
+
       if (post) {
         // Update existing post
         const updateData: BlogPostUpdateRequest = {
@@ -153,12 +174,9 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
           slug: formData.slug,
           showOnHome: formData.showOnHome,
           isFeatured: formData.isFeatured,
+          // Cho phép update (hoặc xoá) ảnh đại diện
+          featuredImage: featuredImageUrl || '',
         };
-
-        // Chỉ thêm field featuredImage nếu có giá trị (string) để tránh undefined
-        if (formData.featuredImage) {
-          (updateData as BlogPostUpdateRequest).featuredImage = formData.featuredImage;
-        }
         
         const result = await blogApi.updatePost(post.id, updateData);
         if (result.success) {
@@ -173,6 +191,7 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
         const result = await blogApi.createPost({
           ...formData,
           content: finalContent,
+          featuredImage: featuredImageUrl,
         });
         if (result.success) {
           toast.success('Tạo bài viết thành công!');
@@ -411,8 +430,14 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
               </label>
               <ImageUpload
                 value={formData.featuredImage}
+                // Chỉ preview tạm, upload khi submit
+                uploadOnSelect={false}
+                onFileSelect={(file) => setFeaturedImageFile(file)}
                 onChange={(url) => setFormData(prev => ({ ...prev, featuredImage: url }))}
-                onRemove={() => setFormData(prev => ({ ...prev, featuredImage: '' }))}
+                onRemove={() => {
+                  setFeaturedImageFile(null);
+                  setFormData(prev => ({ ...prev, featuredImage: '' }));
+                }}
                 disabled={loading}
                 placeholder="Chọn ảnh đại diện cho bài viết"
                 maxSize={5}
