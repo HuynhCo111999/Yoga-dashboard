@@ -118,7 +118,6 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
 
     setLoading(true);
     try {
-      // 1. Upload các ảnh base64 trong nội dung (Quill) nếu có và replace sang URL thật
       let finalContent = formData.content;
       if (finalContent.includes('data:image')) {
         const parser = new DOMParser();
@@ -145,7 +144,6 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
         finalContent = doc.body.innerHTML;
       }
 
-      // 2. Upload ảnh đại diện nếu có chọn file mới (giống logic add)
       let featuredImageUrl = formData.featuredImage;
       if (featuredImageFile) {
         const uploadResult = await storageService.uploadBlogImage(featuredImageFile);
@@ -156,7 +154,6 @@ function BlogModal({ isOpen, onClose, post, onSave }: BlogModalProps) {
         }
         featuredImageUrl = uploadResult.url;
       } else if (featuredImageUrl?.startsWith('blob:')) {
-        // Fallback: nếu đang là URL preview tạm nhưng không còn file
         featuredImageUrl = originalFeaturedImage;
       }
 
