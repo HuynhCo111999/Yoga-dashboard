@@ -125,8 +125,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <GoogleTagManager gtmId="GTM-MQ9ZLX8C" />
-        <GoogleAnalytics gaId="G-LG5C7RHPJX" />
+        <GoogleTagManager gtmId="GTM-K77VHPNP" />
+        <GoogleAnalytics gaId="G-78KVLJD761" />
         <AuthProvider>
           <LayoutWrapper>{children}</LayoutWrapper>
           <Toaster 
