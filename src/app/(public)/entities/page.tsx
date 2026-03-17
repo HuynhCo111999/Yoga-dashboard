@@ -201,9 +201,9 @@ const socialLinks = [
 ];
 
 export const metadata = {
-  title: 'Social Entities của Yên Yoga Studio',
+  title: 'Social Entities của Yên Yoga',
   description:
-    'Danh sách các social entity chính thức của Yên Yoga Studio để Google hiểu rõ thương hiệu và tăng độ tin cậy SEO.',
+    'Danh sách các social entity chính thức của Yên Yoga để Google hiểu rõ thương hiệu và tăng độ tin cậy SEO.',
 };
 
 export default function EntitiesPage() {
@@ -215,11 +215,11 @@ export default function EntitiesPage() {
             Social Entities
           </p>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-            Các kênh chính thức của Yên Yoga Studio
+            Các kênh chính thức của Yên Yoga
           </h1>
           <p className="text-sm sm:text-base text-gray-600">
             Trang này liệt kê các đường dẫn social entity chính thức của thương hiệu để hỗ trợ
-            Google và các công cụ tìm kiếm hiểu rõ hơn về Yên Yoga Studio.
+            Google và các công cụ tìm kiếm hiểu rõ hơn về Yên Yoga.
           </p>
         </header>
 

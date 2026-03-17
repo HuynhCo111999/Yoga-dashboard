@@ -11,9 +11,9 @@ export interface SEOConfig {
 
 export const baseUrl =
   process.env.NEXT_PUBLIC_BASE_URL || "https://yogacungyen.com";
-const siteName = "Yên Yoga Studio";
+const siteName = "Yên Yoga";
 const defaultDescription =
-  "Khám phá hành trình yoga tại Yên Yoga Studio với đội ngũ giảng viên chuyên nghiệp, lớp học đa dạng và không gian thanh tịnh.";
+  "Khám phá hành trình yoga tại Yên Yoga với đội ngũ giảng viên chuyên nghiệp, lớp học đa dạng và không gian thanh tịnh.";
 
 function buildImageUrl(pathOrUrl: string): string {
   if (!pathOrUrl) return `${baseUrl}/logo.jpeg`;
@@ -101,15 +101,15 @@ export function generateMetadata(config: SEOConfig): Metadata {
 // Page-specific SEO configurations
 export const pageConfigs = {
   home: {
-    title: "Khóa học yoga tại Yên Yoga Studio - Không gian yoga thanh tịnh",
+    title: "Khóa học yoga tại Yên Yoga - Không gian yoga thanh tịnh",
     description:
-      "Khám phá các khóa học yoga tại Yên Yoga Studio với đội ngũ giảng viên chuyên nghiệp, lớp học yoga đa dạng và không gian thanh tịnh. Đăng ký khóa học yoga phù hợp với bạn ngay hôm nay!",
+      "Khám phá các khóa học yoga tại Yên Yoga với đội ngũ giảng viên chuyên nghiệp, lớp học yoga đa dạng và không gian thanh tịnh. Đăng ký khóa học yoga phù hợp với bạn ngay hôm nay!",
     keywords: [
       "yoga studio",
       "khóa học yoga",
       "lớp yoga",
       "khóa học yoga Yên Yoga",
-      "Yên Yoga Studio",
+      "Yên Yoga",
       "đăng ký khóa học yoga",
       "giảng viên yoga chuyên nghiệp",
     ],
@@ -118,9 +118,9 @@ export const pageConfigs = {
   },
 
   about: {
-    title: "Về chúng tôi - Câu chuyện Yên Yoga Studio",
+    title: "Về chúng tôi - Câu chuyện Yên Yoga",
     description:
-      "Tìm hiểu về sứ mệnh, tầm nhìn và đội ngũ giảng viên chuyên nghiệp tại Yên Yoga Studio. Hành trình mang yoga đến với mọi người.",
+      "Tìm hiểu về sứ mệnh, tầm nhìn và đội ngũ giảng viên chuyên nghiệp tại Yên Yoga. Hành trình mang yoga đến với mọi người.",
     keywords: ["về yên yoga", "đội ngũ giảng viên", "triết lý yoga", "sứ mệnh"],
     canonical: "/about",
   },
@@ -128,7 +128,7 @@ export const pageConfigs = {
   blog: {
     title: "Blog Yoga - Kiến thức & Chia sẻ",
     description:
-      "Khám phá những bài viết hữu ích về yoga, thiền, sức khỏe và lối sống cân bằng từ các chuyên gia tại Yên Yoga Studio.",
+      "Khám phá những bài viết hữu ích về yoga, thiền, sức khỏe và lối sống cân bằng từ các chuyên gia tại Yên Yoga.",
     keywords: [
       "blog yoga",
       "kiến thức yoga",
@@ -142,7 +142,7 @@ export const pageConfigs = {
   calendar: {
     title: "Lịch học Yoga - Đặt lớp trực tuyến",
     description:
-      "Xem lịch học yoga chi tiết và đặt lớp học trực tuyến tại Yên Yoga Studio. Các lớp Hatha, Vinyasa, Yin Yoga và nhiều hơn nữa.",
+      "Xem lịch học yoga chi tiết và đặt lớp học trực tuyến tại Yên Yoga. Các lớp Hatha, Vinyasa, Yin Yoga và nhiều hơn nữa.",
     keywords: ["lịch học yoga", "đặt lớp yoga", "lịch yoga", "đăng ký lớp học"],
     canonical: "/calendar",
   },
@@ -150,15 +150,15 @@ export const pageConfigs = {
   packages: {
     title: "Gói tập Yoga - Ưu đãi hấp dẫn",
     description:
-      "Khám phá các gói tập yoga với mức giá ưu đãi tại Yên Yoga Studio. Từ gói cơ bản đến gói không giới hạn, phù hợp với mọi nhu cầu.",
+      "Khám phá các gói tập yoga với mức giá ưu đãi tại Yên Yoga. Từ gói cơ bản đến gói không giới hạn, phù hợp với mọi nhu cầu.",
     keywords: ["gói yoga", "giá yoga", "ưu đãi yoga", "membership yoga"],
     canonical: "/packages",
   },
 
   contact: {
-    title: "Liên hệ - Yên Yoga Studio",
+    title: "Liên hệ - Yên Yoga",
     description:
-      "Liên hệ với Yên Yoga Studio để được tư vấn về lớp học, gói tập và dịch vụ. Địa chỉ, số điện thoại và form liên hệ trực tuyến.",
+      "Liên hệ với Yên Yoga để được tư vấn về lớp học, gói tập và dịch vụ. Địa chỉ, số điện thoại và form liên hệ trực tuyến.",
     keywords: ["liên hệ yoga", "địa chỉ yoga studio", "tư vấn yoga"],
     canonical: "/contact",
   },

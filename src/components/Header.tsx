@@ -165,7 +165,7 @@ export default function Header() {
                 <Image src="/logo.jpeg" alt="Yên Yoga" width={50} height={50} className="rounded-full" />
               </div>
               <span className="text-xl sm:text-2xl font-bold text-primary-600 group-hover:text-primary-500 transition-colors">
-                Yên Yoga Studio
+                Yên Yoga
               </span>
             </Link>
           </div>

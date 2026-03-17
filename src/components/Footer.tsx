@@ -21,7 +21,7 @@ export default function Footer() {
   return (
     <footer className="bg-secondary-900" aria-labelledby="footer-heading">
       <h2 id="footer-heading" className="sr-only">
-        Footer – Yên Yoga Studio
+        Footer – Yên Yoga
       </h2>
 
       {/* Main footer content */}
@@ -32,10 +32,10 @@ export default function Footer() {
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center space-x-3 group mb-5">
               <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-primary-500/30 flex-shrink-0">
-                <Image src="/logo.jpeg" alt="Logo Yên Yoga Studio" width={44} height={44} className="rounded-full object-cover" />
+                <Image src="/logo.jpeg" alt="Logo Yên Yoga" width={44} height={44} className="rounded-full object-cover" />
               </div>
               <span className="text-xl font-bold text-white group-hover:text-primary-400 transition-colors">
-                Yên Yoga Studio
+                Yên Yoga
               </span>
             </Link>
             <p className="text-sm text-secondary-300 leading-relaxed mb-6">
@@ -47,7 +47,7 @@ export default function Footer() {
                 href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer nofollow"
-                aria-label="Facebook Yên Yoga Studio"
+                aria-label="Facebook Yên Yoga"
                 className="w-9 h-9 rounded-xl bg-secondary-700 hover:bg-primary-600 flex items-center justify-center text-secondary-300 hover:text-white transition-all duration-300 hover:scale-110"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -58,7 +58,7 @@ export default function Footer() {
                 href="https://youtube.com"
                 target="_blank"
                 rel="noopener noreferrer nofollow"
-                aria-label="YouTube Yên Yoga Studio"
+                aria-label="YouTube Yên Yoga"
                 className="w-9 h-9 rounded-xl bg-secondary-700 hover:bg-primary-600 flex items-center justify-center text-secondary-300 hover:text-white transition-all duration-300 hover:scale-110"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -156,7 +156,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-12 pt-8 border-t border-secondary-700/60 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-secondary-400">
-            &copy; {new Date().getFullYear()} Yên Yoga Studio. Bản quyền thuộc về chúng tôi.
+            &copy; {new Date().getFullYear()} Yên Yoga. Bản quyền thuộc về chúng tôi.
           </p>
           <div className="flex items-center gap-5 text-sm text-secondary-400">
             <Link href="/about" className="hover:text-primary-400 transition-colors">Chính sách</Link>

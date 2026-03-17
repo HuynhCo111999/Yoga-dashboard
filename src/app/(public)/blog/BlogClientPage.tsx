@@ -288,7 +288,7 @@ export default function BlogClientPage() {
             <p className="mt-3 text-gray-600 max-w-md mx-auto">
               {searchTerm || selectedTag ? 
                 'Hãy thử thay đổi từ khóa tìm kiếm hoặc bộ lọc để khám phá thêm.' : 
-                'Hãy quay lại sau để đọc những bài viết mới từ Yên Yoga Studio.'
+                'Hãy quay lại sau để đọc những bài viết mới từ Yên Yoga.'
               }
             </p>
           </div>

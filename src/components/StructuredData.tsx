@@ -116,7 +116,7 @@ export default function StructuredData({ type }: StructuredDataProps) {
         const organizationSchema: OrganizationSchema = {
           '@context': 'https://schema.org',
           '@type': 'Organization',
-          name: 'Yên Yoga Studio',
+          name: 'Yên Yoga',
           description: 'Studio yoga chuyên nghiệp tại Việt Nam, cung cấp các lớp học yoga đa dạng cho mọi trình độ',
           url: baseUrl,
           logo: `${baseUrl}/logo.jpeg`,
@@ -170,7 +170,7 @@ export default function StructuredData({ type }: StructuredDataProps) {
         const localBusinessSchema: LocalBusinessSchema = {
           '@context': 'https://schema.org',
           '@type': 'SportsActivityLocation',
-          name: 'Yên Yoga Studio',
+          name: 'Yên Yoga',
           description: 'Studio yoga chuyên nghiệp với không gian thanh tịnh và đội ngũ giảng viên có kinh nghiệm',
           url: baseUrl,
           telephone: '+84-393636143',
@@ -220,8 +220,8 @@ export default function StructuredData({ type }: StructuredDataProps) {
         const websiteSchema: WebsiteSchema = {
           '@context': 'https://schema.org',
           '@type': 'WebSite',
-          name: 'Yên Yoga Studio',
-          description: 'Website chính thức của Yên Yoga Studio',
+          name: 'Yên Yoga',
+          description: 'Website chính thức của Yên Yoga',
           url: baseUrl,
           potentialAction: {
             '@type': 'SearchAction',
@@ -243,7 +243,7 @@ export default function StructuredData({ type }: StructuredDataProps) {
           url: `${baseUrl}/blog`,
           publisher: {
             '@type': 'Organization',
-            name: 'Yên Yoga Studio',
+            name: 'Yên Yoga',
             logo: {
               '@type': 'ImageObject',
               url: `${baseUrl}/logo.jpeg`

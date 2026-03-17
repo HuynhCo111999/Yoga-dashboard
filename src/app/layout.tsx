@@ -20,18 +20,18 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL('https://yogacungyen.com'),
   title: {
-    default: "Yên Yoga Studio - Không gian yoga thanh tịnh",
-    template: "%s | Yên Yoga Studio"
+    default: "Yên Yoga - Không gian yoga thanh tịnh",
+    template: "%s | Yên Yoga"
   },
-  description: "Khám phá hành trình yoga tại Yên Yoga Studio với đội ngũ giảng viên chuyên nghiệp, lớp học đa dạng và không gian thanh tịnh. Đăng ký ngay để bắt đầu hành trình cân bằng cơ thể và tâm hồn.",
+  description: "Khám phá hành trình yoga tại Yên Yoga với đội ngũ giảng viên chuyên nghiệp, lớp học đa dạng và không gian thanh tịnh. Đăng ký ngay để bắt đầu hành trình cân bằng cơ thể và tâm hồn.",
   keywords: [
     "yoga", "yoga studio", "hatha yoga", "vinyasa yoga", "meditation", 
     "thiền", "tập yoga", "yoga việt nam", "yoga hcm", "yoga sài gòn",
     "lớp yoga", "giảng viên yoga", "yoga cho người mới", "yoga nâng cao"
   ],
-  authors: [{ name: "Yên Yoga Studio" }],
-  creator: "Yên Yoga Studio",
-  publisher: "Yên Yoga Studio",
+  authors: [{ name: "Yên Yoga" }],
+  creator: "Yên Yoga",
+  publisher: "Yên Yoga",
   robots: {
     index: true,
     follow: true,
@@ -47,28 +47,28 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'vi_VN',
     url: 'https://yogacungyen.com',
-    siteName: 'Yên Yoga Studio',
-    title: 'Yên Yoga Studio - Không gian yoga thanh tịnh',
-    description: 'Khám phá hành trình yoga tại Yên Yoga Studio với đội ngũ giảng viên chuyên nghiệp, lớp học đa dạng và không gian thanh tịnh.',
+    siteName: 'Yên Yoga',
+    title: 'Yên Yoga - Không gian yoga thanh tịnh',
+    description: 'Khám phá hành trình yoga tại Yên Yoga với đội ngũ giảng viên chuyên nghiệp, lớp học đa dạng và không gian thanh tịnh.',
     images: [
       {
         url: '/logo.jpeg',
         width: 1200,
         height: 630,
-        alt: 'Yên Yoga Studio Logo',
+        alt: 'Yên Yoga Logo',
       },
       {
         url: '/class-studio.jpeg',
         width: 1200,
         height: 630,
-        alt: 'Yên Yoga Studio - Không gian luyện tập',
+        alt: 'Yên Yoga - Không gian luyện tập',
       }
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Yên Yoga Studio - Không gian yoga thanh tịnh',
-    description: 'Khám phá hành trình yoga tại Yên Yoga Studio với đội ngũ giảng viên chuyên nghiệp, lớp học đa dạng và không gian thanh tịnh.',
+    title: 'Yên Yoga - Không gian yoga thanh tịnh',
+    description: 'Khám phá hành trình yoga tại Yên Yoga với đội ngũ giảng viên chuyên nghiệp, lớp học đa dạng và không gian thanh tịnh.',
     images: ['/logo.jpeg'],
     creator: '@yenyogastudio',
     site: '@yenyogastudio',

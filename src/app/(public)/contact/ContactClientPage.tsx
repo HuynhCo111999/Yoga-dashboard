@@ -102,7 +102,7 @@ export default function ContactClientPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
-                <p className="text-2xl font-bold tracking-wide drop-shadow-md">Yên Yoga Studio</p>
+                <p className="text-2xl font-bold tracking-wide drop-shadow-md">Yên Yoga</p>
                 <p className="text-primary-100 mt-2 font-medium">Bản đồ tương tác sẽ hiển thị tại đây</p>
               </div>
             </div>

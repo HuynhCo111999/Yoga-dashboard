@@ -79,7 +79,7 @@ export default function NotFound() {
                 </div>
 
                 <div className="flex items-center justify-between text-[11px] text-gray-400 pt-1">
-                  <span>Yên Yoga Studio</span>
+                  <span>Yên Yoga</span>
                   <span>Luôn ở đây khi bạn cần.</span>
                 </div>
               </div>

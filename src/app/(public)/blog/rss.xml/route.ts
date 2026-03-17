@@ -39,7 +39,7 @@ export async function GET() {
   <channel>
     <title>Yên Yoga Blog</title>
     <link>${SITE_URL}/blog</link>
-    <description>Các bài viết từ Yên Yoga Studio</description>
+    <description>Các bài viết từ Yên Yoga</description>
     <language>vi-VN</language>
     ${itemsXml}
   </channel>
