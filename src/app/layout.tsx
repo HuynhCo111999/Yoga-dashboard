@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://yen-yoga-studio.com'),
+  metadataBase: new URL('https://yogacungyen.com'),
   title: {
     default: "Yên Yoga Studio - Không gian yoga thanh tịnh",
     template: "%s | Yên Yoga Studio"
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'vi_VN',
-    url: 'https://yen-yoga-studio.com',
+    url: 'https://yogacungyen.com',
     siteName: 'Yên Yoga Studio',
     title: 'Yên Yoga Studio - Không gian yoga thanh tịnh',
     description: 'Khám phá hành trình yoga tại Yên Yoga Studio với đội ngũ giảng viên chuyên nghiệp, lớp học đa dạng và không gian thanh tịnh.',
@@ -79,9 +79,9 @@ export const metadata: Metadata = {
     yahoo: 'your-yahoo-verification-code',
   },
   alternates: {
-    canonical: 'https://yen-yoga-studio.com',
+    canonical: 'https://yogacungyen.com',
     languages: {
-      'vi-VN': 'https://yen-yoga-studio.com',
+      'vi-VN': 'https://yogacungyen.com',
     },
   },
   category: 'Health & Fitness',

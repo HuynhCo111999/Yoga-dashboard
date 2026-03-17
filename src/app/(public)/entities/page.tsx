@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-const TARGET_URL = 'https://yen-yoga-studio.com/';
+const TARGET_URL = 'https://yogacungyen.com/';
 
 const googleRedirectBases = [
   'https://google.pl/url',
