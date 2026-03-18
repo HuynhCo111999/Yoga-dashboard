@@ -12,9 +12,9 @@ const navigation = [
   { name: 'Trang chủ', href: '/' },
   { name: 'Về chúng tôi', href: '/about' },
   { name: 'Khóa học yoga', href: '/khoa-hoc-yoga' },
-  { name: 'Lịch học', href: '/calendar' },
-  { name: 'Gói tập', href: '/packages' },
-  { name: 'Blog', href: '/blog' },
+  // { name: 'Lịch học', href: '/calendar' },
+  // { name: 'Gói tập', href: '/packages' },
+  { name: 'Bài viết', href: '/blog' },
   { name: 'Liên hệ', href: '/contact' },
 ];
 
