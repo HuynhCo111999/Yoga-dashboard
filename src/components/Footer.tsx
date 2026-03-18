@@ -2,8 +2,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 const quickLinks = [
-  { name: 'Yoga 1 kèm 1', href: '/yoga-1-kem-1' },
   { name: 'Về chúng tôi', href: '/about' },
+  { name: 'Khóa học yoga', href: '/khoa-hoc-yoga' },
   { name: 'Lịch học', href: '/calendar' },
   { name: 'Gói tập', href: '/packages' },
   { name: 'Blog', href: '/blog' },
@@ -21,9 +21,6 @@ const services = [
 export default function Footer() {
   return (
     <footer className="bg-secondary-900" aria-labelledby="footer-heading">
-      <h2 id="footer-heading" className="sr-only">
-        Footer – Yên Yoga
-      </h2>
 
       {/* Main footer content */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-16 pb-8">
