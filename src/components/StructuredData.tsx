@@ -87,6 +87,19 @@ interface WebsiteSchema {
   };
 }
 
+interface CreativeWorkSeriesSchema {
+  '@context': string;
+  '@type': string;
+  name: string;
+  description: string;
+  url: string;
+  aggregateRating: {
+    '@type': string;
+    ratingValue: string;
+    reviewCount: string;
+  };
+}
+
 interface BlogSchema {
   '@context': string;
   '@type': string;
@@ -104,7 +117,7 @@ interface BlogSchema {
 }
 
 interface StructuredDataProps {
-  type: 'organization' | 'localBusiness' | 'website' | 'blog';
+  type: 'organization' | 'localBusiness' | 'website' | 'blog' | 'series';
 }
 
 export default function StructuredData({ type }: StructuredDataProps) {
@@ -251,6 +264,21 @@ export default function StructuredData({ type }: StructuredDataProps) {
           }
         };
         return blogSchema;
+
+      case 'series':
+        const seriesSchema: CreativeWorkSeriesSchema = {
+          '@context': 'https://schema.org',
+          '@type': 'CreativeWorkSeries',
+          name: 'Chuỗi lớp Yoga Yên Yoga',
+          description: 'Chuỗi lớp yoga từ cơ bản đến nâng cao tại Yên Yoga, bao gồm lớp nhóm và yoga 1 kèm 1 tại TP.HCM.',
+          url: `${baseUrl}/`,
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: '4.7',
+            reviewCount: '120',
+          },
+        };
+        return seriesSchema;
 
       default:
         return null;

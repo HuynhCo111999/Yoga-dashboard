@@ -101,10 +101,18 @@ export function generateMetadata(config: SEOConfig): Metadata {
 // Page-specific SEO configurations
 export const pageConfigs = {
   home: {
-    title: "Khóa học yoga tại Yên Yoga - Không gian yoga thanh tịnh",
+    title: "Yoga 1 kèm 1 tại TP.HCM (HCM) | Yên Yoga",
     description:
-      "Khám phá các khóa học yoga tại Yên Yoga với đội ngũ giảng viên chuyên nghiệp, lớp học yoga đa dạng và không gian thanh tịnh. Đăng ký khóa học yoga phù hợp với bạn ngay hôm nay!",
+      "Yoga 1 kèm 1 tại TP.HCM (HCM) cùng HLV kèm riêng theo thể trạng. Lộ trình cá nhân hóa, chỉnh tư thế kỹ, phù hợp người mới, dân văn phòng, phục hồi. Đăng ký học thử tại Yên Yoga.",
     keywords: [
+      "yoga 1 kèm 1",
+      "yoga 1-1",
+      "yoga kèm riêng",
+      "yoga cá nhân",
+      "yoga PT",
+      "yoga tại HCM",
+      "yoga TP.HCM",
+      "yoga Bình Thạnh",
       "yoga studio",
       "khóa học yoga",
       "lớp yoga",

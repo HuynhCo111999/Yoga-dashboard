@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 const quickLinks = [
+  { name: 'Yoga 1 kèm 1', href: '/yoga-1-kem-1' },
   { name: 'Về chúng tôi', href: '/about' },
   { name: 'Lịch học', href: '/calendar' },
   { name: 'Gói tập', href: '/packages' },

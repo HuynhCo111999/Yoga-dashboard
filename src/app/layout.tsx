@@ -113,14 +113,15 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/icon-192x192.png" type="image/png" sizes="192x192" />
-        <link rel="icon" href="/icon-512x512.png" type="image/png" sizes="512x512" />
-        <link rel="apple-touch-icon" href="/icon-192x192.png" />
-        <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="https://yogacungyen.com/favicon.ico" sizes="any" />
+        <link rel="icon" href="https://yogacungyen.com/icon-192x192.png" type="image/png" sizes="192x192" />
+        <link rel="icon" href="https://yogacungyen.com/icon-512x512.png" type="image/png" sizes="512x512" />
+        <link rel="apple-touch-icon" href="https://yogacungyen.com/icon-192x192.png" />
+        <link rel="manifest" href="https://yogacungyen.com/manifest.json" />
         <StructuredData type="organization" />
         <StructuredData type="localBusiness" />
         <StructuredData type="website" />
+        <StructuredData type="series" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
