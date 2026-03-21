@@ -91,7 +91,7 @@ export default function YogaCoursesPage() {
                 Khóa học Premium
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-white tracking-tight leading-[1.1] mb-6">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white tracking-tight leading-[1.1] mb-6">
                 Chữa lành cơ thể, <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-300 to-accent-300">tìm lại chính mình</span>
               </h1>
@@ -185,7 +185,7 @@ export default function YogaCoursesPage() {
               <span className="inline-flex items-center gap-2 rounded-full bg-secondary-50 px-4 py-1.5 text-xs font-bold text-secondary-700 uppercase tracking-widest border border-secondary-100 mb-4 shadow-sm animate-fadeInUp">
                 Có phải bạn đang...
               </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-6 tracking-tight animate-fadeInUp animate-delay-100">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 tracking-tight animate-fadeInUp animate-delay-100">
                 Cảm thấy việc tập luyện <br className="hidden sm:block"/> <span className="text-secondary-600">chưa mang lại hiệu quả?</span>
               </h2>
               <p className="text-base sm:text-lg text-gray-600 animate-fadeInUp animate-delay-200">
@@ -231,7 +231,7 @@ export default function YogaCoursesPage() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <div>
-                <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-6 tracking-tight leading-tight">
+                <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 tracking-tight leading-tight">
                   Khóa học tại Yên Yoga <br/> <span className="text-primary-600">thực sự dành cho ai?</span>
                 </h2>
                 <p className="text-lg text-gray-600 mb-8 leading-relaxed">
@@ -307,7 +307,7 @@ export default function YogaCoursesPage() {
                 <span className="inline-flex items-center gap-2 rounded-full bg-primary-50 px-4 py-1.5 text-xs font-bold text-primary-700 uppercase tracking-widest border border-primary-100 mb-4 shadow-sm animate-fadeInUp">
                   Đặc quyền tại Yên Yoga
                 </span>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight animate-fadeInUp animate-delay-100">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 tracking-tight animate-fadeInUp animate-delay-100">
                   Phục hồi từ sâu bên trong <br className="hidden sm:block"/> <span className="gradient-text">với Yoga 1 Kèm 1</span>
                 </h2>
                 <p className="text-lg text-gray-600 mb-10 leading-relaxed max-w-2xl animate-fadeInUp animate-delay-200">
@@ -343,7 +343,7 @@ export default function YogaCoursesPage() {
         <section className="py-20 relative bg-gradient-to-b from-primary-50/50 to-white">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto mb-16">
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-6 tracking-tight">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 tracking-tight">
                 Hành trình chuyển đổi <span className="text-primary-600">toàn diện</span>
               </h2>
               <p className="text-lg text-gray-600">
@@ -411,7 +411,7 @@ export default function YogaCoursesPage() {
               <span className="inline-flex items-center gap-2 rounded-full bg-secondary-50 px-4 py-1.5 text-xs font-bold text-secondary-700 uppercase tracking-widest border border-secondary-100 mb-4 shadow-sm">
                 Đơn giản & Dễ dàng
               </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 tracking-tight">
                 4 Bước bắt đầu cùng Yên Yoga
               </h2>
               <p className="text-lg text-gray-600">
@@ -448,7 +448,7 @@ export default function YogaCoursesPage() {
         <section className="py-20 bg-gray-50/50">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-extrabold text-gray-900 mb-4">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
                 Câu hỏi thường gặp
               </h2>
               <p className="text-lg text-gray-600">
@@ -490,7 +490,7 @@ export default function YogaCoursesPage() {
                 <span className="inline-block py-1.5 px-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-semibold tracking-widest uppercase mb-6 shadow-sm animate-pulse">
                   Chỉ còn vài slot trống trong tháng
                 </span>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6 leading-tight">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
                   Sẵn sàng thay đổi <br/> <span className="text-accent-400">cùng Yên Yoga?</span>
                 </h2>
                 <p className="text-lg text-gray-300 max-w-2xl mx-auto mb-10 leading-relaxed">
