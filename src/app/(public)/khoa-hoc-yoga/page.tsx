@@ -5,19 +5,22 @@ import Header from "@/components/Header";
 import { generateMetadata as generateSEOMetadata, generateFAQStructuredData, generateServiceStructuredData } from "@/utils/seo";
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: "Khóa học yoga tại TP.HCM (HCM) | Yên Yoga",
+  title: "Khóa học yoga ở HCM (HCM) | Yên Yoga",
   description:
-    "Khóa học yoga tại TP.HCM (HCM) cho người mới và đã tập: lớp nhóm, yoga 1 kèm 1, trị liệu, phục hồi, giảm cân. Lộ trình rõ ràng, giảng viên tận tâm, không gian thanh tịnh tại Bình Thạnh.",
+    "Khóa học yoga ở HCM cho người mới và đã tập: các lớp nhóm, yoga 1 kèm 1, trị liệu, phục hồi, giảm cân. Yên Yoga cung cấp chương trình với hình thức tại studio hoặc tại nhà, ưu tiên chất lượng từ đội ngũ huấn luyện viên.",
   keywords: [
     "khóa học yoga",
-    "lớp yoga",
-    "học yoga tại HCM",
+    "các lớp yoga",
+    "học yoga ở HCM",
     "học yoga Bình Thạnh",
     "yoga cho người mới",
     "yoga trị liệu",
     "yoga phục hồi",
     "yoga giảm cân",
     "yoga 1 kèm 1",
+    "giáo viên dạy yoga",
+    "hình thức tại nhà",
+    "chương trình đào tạo",
   ],
   canonical: "/khoa-hoc-yoga",
   ogImage: "/class-studio.jpeg",
@@ -25,14 +28,14 @@ export const metadata: Metadata = generateSEOMetadata({
 
 const faqs = [
   {
-    question: "Yoga 1 kèm 1 tại TP.HCM phù hợp với ai?",
+    question: "Yoga 1 kèm 1 ở HCM phù hợp với ai?",
     answer:
-      "Phù hợp với người mới cần chỉnh tư thế kỹ, người bận rộn cần lịch linh hoạt, dân văn phòng hay đau mỏi vai gáy/lưng, và người có mục tiêu cụ thể như tăng linh hoạt, cải thiện sức bền hoặc giảm stress.",
+      "Phù hợp với người mới cần chỉnh tư thế kỹ, người bận rộn cần lịch phù hợp, người làm việc bận rộn hay đau mỏi vai gáy/lưng, và người có mục tiêu cụ thể như tăng độ dẻo dai, cải thiện sức bền hoặc giảm stress.",
   },
   {
     question: "Tập yoga 1–1 khác gì so với lớp đông?",
     answer:
-      "Với yoga 1–1, HLV theo sát từng động tác, điều chỉnh bài tập theo thể trạng và mục tiêu riêng. Bạn được sửa sai ngay tại chỗ, tập an toàn hơn và thường tiến bộ nhanh hơn.",
+      "Với yoga 1–1, HLV theo sát từng động tác, cá nhân hóa bài tập theo thể trạng và mục tiêu riêng. Bạn được sửa sai ngay tại chỗ, tập an toàn hơn và thường tiến bộ nhanh hơn.",
   },
   {
     question: "Một buổi yoga 1 kèm 1 kéo dài bao lâu?",
@@ -45,9 +48,9 @@ const faqs = [
       "Chỉ cần trang phục thoải mái, khăn nhỏ và nước uống. Thảm tập và dụng cụ hỗ trợ thường có sẵn tại studio.",
   },
   {
-    question: "Lịch học yoga 1 kèm 1 tại HCM có linh hoạt không?",
+    question: "Lịch học yoga 1 kèm 1 ở HCM có phù hợp không?",
     answer:
-      "Có. Bạn có thể chọn khung giờ phù hợp (sáng/trưa/tối) và sắp xếp lại buổi theo chính sách của gói tập. Hãy liên hệ để được gợi ý lịch phù hợp.",
+      "Có. Nếu bạn có yêu cầu thời gian, bạn có thể chọn buổi theo thời gian làm việc (sáng/trưa/tối) và sắp xếp lại theo chương trình của gói tập. Hãy liên hệ để được gợi ý.",
   },
 ];
 
@@ -97,7 +100,7 @@ export default function YogaCoursesPage() {
               </h1>
 
               <p className="text-lg sm:text-xl text-gray-300 leading-relaxed max-w-xl mb-10 font-light">
-                Chăm sóc sức khỏe toàn diện với lộ trình Yoga 1 kèm 1 được thiết kế chuyên biệt dựa trên thể trạng và mục tiêu của riêng bạn. Không ồn ào, không vội vã.
+                Chăm sóc sức khỏe vững vàng với lộ trình Yoga 1 kèm 1 được thiết kế chuyên biệt dựa trên thể trạng và mục tiêu của riêng bạn. Không ồn ào, không vội vã.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-5 mb-14">
@@ -162,13 +165,13 @@ export default function YogaCoursesPage() {
               {/* Secondary Floating Card */}
               <div className="absolute top-10 right-0 w-64 rounded-2xl bg-gray-900/60 backdrop-blur-md border border-white/10 p-5 shadow-2xl transform -translate-x-8 -rotate-6 hover:-rotate-3 transition-transform animate-float z-10">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-white font-bold">Linh Hoạt Lịch Tập</span>
+                  <span className="text-white font-bold">Thời gian tập phù hợp</span>
                   <span className="text-primary-400">⏱️</span>
                 </div>
                 <div className="w-full bg-gray-800 rounded-full h-1.5 mb-2 overflow-hidden">
                   <div className="bg-gradient-to-r from-primary-500 to-accent-500 h-1.5 rounded-full w-[85%]"></div>
                 </div>
-                <p className="text-xs text-gray-400">85% học viên là dân văn phòng</p>
+                <p className="text-xs text-gray-400">85% học viên là người làm việc bận rộn</p>
               </div>
             </div>
             
@@ -199,7 +202,7 @@ export default function YogaCoursesPage() {
                 { title: "Đau mỏi sau tập", desc: "Tập xong lại thấy đau lưng, mỏi cổ vai gáy do sai tư thế, lệch trọng tâm.", icon: "🤕", color: "orange" },
                 { title: "Không rõ tiến bộ", desc: "Mãi lặp lại một bài tập, không biết khi nào mới được lên level tiếp theo.", icon: "🤷", color: "blue" },
                 { title: "Áp lực, căng thẳng", desc: "Khó thở sâu, đầu óc liên tục suy nghĩ về công việc không thể thư giãn.", icon: "🤯", color: "purple" },
-                { title: "Sợ chấn thương", desc: "Khớp gối hay cổ tay yếu, ngại vào các tư thế vì sợ đau và chấn thương thêm.", icon: "⚠️", color: "amber" },
+                { title: "Sợ đau & tổn thương", desc: "Khớp gối hay cổ tay yếu, ngại vào các tư thế vì sợ đau và tổn thương thêm.", icon: "⚠️", color: "amber" },
                 { title: "Lịch trình quá bận", desc: "Muốn đi tập trung tâm nhưng giờ lớp cố định không khớp với giờ tan làm.", icon: "⏰", color: "teal" },
               ].map((item, idx) => (
                 <div key={item.title} className={`group relative rounded-3xl bg-white p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] border border-gray-100 transition-all duration-300 transform hover:-translate-y-2 animate-fadeInUp animate-delay-${(idx % 3 + 1) * 100}`}>
@@ -220,7 +223,7 @@ export default function YogaCoursesPage() {
             
             <div className="mt-14 text-center">
               <p className="text-lg font-medium text-gray-800 bg-primary-50 inline-block px-6 py-3 rounded-xl border border-primary-100">
-                <span className="text-xl mr-2">💡</span>Đừng lo lắng, Yên Yoga luôn có <strong>lớp học thiết kế riêng</strong> dành cho bạn!
+                <span className="text-xl mr-2">💡</span>Đừng lo lắng, Yên Yoga luôn có <strong>chương trình thiết kế riêng</strong> dành cho bạn!
               </p>
             </div>
           </div>
@@ -235,13 +238,13 @@ export default function YogaCoursesPage() {
                   Khóa học tại Yên Yoga <br/> <span className="text-primary-600">thực sự dành cho ai?</span>
                 </h2>
                 <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                  Chúng tôi không thiết kế một lớp học cho tất cả mọi người. Yên Yoga lắng nghe cơ thể bạn và thiết kế giáo án phù hợp với từng nhu cầu, trình độ.
+                  Chúng tôi không thiết kế một chương trình cho tất cả mọi người. Yên Yoga lắng nghe cơ thể bạn và thiết kế giáo án phù hợp với từng nhu cầu, trình độ.
                 </p>
                 
                 <div className="space-y-6">
                   {[
                     { title: "Người mới tinh (Người chơi hệ 'Cứng')", desc: "Chưa từng tập, cơ thể cứng cáp. Cần học cách thở, định tuyến cơ bản từ con số 0.", icon: "🌱" },
-                    { title: "Dân văn phòng bận rộn", desc: "Ngồi máy tính nhiều gay đau mỏi vai gáy. Cần thời gian linh hoạt và bài tập xả stress.", icon: "💻" },
+                    { title: "Người làm việc bận rộn", desc: "Ngồi máy tính nhiều gây đau mỏi vai gáy. Cần thời gian phù hợp và bài tập xả stress.", icon: "💻" },
                     { title: "Người cần trị liệu & phục hồi", desc: "Gặp vấn đề về võng lưng, thoát vị nhẹ. Cần HLV chuyên môn cao kèm sát từng centimet.", icon: "🧘‍♀️" },
                   ].map((item) => (
                     <div key={item.title} className="flex gap-5 bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:border-primary-200 transition-colors">
@@ -262,7 +265,7 @@ export default function YogaCoursesPage() {
                 <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white">
                   <Image 
                     src="/images/class-studio.jpeg" 
-                    alt="Lớp học Yoga thư giãn tại Yên Yoga"
+                    alt="Chương trình Yoga thư giãn tại Yên Yoga"
                     fill
                     className="object-cover hover:scale-105 transition-transform duration-700"
                   />
@@ -295,7 +298,7 @@ export default function YogaCoursesPage() {
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-gray-900/80 via-gray-900/40 to-transparent p-6 text-white pt-24">
                       <div className="flex items-center gap-3 mb-2">
                         <span className="flex h-3 w-3 rounded-full bg-green-400 animate-pulse"></span>
-                        <p className="text-sm font-medium">Lớp học Private</p>
+                        <p className="text-sm font-medium">Private 1 kèm 1</p>
                       </div>
                       <p className="font-bold text-lg">Chỉnh sửa từng milimet tư thế</p>
                     </div>
@@ -316,9 +319,9 @@ export default function YogaCoursesPage() {
 
                 <div className="grid sm:grid-cols-2 gap-x-8 gap-y-10">
                   {[
-                    { title: "Bắt đúng bệnh, kê đúng bài", desc: "Test thể trạng toàn diện trong buổi đầu tiên. Tập trung phục hồi vùng cơ đang tổn thương.", icon: "🩺" },
+                    { title: "Bắt đúng bệnh, kê đúng bài", desc: "Test thể trạng kỹ lưỡng trong buổi đầu. Tập trung phục hồi vùng cơ đang tổn thương.", icon: "🩺" },
                     { title: "Nắn chỉnh (Adjustment) chi tiết", desc: "HLV hỗ trợ dùng tay nắn chỉnh tư thế an toàn, giúp bạn vào thế sâu hơn mà không bị đau.", icon: "👐" },
-                    { title: "Lịch linh hoạt theo bạn", desc: "Không sợ mất buổi tập vì bận việc đột xuất. Hỗ trợ dời lịch học linh hoạt theo tuần.", icon: "📅" },
+                    { title: "Lịch học phù hợp theo bạn", desc: "Không sợ mất buổi tập vì bận việc đột xuất. Hỗ trợ dời lịch học theo tuần theo sắp xếp.", icon: "📅" },
                     { title: "Theo sát cả chế độ dinh dưỡng", desc: "Kết hợp tư vấn ăn uống, sinh hoạt để đẩy nhanh quá trình phục hồi, giảm mỡ thừa.", icon: "🥗" },
                   ].map((item, idx) => (
                     <div key={item.title} className={`animate-fadeInUp animate-delay-${(idx + 3) * 100}`}>
@@ -344,7 +347,7 @@ export default function YogaCoursesPage() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto mb-16">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 tracking-tight">
-                Hành trình chuyển đổi <span className="text-primary-600">toàn diện</span>
+                Hành trình chuyển đổi <span className="text-primary-600">rõ ràng</span>
               </h2>
               <p className="text-lg text-gray-600">
                 Sự thay đổi không đến trong ngày một ngày hai. Tại Yên Yoga, chúng tôi cam kết lộ trình rõ ràng để bạn cảm nhận cơ thể mình tốt lên từng ngày.
@@ -354,15 +357,15 @@ export default function YogaCoursesPage() {
             <div className="grid md:grid-cols-3 gap-8">
               {[
                 { 
-                  time: "Tháng đầu tiên", 
+                  time: "Tháng 1", 
                   title: "Làm quen & Giải mỏi", 
-                  desc: "Chỉnh sửa tật gù lưng, rụt cổ. Học cách thở đúng, giải phóng các vùng cơ căng cứng như vai, cổ, thắt lưng. Bạn sẽ thấy ngủ ngon hơn rõ rệt.",
+                  desc: "Chỉnh sửa tật gù lưng, rụt cổ. Học cách thở đúng, giải phóng các vùng cơ căng cứng như vai, cổ, thắt lưng. Sau khi tập đều đặn, bạn sẽ thấy ngủ ngon hơn rõ rệt.",
                   color: "bg-blue-50 text-blue-700 border-blue-200",
                   img: "1"
                 },
                 { 
                   time: "Tháng thứ 3", 
-                  title: "Gia tăng linh hoạt", 
+                  title: "Gia tăng độ dẻo",
                   desc: "Các khớp cơ mở dần ra. Bạn có thể thực hiện các tư thế khó hơn mà không thấy đau rát. Cơ thể nhẹ nhàng, vòng eo bắt đầu thon gọn.",
                   color: "bg-primary-50 text-primary-700 border-primary-200",
                   img: "2"
@@ -425,10 +428,10 @@ export default function YogaCoursesPage() {
               
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 relative z-10">
                 {[
-                  { step: "01", title: "Nhận Tư Vấn", desc: "Trao đổi mục tiêu, thời gian rảnh, tình trạng sức khỏe để chọn khung giờ.", icon: "💬" },
-                  { step: "02", title: "Test Thể Trạng", desc: "Đo mức độ linh hoạt, điểm gồng cứng cơ và thói quen vận động.", icon: "⚖️" },
-                  { step: "03", title: "Lên Lộ Trình", desc: "Phân tích và thiết kế bài tập riêng: phục hồi, giảm cân hay linh hoạt.", icon: "📝" },
-                  { step: "04", title: "Bắt Đầu Tập", desc: "HLV theo sát từng nhịp thở, điều chỉnh bài tập liên tục để tối ưu.", icon: "✨" },
+                  { step: "01", title: "Nhận Tư Vấn", desc: "Trao đổi mục tiêu, thời gian rảnh, tình trạng sức khỏe để chọn thời gian.", icon: "💬" },
+                  { step: "02", title: "Test Thể Trạng", desc: "Đo độ dẻo, điểm gồng cứng cơ và thói quen vận động.", icon: "⚖️" },
+                  { step: "03", title: "Lên Lộ Trình", desc: "Phân tích và thiết kế bài tập riêng: phục hồi, giảm cân hay nâng cao theo mục tiêu.", icon: "📝" },
+                  { step: "04", title: "Bắt Đầu Tập", desc: "HLV theo sát từng nhịp thở, hướng dẫn tối ưu bài tập theo buổi.", icon: "✨" },
                 ].map((item, idx) => (
                   <div key={item.step} className="relative group text-center animate-fadeInUp animate-delay-200">
                     <div className="mx-auto w-24 h-24 rounded-full bg-white border-4 border-gray-50 flex flex-col items-center justify-center shadow-xl group-hover:border-primary-200 group-hover:scale-110 transition-all duration-300 mb-6">
@@ -439,6 +442,110 @@ export default function YogaCoursesPage() {
                     <p className="text-sm text-gray-600 leading-relaxed px-2">{item.desc}</p>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Information & Requirements (Action - giúp chuyển đổi) */}
+        <section className="py-16 bg-white border-b border-gray-100">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-2 gap-10 items-start">
+              <div>
+                <span className="inline-flex items-center gap-2 rounded-full bg-primary-50 px-4 py-1.5 text-xs font-semibold text-primary-700 border border-primary-100">
+                  Thông tin trước khi tham gia
+                </span>
+                <h2 className="mt-4 text-3xl font-bold text-gray-900">
+                  Nếu bạn đang tìm lựa chọn chất lượng cho các lớp yoga
+                </h2>
+                <p className="mt-4 text-gray-600 text-base leading-relaxed">
+                  Sau khi bạn gửi <strong>yêu cầu</strong>, Yên Yoga sẽ <strong>cung cấp</strong> thông tin rõ ràng
+                  và <strong>hướng dẫn</strong> bạn chọn <strong>hình thức</strong> phù hợp: tại trung tâm, tại nhà
+                  hoặc online. Chúng tôi ưu tiên <strong>kết nối</strong> trực tiếp với <strong>đội ngũ</strong>,
+                  để bạn tham gia đúng chương trình, đúng mục tiêu.
+                </p>
+
+                <div className="mt-6 grid sm:grid-cols-2 gap-4">
+                  <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      Hỗ trợ nhanh
+                    </p>
+                    <p className="mt-2 text-sm text-gray-800">
+                      điện thoại: <strong>0393636143</strong>
+                    </p>
+                    <p className="mt-1 text-sm text-gray-800">
+                      địa chỉ: <strong>Bình Thạnh, Thành phố Hồ Chí Minh</strong>
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      Giới thiệu & đào tạo
+                    </p>
+                    <p className="mt-2 text-sm text-gray-800">
+                      Đào tạo dựa trên kinh nghiệm và bằng cấp của huấn luyện viên, với các giáo án rõ ràng.
+                    </p>
+                    <p className="mt-1 text-sm text-gray-800">
+                      Giáo viên dạy yoga theo sát bạn để tối ưu lợi ích.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-6 rounded-2xl bg-gradient-to-r from-primary-50 to-accent-50 border border-primary-100 p-5 shadow-sm">
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    Bạn cũng có thể xem thêm ở <Link href="/">trang chủ</Link> hoặc liên hệ để được giới thiệu đúng chương trình,
+                    đúng lựa chọn cho mục tiêu (giảm đau lưng, giảm stress, tăng độ dẻo dai) — theo đúng yêu cầu của riêng bạn.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+                  <h3 className="text-base font-bold text-gray-900">Đội ngũ & chất lượng</h3>
+                  <ul className="mt-4 space-y-3 text-sm text-gray-600">
+                    <li className="flex gap-3">
+                      <span className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary-50 text-primary-700">
+                        ✓
+                      </span>
+                      Huấn luyện viên và giáo viên dạy yoga có bằng cấp, kinh nghiệm thực tế.
+                    </li>
+                    <li className="flex gap-3">
+                      <span className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary-50 text-primary-700">
+                        ✓
+                      </span>
+                      Huấn luyện theo mục tiêu cá nhân, tập trung vào lợi ích lâu dài.
+                    </li>
+                    <li className="flex gap-3">
+                      <span className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary-50 text-primary-700">
+                        ✓
+                      </span>
+                      Thông tin minh bạch, chương trình rõ ràng về lịch và yêu cầu tham gia.
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+                  <h3 className="text-base font-bold text-gray-900">Bạn sẽ nhận được gì sau khi tham gia?</h3>
+                  <ul className="mt-4 space-y-3 text-sm text-gray-600">
+                    <li className="flex gap-3">
+                      <span className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-accent-50 text-accent-700">
+                        →
+                      </span>
+                      Lộ trình theo thể trạng, kết nối chặt chẽ giữa người dạy và người học.
+                    </li>
+                    <li className="flex gap-3">
+                      <span className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-accent-50 text-accent-700">
+                        →
+                      </span>
+                      Hướng dẫn kỹ thuật để bạn tự tập và duy trì ở tại nhà.
+                    </li>
+                    <li className="flex gap-3">
+                      <span className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-accent-50 text-accent-700">
+                        →
+                      </span>
+                      Danh sách thông tin cần chuẩn bị trước mỗi buổi theo chương trình đào tạo.
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -521,18 +628,18 @@ export default function YogaCoursesPage() {
       </main>
 
       {/* Structured data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(
-            generateServiceStructuredData({
-              name: "Yoga 1 kèm 1 tại TP.HCM",
-              description:
-                "Dịch vụ yoga 1 kèm 1 tại TP.HCM (HCM) cùng HLV kèm riêng theo thể trạng, lộ trình cá nhân hóa, chỉnh tư thế kỹ, phù hợp người mới, dân văn phòng và phục hồi.",
-            }),
-          ),
-        }}
-      />
+              <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                  __html: JSON.stringify(
+                    generateServiceStructuredData({
+                      name: "Yoga 1 kèm 1 ở HCM",
+                      description:
+                        "Dịch vụ yoga 1 kèm 1 ở HCM cùng huấn luyện viên kèm riêng theo thể trạng, chương trình cá nhân hóa, hướng dẫn tư thế kỹ, phù hợp người mới, người làm việc bận rộn và phục hồi.",
+                    }),
+                  ),
+                }}
+              />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
