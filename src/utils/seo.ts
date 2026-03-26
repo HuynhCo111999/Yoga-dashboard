@@ -103,7 +103,7 @@ export const pageConfigs = {
   home: {
     title: "Yoga 1 kèm 1 tại TP.HCM (HCM) | Yên Yoga",
     description:
-      "Yoga 1 kèm 1 tại TP.HCM (HCM) cùng HLV kèm riêng theo thể trạng. Lộ trình cá nhân hóa, chỉnh tư thế kỹ, phù hợp người mới, dân văn phòng, phục hồi. Đăng ký học thử tại Yên Yoga.",
+      "Yoga 1 kèm 1 tại HCM cùng huấn luyện viên riêng, lộ trình cá nhân hóa theo thể trạng. Phù hợp người mới, phục hồi và giảm stress.",
     keywords: [
       "yoga 1 kèm 1",
       "yoga 1-1",

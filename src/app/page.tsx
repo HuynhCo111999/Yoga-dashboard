@@ -38,11 +38,12 @@ export default function Home() {
               </div>
 
               <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl xl:text-7xl leading-tight text-center lg:text-left">
-                Khóa học yoga tại{' '}
-                <span className="gradient-text block sm:inline">Yên Yoga</span>
+                Yoga 1 kèm 1 tại HCM{' '}
+                <span className="gradient-text block sm:inline">tại Yên Yoga</span>
               </h1>
 
               <p className="mt-6 text-lg leading-relaxed text-gray-600 text-center lg:text-left max-w-xl mx-auto lg:mx-0">
+                Yoga 1 kèm 1 tại HCM giúp bạn có lộ trình cá nhân hóa, được theo sát bởi huấn luyện viên và tập đúng kỹ thuật ngay từ đầu.
                 Khám phá các khóa học yoga tại Yên Yoga cùng đội ngũ giảng viên chuyên nghiệp và cộng đồng yêu thương.
                 Tìm sự cân bằng giữa <strong className="text-gray-800">cơ thể và tâm hồn</strong> qua những lớp học yoga được thiết kế phù hợp cho mọi cấp độ.
               </p>
