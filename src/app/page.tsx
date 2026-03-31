@@ -422,10 +422,10 @@ export default function Home() {
 
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
-                href="/member"
+                href="/khoa-hoc-yoga"
                 className="btn-shine w-full sm:w-auto rounded-xl bg-white px-8 py-3.5 text-sm font-bold text-primary-600 shadow-xl hover:bg-primary-50 hover:shadow-2xl transition-all duration-300 text-center"
               >
-                Đăng ký thành viên
+                Xem khóa học yoga
               </Link>
               <Link
                 href="/contact"
