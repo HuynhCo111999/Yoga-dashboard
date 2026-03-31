@@ -267,16 +267,47 @@ export interface FirebaseUser extends User {
 
 // Storage service for uploading files
 export const storageService = {
+  // Convert filename to SEO-friendly slug while preserving extension
+  toSeoFileName: (originalName: string): string => {
+    const lastDotIndex = originalName.lastIndexOf(".");
+    const hasExt = lastDotIndex > 0;
+    const rawBase = hasExt ? originalName.slice(0, lastDotIndex) : originalName;
+    const rawExt = hasExt ? originalName.slice(lastDotIndex + 1) : "";
+
+    const slugBase = rawBase
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .replace(/-{2,}/g, "-");
+
+    const safeBase = slugBase || "image";
+    const ext = rawExt
+      ? rawExt
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, "")
+      : "webp";
+
+    return `${safeBase}.${ext || "webp"}`;
+  },
+
   // Upload image to Firebase Storage
   uploadImage: async (
     file: File,
     path: string
   ): Promise<{ url: string | null; error: string | null }> => {
     try {
+      const seoFileName = storageService.toSeoFileName(file.name);
+      const dotIndex = seoFileName.lastIndexOf(".");
+      const baseName = dotIndex > 0 ? seoFileName.slice(0, dotIndex) : seoFileName;
+      const ext = dotIndex > 0 ? seoFileName.slice(dotIndex + 1) : "webp";
+
       // Create a reference to the file location
       const imageRef = ref(
         storage,
-        `images/${path}/${Date.now()}-${file.name}`
+        `images/${path}/${baseName}-${Date.now()}.${ext}`
       );
 
       // Upload the file
