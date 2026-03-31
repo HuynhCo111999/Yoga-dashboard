@@ -266,3 +266,19 @@ export function generateFAQStructuredData(
     })),
   };
 }
+
+// Generate breadcrumb structured data
+export function generateBreadcrumbStructuredData(
+  items: Array<{ name: string; path: string }>,
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: `${baseUrl}${item.path}`,
+    })),
+  };
+}

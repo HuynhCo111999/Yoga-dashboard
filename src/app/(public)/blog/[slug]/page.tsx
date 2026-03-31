@@ -1,7 +1,11 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { blogApi } from '@/lib/api/blog';
-import { generateMetadata as generateSEOMetadata, generateBlogPostStructuredData } from '@/utils/seo';
+import {
+  generateMetadata as generateSEOMetadata,
+  generateBlogPostStructuredData,
+  generateBreadcrumbStructuredData,
+} from '@/utils/seo';
 import BlogDetailClient from './BlogDetailClient';
 
 // Enable SSG
@@ -100,6 +104,18 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
               featuredImage: post.featuredImage,
               slug: post.slug,
             }))
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(
+              generateBreadcrumbStructuredData([
+                { name: 'Trang chủ', path: '/' },
+                { name: 'Blog', path: '/blog' },
+                { name: post.title, path: `/blog/${post.slug}` },
+              ]),
+            ),
           }}
         />
       </>

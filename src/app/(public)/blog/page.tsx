@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { generateMetadata, pageConfigs } from '@/utils/seo';
+import { generateMetadata, pageConfigs, generateBreadcrumbStructuredData } from '@/utils/seo';
 import StructuredData from '@/components/StructuredData';
 import BlogClientPage from './BlogClientPage';
 
@@ -10,6 +10,17 @@ export default function BlogPage() {
     <>
       <BlogClientPage />
       <StructuredData type="blog" />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            generateBreadcrumbStructuredData([
+              { name: 'Trang chủ', path: '/' },
+              { name: 'Blog', path: '/blog' },
+            ]),
+          ),
+        }}
+      />
     </>
   );
 }

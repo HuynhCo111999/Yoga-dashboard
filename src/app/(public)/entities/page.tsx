@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { generateBreadcrumbStructuredData } from '@/utils/seo';
 
 const TARGET_URL = 'https://yogacungyen.com/';
 
@@ -208,43 +209,56 @@ export const metadata = {
 
 export default function EntitiesPage() {
   return (
-    <main className="min-h-[100dvh] bg-gray-50 py-16">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <header className="mb-10">
-          <p className="text-xs font-semibold tracking-[0.2em] text-primary-500 uppercase mb-3">
-            Social Entities
-          </p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-            Các kênh chính thức của Yên Yoga
-          </h1>
-          <p className="text-sm sm:text-base text-gray-600">
-            Trang này liệt kê các đường dẫn social entity chính thức của thương hiệu để hỗ trợ
-            Google và các công cụ tìm kiếm hiểu rõ hơn về Yên Yoga.
-          </p>
-        </header>
+    <>
+      <main className="min-h-[100dvh] bg-gray-50 py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <header className="mb-10">
+            <p className="text-xs font-semibold tracking-[0.2em] text-primary-500 uppercase mb-3">
+              Social Entities
+            </p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+              Các kênh chính thức của Yên Yoga
+            </h1>
+            <p className="text-sm sm:text-base text-gray-600">
+              Trang này liệt kê các đường dẫn social entity chính thức của thương hiệu để hỗ trợ
+              Google và các công cụ tìm kiếm hiểu rõ hơn về Yên Yoga.
+            </p>
+          </header>
 
-        <section className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 sm:p-6">
-          <ul className="space-y-3">
-            {socialLinks.map((item) => (
-              <li
-                key={item.label}
-                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 border-b last:border-b-0 border-gray-100 pb-3 last:pb-0"
-              >
-                <span className="text-sm font-medium text-gray-800">{item.label}</span>
-                <Link
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs sm:text-sm text-primary-600 hover:text-primary-700 break-all"
+          <section className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 sm:p-6">
+            <ul className="space-y-3">
+              {socialLinks.map((item) => (
+                <li
+                  key={item.label}
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 border-b last:border-b-0 border-gray-100 pb-3 last:pb-0"
                 >
-                  {item.url}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      </div>
-    </main>
+                  <span className="text-sm font-medium text-gray-800">{item.label}</span>
+                  <Link
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs sm:text-sm text-primary-600 hover:text-primary-700 break-all"
+                  >
+                    {item.url}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
+      </main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            generateBreadcrumbStructuredData([
+              { name: 'Trang chủ', path: '/' },
+              { name: 'Social Entities', path: '/entities' },
+            ]),
+          ),
+        }}
+      />
+    </>
   );
 }
 

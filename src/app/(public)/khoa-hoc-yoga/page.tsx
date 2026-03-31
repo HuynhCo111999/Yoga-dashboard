@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import Header from "@/components/Header";
-import { generateMetadata as generateSEOMetadata, generateFAQStructuredData, generateServiceStructuredData } from "@/utils/seo";
+import {
+  generateMetadata as generateSEOMetadata,
+  generateFAQStructuredData,
+  generateServiceStructuredData,
+  generateBreadcrumbStructuredData,
+} from "@/utils/seo";
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "Khóa học yoga ở HCM (HCM) | Yên Yoga",
@@ -644,6 +649,17 @@ export default function YogaCoursesPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(generateFAQStructuredData(faqs)),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            generateBreadcrumbStructuredData([
+              { name: "Trang chủ", path: "/" },
+              { name: "Khóa học yoga", path: "/khoa-hoc-yoga" },
+            ]),
+          ),
         }}
       />
     </>

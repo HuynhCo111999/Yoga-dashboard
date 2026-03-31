@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import PageLogger from '@/components/PageLogger';
-import { generateMetadata, pageConfigs } from '@/utils/seo';
+import { generateMetadata, pageConfigs, generateBreadcrumbStructuredData } from '@/utils/seo';
 import {
   HeartIcon,
   SparklesIcon,
@@ -46,11 +46,12 @@ const classes = [
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <PageLogger pageName="About Page" pageData={{ section: 'about' }} />
-      <Header />
-      
-      <main className="flex-1">
+    <>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <PageLogger pageName="About Page" pageData={{ section: 'about' }} />
+        <Header />
+        
+        <main className="flex-1">
         {/* Hero Section */}
         <section className="relative pt-24 pb-20 lg:pt-16 lg:pb-28 overflow-hidden bg-gradient-to-br from-primary-50 via-white to-accent-50">
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -271,7 +272,19 @@ export default function About() {
             </div>
           </div>
         </section>
-      </main>
-    </div>
+        </main>
+      </div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            generateBreadcrumbStructuredData([
+              { name: 'Trang chủ', path: '/' },
+              { name: 'Về chúng tôi', path: '/about' },
+            ]),
+          ),
+        }}
+      />
+    </>
   );
 }
