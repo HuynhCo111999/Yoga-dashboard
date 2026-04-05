@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type QuillType from 'quill';
 import 'quill/dist/quill.snow.css';
+import './RichText.css';
 
 interface RichTextEditorProps {
   value: string;
@@ -155,7 +156,7 @@ export default function RichTextEditor({
 
       <div
         ref={containerRef}
-        className="bg-white rounded-lg border border-gray-200 quill-container h-[500px]"
+        className="bg-white border border-gray-200 quill-container h-[500px]"
       />
 
       {isImportModalOpen && (
