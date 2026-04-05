@@ -231,7 +231,7 @@ export default function NewBlogPostPage() {
                     Đường dẫn (slug)
                   </label>
                   <p className="text-xs text-gray-500 mb-1 truncate">
-                    https://yenyoga.vn/blog/
+                    https://yogacungyen.com/blog/
                     <span className="font-mono text-gray-800">{slugPreview || 'tieu-de-bai-viet'}</span>
                   </p>
                   <input

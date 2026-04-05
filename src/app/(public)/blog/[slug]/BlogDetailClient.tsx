@@ -83,7 +83,7 @@ export default function BlogDetailClient({ post, relatedPosts }: BlogDetailClien
           const height = Number.isFinite(heightAttr) && heightAttr! > 0 ? heightAttr! : 675;
 
           return (
-            <span className="block my-6">
+            <span className="block">
               <Image
                 src={src}
                 alt={alt}
