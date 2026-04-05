@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import type { Package, Session } from "@/lib/api/types";
 
 export interface SEOConfig {
   title: string;
@@ -172,7 +173,24 @@ export const pageConfigs = {
   },
 };
 
-// Generate structured data for blog posts
+/** ISO-8601 datetime in Vietnam (UTC+7) from YYYY-MM-DD and HH:MM */
+function toVietnamDateTimeIso(dateStr: string, timeStr: string): string {
+  const [h, m] = timeStr.split(":").map((x) => parseInt(x, 10));
+  const hh = String(Number.isFinite(h) ? h : 0).padStart(2, "0");
+  const mm = String(Number.isFinite(m) ? m : 0).padStart(2, "0");
+  return `${dateStr}T${hh}:${mm}:00+07:00`;
+}
+
+const studioPostalAddress = {
+  "@type": "PostalAddress" as const,
+  streetAddress: "Bình Thạnh",
+  addressLocality: "Thành phố Hồ Chí Minh",
+  addressRegion: "HCM",
+  postalCode: "700000",
+  addressCountry: "VN",
+};
+
+// Generate structured data for blog posts (BlogPosting + Article for richer coverage)
 export function generateBlogPostStructuredData(post: {
   title: string;
   description: string;
@@ -181,14 +199,23 @@ export function generateBlogPostStructuredData(post: {
   featuredImage?: string;
   slug: string;
 }) {
+  const pageUrl = `${baseUrl}/blog/${post.slug}`;
+  const imageUrl = post.featuredImage
+    ? buildImageUrl(post.featuredImage)
+    : `${baseUrl}/logo.jpeg`;
+
   return {
     "@context": "https://schema.org",
-    "@type": "BlogPosting",
+    "@type": ["BlogPosting", "Article"],
     headline: post.title,
     description: post.description,
-    image: post.featuredImage
-      ? buildImageUrl(post.featuredImage)
-      : `${baseUrl}/logo.jpeg`,
+    image: imageUrl,
+    url: pageUrl,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": pageUrl,
+      url: pageUrl,
+    },
     author: {
       "@type": "Person",
       name: post.author,
@@ -204,10 +231,108 @@ export function generateBlogPostStructuredData(post: {
     },
     datePublished: post.publishedAt,
     dateModified: post.publishedAt,
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `${baseUrl}/blog/${post.slug}`,
-    },
+  };
+}
+
+/** ItemList of Product — gói tập / membership */
+export function generatePackagesProductStructuredData(packages: Package[]) {
+  const defaultImage = `${baseUrl}/logo.jpeg`;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: `Gói tập ${siteName}`,
+    description: `Các gói tập yoga và membership tại ${siteName}.`,
+    numberOfItems: packages.length,
+    itemListElement: packages.map((pkg, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "Product",
+        name: pkg.name,
+        description: pkg.description,
+        sku: pkg.id,
+        image: [defaultImage],
+        brand: {
+          "@type": "Brand",
+          name: siteName,
+        },
+        category: "Yoga class package",
+        offers: {
+          "@type": "Offer",
+          url: `${baseUrl}/packages`,
+          priceCurrency: "VND",
+          price: String(pkg.price),
+          availability: "https://schema.org/InStock",
+          seller: {
+            "@type": "Organization",
+            name: siteName,
+            url: baseUrl,
+          },
+        },
+      },
+    })),
+  };
+}
+
+/** Upcoming yoga sessions as Event items (lịch học) */
+export function generateYogaSessionsEventsStructuredData(
+  sessions: Session[],
+  options?: { maxItems?: number },
+) {
+  const maxItems = options?.maxItems ?? 48;
+  const today = new Date().toISOString().split("T")[0];
+
+  const upcoming = sessions
+    .filter(
+      (s) =>
+        s.status === "scheduled" &&
+        s.date >= today &&
+        s.className &&
+        s.startTime &&
+        s.endTime,
+    )
+    .sort((a, b) => {
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      return a.startTime.localeCompare(b.startTime);
+    })
+    .slice(0, maxItems);
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: `Lịch học yoga — ${siteName}`,
+    description: `Các buổi tập yoga sắp diễn ra tại ${siteName}.`,
+    numberOfItems: upcoming.length,
+    itemListElement: upcoming.map((session, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "Event",
+        name: session.className,
+        description: `Buổi tập ${session.className} với ${session.instructor} tại ${siteName}.`,
+        startDate: toVietnamDateTimeIso(session.date, session.startTime),
+        endDate: toVietnamDateTimeIso(session.date, session.endTime),
+        eventStatus: "https://schema.org/EventScheduled",
+        eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+        location: {
+          "@type": "SportsActivityLocation",
+          name: siteName,
+          url: baseUrl,
+          address: studioPostalAddress,
+        },
+        organizer: {
+          "@type": "Organization",
+          name: siteName,
+          url: baseUrl,
+        },
+        performer: {
+          "@type": "Person",
+          name: session.instructor,
+        },
+        image: [`${baseUrl}/class-studio.jpeg`],
+      },
+    })),
   };
 }
 
