@@ -13,6 +13,16 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source:
+          "/blog/yoga-buoi-sang-10-phut-khoi-ong-ngay-moi-tran-ay-nang-luong-tich-cuc",
+        destination: "/blog/yoga-buoi-sang-10-phut",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 const withPWA = require("next-pwa")({
