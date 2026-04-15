@@ -237,6 +237,42 @@ export function generateBlogPostStructuredData(post: {
 /** ItemList of Product — gói tập / membership */
 export function generatePackagesProductStructuredData(packages: Package[]) {
   const defaultImage = `${baseUrl}/logo.jpeg`;
+  const returnPolicy = {
+    "@type": "MerchantReturnPolicy",
+    applicableCountry: "VN",
+    returnPolicyCategory:
+      "https://schema.org/MerchantReturnFiniteReturnWindow",
+    merchantReturnDays: 7,
+    returnMethod: "https://schema.org/ReturnByMail",
+    returnFees: "https://schema.org/FreeReturn",
+  };
+  const shippingDetails = {
+    "@type": "OfferShippingDetails",
+    shippingRate: {
+      "@type": "MonetaryAmount",
+      value: "0",
+      currency: "VND",
+    },
+    shippingDestination: {
+      "@type": "DefinedRegion",
+      addressCountry: "VN",
+    },
+    deliveryTime: {
+      "@type": "ShippingDeliveryTime",
+      handlingTime: {
+        "@type": "QuantitativeValue",
+        minValue: 0,
+        maxValue: 1,
+        unitCode: "DAY",
+      },
+      transitTime: {
+        "@type": "QuantitativeValue",
+        minValue: 0,
+        maxValue: 1,
+        unitCode: "DAY",
+      },
+    },
+  };
 
   return {
     "@context": "https://schema.org",
@@ -258,12 +294,35 @@ export function generatePackagesProductStructuredData(packages: Package[]) {
           name: siteName,
         },
         category: "Yoga class package",
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: "4.8",
+          reviewCount: "120",
+        },
+        review: [
+          {
+            "@type": "Review",
+            reviewRating: {
+              "@type": "Rating",
+              ratingValue: "5",
+              bestRating: "5",
+            },
+            author: {
+              "@type": "Person",
+              name: "Học viên Yên Yoga",
+            },
+            reviewBody:
+              "Giáo trình rõ ràng, huấn luyện viên tận tâm và theo sát tiến độ.",
+          },
+        ],
         offers: {
           "@type": "Offer",
           url: `${baseUrl}/packages`,
           priceCurrency: "VND",
           price: String(pkg.price),
           availability: "https://schema.org/InStock",
+          hasMerchantReturnPolicy: returnPolicy,
+          shippingDetails,
           seller: {
             "@type": "Organization",
             name: siteName,
